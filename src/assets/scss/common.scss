@@ -1,0 +1,92 @@
+
+/** 
+动态生成内边距，外边距,圆弧角，高度，宽度
+**/
+@for $i from 10 through 50 {
+    .padding-left-#{$i} {padding-left:#{$i}px};
+    .padding-right-#{$i} {padding-right:#{$i}px};
+    .padding-top-#{$i} {padding-top:#{$i}px};
+    .padding-bottom-#{$i} {padding-bottom:#{$i}px};
+    .margin-left-#{$i} {margin-left:#{$i}px};
+    .margin-right-#{$i} {margin-right:#{$i}px};
+    .margin-top-#{$i} {margin-top:#{$i}px};
+    .margin-bottom-#{$i} {margin-bottom:#{$i}px};
+    .width-#{$i} {
+       width:#{$i}px
+    };
+    .height-#{$i} {
+        height:#{$i}px
+     };
+}
+
+.flex {
+   display: flex;
+}
+
+.justifly-center {
+   justify-content: center;
+}
+
+.align-items{
+   align-items: center;
+}
+
+.flex-auto {
+   flex:1
+}
+
+.flex-end {
+   justify-content: flex-end;
+}
+
+
+.test{
+   background-color: aquamarine;
+ }
+
+ .white {
+   color:#fff;
+ }
+
+
+ .charts {
+   width: 100%;
+   height: 450px;
+ }
+ 
+.charts-list{
+   display: flex;
+   height: 45%;
+   justify-content: space-evenly;
+   padding-top: 10px;
+   box-sizing: border-box;
+
+}
+
+.charts-list-item {   
+   position: relative;
+   width: 400px;
+   border-radius: 5px;
+   background-color: #333;
+   box-sizing: border-box;
+   padding: 10px;
+   overflow: hidden;   
+   .img {
+      width: 100%;
+   }
+   .tips {
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform: translate(-50%);
+      z-index: 2;
+      color:#fff;
+      font-size: 20px;
+   }
+}
+
+.charts-list-item:first-child {
+   background: url('https://images.pexels.com/photos/1477199/pexels-photo-1477199.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260');
+   background-size: cover;
+   background-repeat: no-repeat;
+}

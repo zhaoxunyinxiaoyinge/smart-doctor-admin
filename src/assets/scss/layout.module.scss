@@ -1,0 +1,127 @@
+
+
+// @use "common.scss" as contor;//导入一个scss文件，并且命名空间
+
+
+// .test-father {
+  // @extend contor,.test !optional  # 使用导入的scss文件并带上命名空间
+// }
+
+$layoutHeight: 60px;
+$layoutAside: auto;
+$layoutMain: auto;
+$routeHeight:50px;
+
+$bgColor: #f0f2f5;
+
+$routeContentHeight:calc(100vh - 180px);
+
+html,
+body {
+  height: 100%;
+  background-color: $bgColor;
+}
+
+
+.header {
+  height: $layoutHeight;
+  padding: 0 10px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  background-color:#fff;
+  border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+}
+
+.content {
+  height: 100%;
+  display: flex;
+}
+
+.aside {
+  width: $layoutAside;
+  // background-color: rgba(98, 4, 4, 0.843);
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.route-list {
+  height: $routeHeight;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background-color: #fff;
+  margin-bottom: 10px;
+  .svg-size {
+    fill: #fff;
+    margin-right: 5px;
+  }
+  .route-btn {
+    height: 20px;
+    padding: 6px 10px;
+    line-height: 20px;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.78);
+    font-size: 12px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color:#fff;
+    margin-right: 10px;
+  }
+}
+
+.route-content  {
+  height: calc(100vh - 180px);
+  $routeContentHeight:calc(100vh - 180px);
+  margin: 0 10px;
+  background-color: #fff;
+}
+
+.bottom {
+  height: 50px;
+  margin-top: 10px;
+  background-color: #fff;
+  text-align: center;
+  font-size: 14px;
+  line-height: 50px;
+}
+
+
+.el-menu {
+  border:none;
+}
+
+.show-enter-active,.show-leave-active {
+  transition: opacity 1s ease;
+}
+
+.show-enter-from,.show-leave-to {
+  opacity: 0;
+}
+
+.fullscreen {
+  margin-right: 10px;
+}
+
+.badge {
+  .svg-size {
+    fill: #000;
+  }
+}
+
+// 导出一个内容高度给内容页面使用
+:export {
+  routeContentHeight:$routeContentHeight
+}
+
+
+
+
+

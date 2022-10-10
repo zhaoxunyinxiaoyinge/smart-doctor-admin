@@ -1,0 +1,83 @@
+{
+  "name": "test-project",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit --skipLibCheck && vite build",
+    "builds": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.0.6",
+    "@form-create/element-ui": "^3.1.10",
+    "@types/highcharts": "^7.0.0",
+    "@types/js-cookie": "^3.0.2",
+    "@types/node": "^16.10.3",
+    "@types/nprogress": "^0.2.0",
+    "@vitejs/plugin-legacy": "^2.0.1",
+    "@vitejs/plugin-vue-jsx": "^1.3.8",
+    "@vue/test-utils": "^2.0.0",
+    "@vueuse/core": "^8.7.5",
+    "@wangeditor/editor": "^5.1.20",
+    "@wangeditor/editor-for-vue": "^5.1.12",
+    "animate.css": "^4.1.1",
+    "axios": "^0.26.1",
+    "clipboard": "^2.0.11",
+    "cross-env": "^7.0.3",
+    "echarts": "^5.3.3",
+    "element-plus": "^2.2.8",
+    "form-making": "^1.2.1",
+    "js-cookie": "^3.0.1",
+    "jsdom": "latest",
+    "lodash": "^4.17.21",
+    "mockjs": "^1.1.0",
+    "nprogress": "^0.2.0",
+    "path": "^0.12.7",
+    "pinia": "^2.0.12",
+    "plop": "^3.1.1",
+    "sass": "^1.42.1",
+    "sass-loader": "^12.1.0",
+    "screenfull": "^6.0.2",
+    "scss-loader": "0.0.1",
+    "unplugin-auto-import": "^0.6.8",
+    "unplugin-vue-components": "^0.15.6",
+    "vitest": "latest",
+    "vue": "^3.2.37",
+    "vue-router": "^4.1.3"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.17.0",
+    "@types/jest": "^28.1.6",
+    "@types/lodash": "^4.14.180",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "@vitejs/plugin-vue": "^3.0.3",
+    "dotenv": "^16.0.0",
+    "echart": "^0.1.3",
+    "eslint": "^8.12.0",
+    "eslint-plugin-vue": "^8.5.0",
+    "less": "^4.1.3",
+    "lint-staged": "^13.0.3",
+    "postcss-preset-env": "^7.7.2",
+    "rollup-plugin-postcss": "^4.0.2",
+    "scss": "^0.2.4",
+    "typescript": "^4.6.4",
+    "vite": "^3.0.7",
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-eslint": "^1.3.0",
+    "vite-plugin-mock": "^2.9.6",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vitest": "^0.21.1",
+    "vue-tsc": "^0.39.5"
+  },
+  "lint-staged": {
+    "*":["Volar","eslint  --fix"]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "post-commit": "git update-index --again"
+    }
+  }
+}

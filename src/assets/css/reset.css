@@ -1,0 +1,113 @@
+body,
+html,
+p,
+a,
+ul,
+li,
+dl,
+dd,
+dt,
+form,
+ol,
+table,
+td,
+tr,
+figure,
+figcaption,
+header,
+section,
+main,
+hgroup,
+h1,
+h2,
+h3,
+h4,
+h5,
+time,
+article,
+footer,
+tfoot,
+tbody,
+thead,
+nav,
+input,
+button,
+label,
+map,
+object,
+tfoot,
+mark,
+sup,
+samp,
+span,
+strong,
+div {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #222;
+}
+
+ul,
+ol {
+    list-style-type: none;
+
+}
+
+li {
+    list-style: none;
+}
+
+/* 解决长按页面时造成地对页面地复制 */
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+html,
+body,div#app {
+    height: 100%;
+    width: 100%;
+    /* display: flex;
+    justify-content: flex-start; */
+    font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+  'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+}
+
+.el-sub-menu__title  {
+    /* color:#fff; */
+    font-size:14px
+  }
+
+  .el-sub-menu__title  span {
+    margin-left:10px
+  }
+
+.el-sub-menu__title:hover {
+    /* background-color: #381a143b; */
+  }
+
+
+.el-sub-menu  .el-menu-item  {
+    /* background-color: rgba(98, 4, 4, 0.843); */
+    /* color:#fff; */
+  }
+
+  .el-sub-menu  .el-menu-item span {
+    margin-left:10px
+  }
+
+  .el-sub-menu  {
+    /* background-color: rgba(98, 4, 4, 0.843); */
+    overflow: hidden;
+  }
+
+
+
