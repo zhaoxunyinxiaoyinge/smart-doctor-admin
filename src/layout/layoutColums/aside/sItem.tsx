@@ -39,11 +39,7 @@ const SitemBar = defineComponent({
   },
   setup(props, { slots }) {
 
-    let onlyOneChild = reactive<any>([])
-
-    const handleOpen = () => { };
-
-    const handleClose = () => { };
+    let onlyOneChild = reactive<any>({})
 
     let store = userstore();
 
@@ -63,7 +59,7 @@ const SitemBar = defineComponent({
       }
 
       if (onlyChild.length == 0) {
-         onlyOneChild = { ...parent, path: "", noShowingChildren: true };
+         onlyOneChild = { ...parent, noShowingChildren: true };
         return true;
       }
       return false;
@@ -91,7 +87,7 @@ const SitemBar = defineComponent({
     }
 
     const getSubMenu = () => {
-      if (hasOnyChild(props.item.children, props.item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren)) {
+      if (hasOnyChild(props.item.children||[], props.item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren)) {
         return <el-menu-item v-slots={menuSolt} index={resovlePath(onlyOneChild.path)}>
           {/* 提供svg icon 的支持 */}
           <svg-icon names={onlyOneChild.meta.icon} class='icons other'></svg-icon>

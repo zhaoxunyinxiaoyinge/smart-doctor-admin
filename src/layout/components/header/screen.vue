@@ -15,10 +15,6 @@ export default defineComponent({
       }
     }
 
-    const changescreen = () => {
-
-    }
-
     return {
       toggleScreen
     }

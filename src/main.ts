@@ -2,11 +2,12 @@
 import { createApp } from 'vue'
 import App from '@/App.vue'
 
-import ElementPlus from 'element-plus'
+import ElementPlus from 'element-plus';
+import {i18n} from "@/lang/index"
 
-// import 'element-plus/dist/index.css'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import {directers} from "@/directers/index";
 
 import router from "./router/index"
 
@@ -20,12 +21,12 @@ import svgIcon from "@/components/icons/svg-icon.vue"
 import 'virtual:svg-icons-register';
 
 import 'element-plus/theme-chalk/dark/css-vars.css'
-
 import "@/assets/scss/var.scss";
 
 import "@/assets/css/reset.css";
 
 import "animate.css";
+
 
 // import addState from "./../plugins/pina-plugins"
 // vue3最新缓存文件
@@ -37,22 +38,25 @@ const pina = createPinia();
 // pina.use(addState);
 
 import './perssion.ts'
-let app = createApp(App)
+const app = createApp(App)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-    app.component(key, component)
+  app.component(key, component)
 }
 
-import {setupProdMockServer} from "./createMockServe";
-setupProdMockServer();
+// import { setupProdMockServer } from "./createMockServe";
+// setupProdMockServer();
+
+console.log(import.meta.env, 666);
 
 // 挂载全局变量使用的函数声明
 // declare module "@vue/runtime-core" {
 //     export interface ComponentCustomProperties {
-        // $http: Function,
+// $http: Function,
 //         hello: string
 //     }
 // }
+
 
 import * as echarts from 'echarts/core';
 
@@ -78,7 +82,7 @@ import {
   DatasetComponentOption,
   // 内置数据转换器组件 (filter, sort)
   TransformComponent,
-  LegendComponent 
+  LegendComponent
 } from 'echarts/components';
 
 import { LabelLayout, UniversalTransition } from 'echarts/features';
@@ -111,14 +115,15 @@ echarts.use([
   PieChart
 ]);
 
-
 // 设置全局属性
 app.config.globalProperties.$http = () => { console.log("我是函数") }
 app.config.globalProperties.hello = 'hello';
-app.config.globalProperties.echarts=echarts;
+app.config.globalProperties.echarts = echarts;
 app.use(pina)
 app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 app.use(router);
 app.component('svg-icon', svgIcon)
+app.use(i18n);
+app.use(directers);
 app.mount('#app');
 

@@ -1,32 +1,42 @@
 <template>
   <div class="contanier" ref="div">
-    <div class="login">
-      <el-form class="form" label-width="80px" :model="formData" :rules="rules" ref="formEl">
-        <el-form-item label="用户名" class="form-item" prop="username">
-          <el-input size="default" v-model="formData.username"></el-input>
-        </el-form-item>
+    <div class="bg"></div>
+    <div class="fixed">
+      <div class="login-img">
+        <el-image style="width:800px;height: 700px;"
+          :src="'https://img.tukuppt.com/ad_preview/00/04/75/5c98c7eb09f48.jpg!/fw/980'"> </el-image>
+      </div>
 
-        <el-form-item label="密码" class="form-item" prop="password">
-          <el-input type="password" size="default" v-model="formData.password" show-password></el-input>
-        </el-form-item>
+      <div class="login">
+        <el-form class="form" label-width="80px" :model="formData" :rules="rules" ref="formEl">
+          <el-form-item label="用户名" class="form-item" prop="username">
+            <el-input size="default" v-model="formData.username"></el-input>
+          </el-form-item>
 
-        <el-form-item class="form-item btn-left">
-          <el-button type="primary" @click="login(formEl)" size="default">登录</el-button>
-          <el-button type="default" @click="clear(formEl)" size="default">清除</el-button>
-        </el-form-item>
-      </el-form>
+          <el-form-item label="密码" class="form-item" prop="password">
+            <el-input type="password" size="default" v-model="formData.password" show-password></el-input>
+          </el-form-item>
+
+          <el-form-item class="form-item btn-left">
+            <el-button type="primary" @click="login(formEl)" size="default">登录</el-button>
+            <el-button type="default" @click="clear(formEl)" size="default">清除</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
     </div>
+
     <!-- 添加其他登录方式 -->
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref, watch, watchEffect } from "vue";
-import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
+import { onMounted, reactive, ref, watchEffect } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElInput, ElForm, ElFormItem, ElButton, FormInstance } from "element-plus";
-import { userstore } from "./../store/expmle"
+import { userstore } from "./../store/expmle";
+import { userInfo } from "./../store/user"
 import Cookies from "js-cookie"
-import type { LocationQueryRaw, LocationQueryValue } from "vue-router"
+import type { LocationQueryValue } from "vue-router";
 
 interface formFileds {
   username: string,
@@ -47,6 +57,8 @@ const router = useRouter();
 const routes = useRoute();
 
 const store = userstore();
+
+const user = userInfo();
 
 let formData = reactive<formFileds>({ username: "", password: "" });
 
@@ -76,10 +88,13 @@ const login = (formEl: FormInstance | undefined) => {
       // 触发用户登录
       store.login(username, password).then(
         (res) => {
-          if (res.code == 0) {
-            window.localStorage.setItem("token", res.token);
-            Cookies.set('token', res.token);
-            store.$patch({ token: res.token });
+          if (res.code == 1) {
+            let date=new Date(res.updateTime)
+            Cookies.set('token', res.data.token,{ expires: date.setDate(date.getDate()+10)});
+            Cookies.set('userinfo',JSON.stringify(res.data))
+            store.$patch({ token: res.data.token });
+
+            user.setUserInfo({ name: res.data.userName, phone: res.data.phone, work: res.data.work });
             router.push({
               path: redirect.value as string || "/",
               query: otherQuery,
@@ -145,15 +160,25 @@ const clear = (formEl: FormInstance | undefined) => {
 </script>
 
 <style lang="scss" scoped>
-.contanier {
-  display: flex;
-  align-items: center;
-  padding-left: 300px;
-  background: url('https://img.tukuppt.com/ad_preview/00/04/75/5c98c7eb09f48.jpg!/fw/980') no-repeat;
-  background-size: 100%;
-  filter: blur(50);
+.bg {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  filter: blur(2px);
+  background-color: rgb(238, 236, 236);
 }
 
+.fixed {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  filter: blur(0px);
+  background-color: #fff;
+  padding: 0 20px;
+}
 
 .login {
   display: flex;
@@ -180,7 +205,7 @@ const clear = (formEl: FormInstance | undefined) => {
 }
 
 .login ::v-deep .el-form-item__label {
-  color: #fff;
+  color: #000;
   font-weight: 700;
 }
 </style>

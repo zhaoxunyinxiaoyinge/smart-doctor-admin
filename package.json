@@ -6,9 +6,15 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit --skipLibCheck && vite build",
     "builds": "vite build",
-    "preview": "vite preview"
+    "build:test": "vite --mode test",
+    "preview": "vite preview",
+    "prepare": "husky install",
+    "test": "vitest",
+    "test:util": "vitest --environment jsdom"
   },
   "dependencies": {
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
     "@element-plus/icons-vue": "^2.0.6",
     "@form-create/element-ui": "^3.1.10",
     "@types/highcharts": "^7.0.0",
@@ -25,11 +31,11 @@
     "axios": "^0.26.1",
     "clipboard": "^2.0.11",
     "cross-env": "^7.0.3",
+    "driver.js": "^0.9.8",
     "echarts": "^5.3.3",
     "element-plus": "^2.2.8",
     "form-making": "^1.2.1",
     "js-cookie": "^3.0.1",
-    "jsdom": "latest",
     "lodash": "^4.17.21",
     "mockjs": "^1.1.0",
     "nprogress": "^0.2.0",
@@ -43,24 +49,33 @@
     "unplugin-auto-import": "^0.6.8",
     "unplugin-vue-components": "^0.15.6",
     "vitest": "latest",
+    "volar": "^0.0.0",
     "vue": "^3.2.37",
-    "vue-router": "^4.1.3"
+    "vue-eslint-parser": "^9.1.0",
+    "vue-i18n": "^9.2.2",
+    "vue-router": "^4.1.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.17.0",
     "@types/jest": "^28.1.6",
     "@types/lodash": "^4.14.180",
+    "@types/qs": "^6.9.7",
+    "@types/xlsx": "^0.0.36",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
-    "@vitejs/plugin-vue": "^3.0.3",
+    "@vitejs/plugin-vue": "^3.1.2",
+    "babel-eslint": "^10.1.0",
     "dotenv": "^16.0.0",
     "echart": "^0.1.3",
     "eslint": "^8.12.0",
     "eslint-plugin-vue": "^8.5.0",
-    "husky": "^8.0.1",
+    "husky": "^8.0.0",
+    "jsdom": "^20.0.1",
     "less": "^4.1.3",
     "lint-staged": "^13.0.3",
     "postcss-preset-env": "^7.7.2",
+    "qs": "^6.11.0",
     "rollup-plugin-postcss": "^4.0.2",
     "scss": "^0.2.4",
     "typescript": "^4.6.4",
@@ -69,19 +84,18 @@
     "vite-plugin-eslint": "^1.3.0",
     "vite-plugin-mock": "^2.9.6",
     "vite-plugin-svg-icons": "^2.0.1",
+    "vite-plugin-top-level-await": "^1.3.0",
     "vitest": "^0.21.1",
     "vue-tsc": "^0.39.5"
   },
   "lint-staged": {
     "*": [
-      "Volar",
-      "eslint  --fix"
+      "eslint --fix "
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "post-commit": "git update-index --again"
-    }
-  }
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
 }

@@ -1,7 +1,9 @@
-// 全局修改elementplus中的变量样式
+@use "sass:color";
 :root {
-    --el-menu-bg-color:rgba(0, 1, 1, 0.296);
-    --el-bg-color-overlay:rgba(0, 1, 1, 0.796);
-  }
-
+  --el-menu-bg-color: rgba(0, 1, 1, 0.296);
+  --el-bg-color-overlay: rgba(0, 1, 1, 0.796);
+  --el-color-primary:#409eff;
+  --bg-color: #fff;
+  --color-white: #fff;
+}
 

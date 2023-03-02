@@ -6,7 +6,7 @@ let user = userInfo();
   <div class="padding-left-10 padding-right-10 padding-top-10 padding-bottom-10">
     <el-card class="box-card" :body-style="{textAlign:'left',lineHeight:2.5,fontWeight:'bold'}">
       <template #header>
-        <div class="card-header">
+        <div class="card-header  justifly-start " style="text-align: left;">
           <span>用户个人中心</span>
         </div>
       </template>

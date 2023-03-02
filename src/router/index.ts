@@ -1,159 +1,39 @@
 
-
 import {
   createRouter,
   createWebHistory,
-  RouteRecordRaw,
+  RouteRecordRaw
 } from "vue-router";
+ 
+/**
+ * @param  path  路径
+ * @param  title 标题
+ * @param  hidden 菜单是否显示
+ * @param  component 组件
+ * @param  redirect 重定向
+ * @param  children 嵌套子路由
+ */
 
-const containRoute: Array<any> = [
-  {
-    path: "/",
-    meta: {
-      title: "主页",
-      hidden: false,
-    },
-    component: () => import("@/layout/index.vue"),
-    redirect: "/welcome",
-    children: [
-      {
-        path: "/welcome",
-        redirect: "",
-        meta: {
-          title: "首页",
-          icon: "house-damage",
-          hidden: false,
-        },
-        component:defineAsyncComponent(() => import("@/views/welcome/index.vue"))
-      },
-      {
-        path: '/tabel',
-        redirect: '',
-        meta: {
-          title: 'tabel的使用',
-          icon: 'books',
-          hidden: false
-        },
-        component:defineAsyncComponent(() => import("@/views/welcome/tabel.vue"))
-      }, {
-        name: 'editor',
-        path: 'customelement',
-        redirect: '',
-        meta: {
-          title: '富文本编辑器',
-          icon: 'file-import',
-          hidden: false,
-        },
-        component: () => import('@/views/welcome/customelement.vue')
-      }, {
+const routes = <Array<RouteRecordRaw>>[];
 
-        path: '/icons',
-        redirect: '',
-        meta: {
-          title: 'svg图标',
-          icon: 'icon',
-          hidden: false,
-        },
-        component: () => import('@/views/welcome/icon.vue')
-      },
-      {
+// 动态导入路由文件
+const modules = await import.meta.glob('./module/route.ts', { import: 'default', eager: true });
+Object.keys(modules).forEach(async keys => {
+  let res: any = modules[keys];
+  res.forEach((item: any) => {
+    routes.push(item);
+  })
+});
 
-        path: '/vgtabel',
-        redirect: '',
-        meta: {
-          title: '无限表格',
-          icon: 'bolt',
-          hidden: false,
-        },
-        component: () => import('@/views/welcome/vtabel.vue')
-      }
-    ],
-  },
-  {
-    path: "/modelInput",
-    redirect: "/modelInput/index",
-    meta: {
-      title: "model组件使用",
-      hidden: false
-    },
-    component: () => import("@/layout/index.vue"),
-    children: [
-      {
-        path: 'index',
-        redirect: '',
-        meta: {
-          title: "model组件",
-          hidden: false,
-          icon: 'books'
-        },
-        component: () => import("@/views/model/index.vue"),
-      }
-    ]
-
-  },
-
-  {
-    path: "/stylems",
-    meta: {
-      title: '系统',
-      hidden: false,
-    },
-    component: () => import("@/layout/index.vue"),
-    redirect: "/stylems/index",
-    children: [
-      {
-        path: 'index',
-        redirect: '',
-        meta: {
-          title: "系统设置",
-          hidden: false,
-          icon: "align-center"
-        },
-        component: () => import("@/views/stylems/index.vue"),
-      }
-    ]
-  },
-  {
-    path: '/repeat',
-    redirect: '/repeat/index',
-    meta: {
-      title: '重复路由',
-      hidden: false
-    },
-    component: () => import("@/layout/index.vue"),
-    children: [
-      {
-        path: 'index',
-        redirect: '',
-        meta: {
-          title: '重复路由参数',
-          hidden: false,
-          icon: "repeat"
-        },
-        component: () => import("../views/repeat/index.vue")
-      }
-    ]
-
-  }
-  ,
-  {
-    path: "/login",
-    name: 'login',
-    meta: {
-      title: "用户登录",
-      hidden: false,
-    },
-    component: () => import("../login/index.vue"),
-  },
-
-  { path: '/:pathMatch(.*)*', component: () => import('@/views/notFound/notFound.vue') },
-];
-
+// 创建路由实列
 const router = createRouter({
   history: createWebHistory(),
-  routes: containRoute,
-  scrollBehavior: function (to, from, savedPosition) {
+  routes: routes,
+  scrollBehavior: function () {
     return { top: 0 };
   },
 });
 export default router;
+export {
+  routes
+}

@@ -2,27 +2,29 @@
 import { defineComponent } from "vue";
 import {userstore} from "@/store/expmle";
 import { ElMessage } from 'element-plus';
-import svgIcon from "@/components/icons/svg-icon.vue";
+import {i18n} from "@/lang/index"
+import Cookies from "js-cookie";
 export default defineComponent({
   setup() {
     let store=userstore();
-
-    const toggle=()=>{
+    const toggle=()=>{    
         store.setCurrentLang();
-        ElMessage.success('当前语言已切换')
+        ElMessage.success(`当前语言已切换为${store.lang!=='zh'?'英文':'中文'}`);
+        i18n.global.locale=store.lang=="zh"?'zh':'en';
+        Cookies.set('lang',store.lang)
     }
     return {
-      toggle
+      toggle,
+      store,
     }
   },
   components:{
-    svgIcon
   }
 });
 </script>
 <template>
   <span class="margin-right-10 margin-left-10" @click="toggle()">
-      <svgIcon :names="'ziyuan'"></svgIcon>
+      {{ store.lang=="zh"?'中文':'英文'}}
   </span>
 
 </template>

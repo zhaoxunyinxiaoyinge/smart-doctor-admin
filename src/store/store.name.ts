@@ -1,7 +1,8 @@
  enum names {
         TEST='TEST',
         USER='USER',
-        INFO='INFO'
+        INFO='INFO',
+        THEME="THEME"
 }
 
 export default names;

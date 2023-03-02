@@ -1,19 +1,20 @@
 // 引用指定的样式文件并传递参数
-@forward 'element-plus/theme-chalk/src/common/var.scss' with (
-  $colors: (
-    'primary': (
-      'base': #000,
-    ),
-  ),
 
-);
+@use "./../scss/var.scss";
 
 
 // 替代@import 的使用引入一个外部样式表， 命名空间为全局
 @use "element-plus/theme-chalk/src/index.scss" as *;
 
-$el-sub-menu__title_hover_bg:rgba(0, 0, 0, 0.923);
+// @forward 'element-plus/theme-chalk/src/common/var.scss' with (
+//   $colors: (
+//     'primary': (
+//       'base': green,
+//     ),
+//   ),
+// );
 
+$el-sub-menu__title_hover_bg:rgba(0, 0, 0, 0.923);
 
 $breaum-height:50px;
 $router-list-height:50px;
@@ -28,6 +29,9 @@ $router-list-bg:auto;
 .el-menu {
   background-color:rgba(0, 1, 1, 0.296);
 }
+
+
+
 .el-menu-item,.el-sub-menu {
   span,.el-icon {
      color: #bdbdc0 !important;
@@ -45,11 +49,9 @@ $router-list-bg:auto;
     color:#fff !important;
   }
   .icons {
-    fill:#fff;
+    fill: #fff;
+  }
 }
-}
-
-
 
 .el-sub-menu__title:hover,.el-menu-item:hover,.el-sub-menu__title:hover,.el-menu-item.is-active,.el-sub-menu__title.el-active {
   background: $el-sub-menu__title_hover_bg;
@@ -89,7 +91,9 @@ $router-list-bg:auto;
 
 .icons {
     fill:#bdbdc0;
+    margin-right: 5px;
 }
+
 .icons + span{
 
   margin-left: 10px;

@@ -1,65 +1,55 @@
 <template>
-    <div class="wrap" id="editor—wrapper">
-      <Toolbar
-        style="border-bottom: 1px solid #ccc"
-        :editor="editorRef"
-        :defaultConfig="toolbarConfig"
-        :mode="'default'"
-      />
-      <Editor
-        style="height: 500px; overflow-y: hidden;"
-        v-model="valueHtml"
-        :defaultConfig="editorConfig"
-        :mode="mode"
-        @onCreated="handleCreated"
-        @onDestroyed="handleDestroyed"
-        @onChange="handleChange"
-        @onBlur="hangleBur"
-        @customPaste="customPaste"
-      />
-   </div>
-
+  <div class="wrap" id="editor—wrapper">
+    <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="'default'" />
+    <Editor style="height: 500px; overflow-y: hidden;" v-model="valueHtml" :defaultConfig="editorConfig" :mode="mode"
+      @onCreated="handleCreated" @onDestroyed="handleDestroyed" @onChange="handleChange" @onBlur="hangleBur"
+      @customPaste="customPaste" />
+  </div>
 </template>
 
 <script lang="ts" setup>
 import '@wangeditor/editor/dist/css/style.css'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
-import { SlateElement,IToolbarConfig,IEditorConfig,IDomEditor  } from '@wangeditor/editor';
-import {customCheckLinkFns} from "./index"
+import { SlateElement, IToolbarConfig, IEditorConfig, IDomEditor } from '@wangeditor/editor';
+import { customCheckLinkFns } from "./index"
+import Cookies from 'js-cookie';
+import { defineEmits, withDefaults } from "vue";
 
-const editorRef=shallowRef();
+const editorRef = shallowRef();
 
 type ImageElement = SlateElement & {
-    src: string
-    alt: string
-    url: string
-    href: string
+  src: string
+  alt: string
+  url: string
+  href: string
 }
 
+type RestFun = () => ({});
 
-const emits=defineEmits<{
-  (e:"currentVal",val:String):void
+
+const emits = defineEmits<{
+  (e: "currentVal", val: String): void
 }>();
 
 
-const props=withDefaults(defineProps<{
-  rest:Function
-}>(),{
-  rest:()=>{}
-}) 
+const props = withDefaults(defineProps<{
+  rest: RestFun
+}>(), {
+  rest: () =>({})
+})
 
-const toolbarConfig:Partial<IToolbarConfig>=reactive({
-  toolbarKeys:[
-  'headerSelect',
-  "|",
-  'bold', 'italic',
-  'fontSize',
+const toolbarConfig: Partial<IToolbarConfig> = reactive({
+  toolbarKeys: [
+    'headerSelect',
+    "|",
+    'bold', 'italic',
+    'fontSize',
     {
-        key: 'group-more-style', // 必填，要以 group 开头
-        title: '更多样式', // 必填
-        iconSvg: '<svg>....</svg>', // 可选
-        menuKeys: ["through", "code", "clearStyle"] // 下级菜单 key ，必填
-    }, 
+      key: 'group-more-style', // 必填，要以 group 开头
+      title: '更多样式', // 必填
+      iconSvg: '<svg>....</svg>', // 可选
+      menuKeys: ["through", "code", "clearStyle"] // 下级菜单 key ，必填
+    },
     "uploadImage",
     "color",
     "fontFamily",
@@ -74,26 +64,25 @@ const toolbarConfig:Partial<IToolbarConfig>=reactive({
 
 
 // 获取当前编辑器的默认配置
-const editorConfig:Partial<IEditorConfig>=reactive({
+const editorConfig: Partial<IEditorConfig> = reactive({
   "MENU_CONF": {
-    uploadImage:{
-      title:'图片上传',
-      server: '/api/upload-image',
-      fieldName: '上传图片',
-      meta: {
-        token: 'xxx',
-        otherKey: 'yyy'
-    },
-    metaWithUrl: false,
-    onSuccess(){
-      console.log("图片上传成功")
-    },
-    onFailed(file: File, res: any) { 
+    uploadImage: {
+      title: '图片上传',
+      server: '/api/common/upload',
+      fieldName: 'file',
+      headers: {
+        Authorization: Cookies.get("token")
+      },
+      metaWithUrl: false,
+      onSuccess() {
+        console.log("图片上传成功")
+      },
+      onFailed(file: File, res: any) {
         console.log("上传文件失败")
+      },
     },
-  },
-    fontSize:{
-      fontSizeList:[ 
+    fontSize: {
+      fontSizeList: [
         '12px',
         "14px",
         '16px',
@@ -102,7 +91,7 @@ const editorConfig:Partial<IEditorConfig>=reactive({
 
       ]
     },
-    fontFamily:{
+    fontFamily: {
       fontFamilyList: [
         '黑体',
         '楷体',
@@ -110,35 +99,35 @@ const editorConfig:Partial<IEditorConfig>=reactive({
         'Arial',
         'Tahoma',
         'Verdana'
-    ]
+      ]
     },
-    lineHeight:{
+    lineHeight: {
       lineHeightList: ['1', '1.5', '2', '2.5']
     },
-    emotin:{
-      emotions: '😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉'.split(' ') 
+    emotin: {
+      emotions: '😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉'.split(' ')
     },
-    insertLink:{
+    insertLink: {
       checkLink: customCheckLinkFns,
     },
-    insertImage:{
-      onInsertedImage(imageNode: ImageElement | null){
-          if(imageNode==null){return }
-          const { src, alt, url, href } = imageNode
+    insertImage: {
+      onInsertedImage(imageNode: ImageElement | null) {
+        if (imageNode == null) { return }
+        const { src, alt, url, href } = imageNode
         console.log('inserted image', src, alt, url, href);
       }
     },
-    editImage(imageNode: ImageElement | null){
-        console.log("这里时图片编辑时候触发");
+    editImage(imageNode: ImageElement | null) {
+      console.log("这里时图片编辑时候触发");
     },
-    codeSelectLang:{
+    codeSelectLang: {
       codeLangs: [
         { text: 'CSS', value: 'css' },
         { text: 'HTML', value: 'html' },
         { text: 'XML', value: 'xml' },
         // 其他
-    ]
-    } 
+      ]
+    }
   }
 });
 
@@ -151,57 +140,64 @@ editorConfig.onMaxLength = function (editor: IDomEditor) {
 
 
 editorConfig.hoverbarKeys = {
-    'link': {
-        // 重写 link 元素的 hoverbar
-        menuKeys: ['editLink', 'unLink', 'viewLink'],
-    },
-    'image': {
-        // 清空 image 元素的 hoverbar
-        menuKeys: [],
-    }
+  'link': {
+    // 重写 link 元素的 hoverbar
+    menuKeys: ['editLink', 'unLink', 'viewLink'],
+  },
+  'image': {
+    // 清空 image 元素的 hoverbar
+    menuKeys: [],
+  }
 }
 
-const mode=ref("default")
+const mode = ref("default")
 
-const valueHtml=ref<string>("");
+const valueHtml = ref<string>("");
 
 // 创建编辑器
-const handleCreated=(val:SlateElement)=>{
-      editorRef.value=val;
+const handleCreated = (val: SlateElement) => {
+  editorRef.value = val;
 }
 
-const handleChange=(editor:IDomEditor)=>{
-    let htmls=editor.getHtml();
-    emits('currentVal',htmls);
+const handleChange = (editor: IDomEditor) => {
+  let htmls = editor.getHtml();
+  emits('currentVal', htmls);
 
 }
 
-const hangleBur=(editor:IDomEditor)=>{
-    let htmls=editor.getHtml();
-    emits('currentVal',htmls);
+const hangleBur = (editor: IDomEditor) => {
+  let htmls = editor.getHtml();
+  emits('currentVal', htmls);
 }
 
-const customPaste=(editor:IDomEditor,event: ClipboardEvent ,callback: any)=>{
-      console.log("复制文本和图片到这里")
+const customPaste = (editor: IDomEditor, event: ClipboardEvent, callback: any) => {
+  console.log("复制文本和图片到这里")
 }
 
 //销毁编辑器
-const handleDestroyed = (editor:IDomEditor) => { 
+const handleDestroyed = (editor: IDomEditor) => {
   console.log('destroyed');
-   editor.destroy()
+  editor.destroy()
 }
 
 </script>
 
 <style scoped lang="scss">
-    .wrap {
-      text-align: left;
-    }
+.wrap {
+  text-align: left;
+}
 
-    #editor—wrapper {
-    border: 1px solid #ccc;
-    z-index: 100; /* 按需定义 */
-  }
-  #toolbar-container { border-bottom: 1px solid #ccc; }
-  #editor-container { height: 500px; }
+#editor—wrapper {
+  border: 1px solid #ccc;
+  z-index: 100;
+  /* 按需定义 */
+}
+
+#toolbar-container {
+  border-bottom: 1px solid #ccc;
+}
+
+#editor-container {
+  height: 500px;
+}
 </style>

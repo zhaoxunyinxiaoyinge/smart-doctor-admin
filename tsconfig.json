@@ -2,6 +2,16 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
+    "allowUnreachableCode": true,//允许多于的代码，不会执行的
+    "allowUnusedLabels": false,//不允许无法执行的代码，比如错误的语法代码
+    "alwaysStrict": true,// 确保在 ECMAScript 严格模式下解析文件，并为每个源文件发出“use strict”。
+    "exactOptionalPropertyTypes":false,//这个属性指定类型不能赋值unfined
+    "noFallthroughCasesInSwitch":true,//switch语句内网穿透，会导致报错提示
+    "noImplicitAny": false,//在项目中不允许出现any,
+    "noImplicitOverride":true,//在子类继承父类时，从写父类的方法，必须加上关键字，override，
+    "noImplicitReturns":true,//确保每一个函数执行完毕的时候会返回一个值
+    "noImplicitThis":true,//保证this 引用到正确的对象，
+    "noPropertyAccessFromIndexSignature":false,//用户设置访问一个对象上的属性，必须可以用index和dot 形式房访问，如果不存在，就能用dot 形式访问
     "module": "ESNext",
     "moduleResolution": "Node",
     "strict": true,
@@ -13,12 +23,13 @@
     "skipLibCheck": true,
     "lib": ["ESNext", "DOM","es2015"],
     "types": ["node"],
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@/*":["src/*"]
     },
     "allowJs": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue","./auto-imports.d.ts","test/*.ts","src/typings/foo/*.d.ts","./global.d.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "exclude": ["/node_modules"]
 }

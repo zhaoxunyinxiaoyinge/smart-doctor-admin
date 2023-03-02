@@ -23,8 +23,20 @@
    display: flex;
 }
 
+.flex-1 {
+   flex: 1;
+   overflow: hidden;
+}
+
 .justifly-center {
    justify-content: center;
+}
+
+.justifly-betwwen {
+   justify-content: space-between;
+}
+.justifly-start {
+   justify-content: flex-start;
 }
 
 .align-items{
@@ -89,4 +101,8 @@
    background: url('https://images.pexels.com/photos/1477199/pexels-photo-1477199.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260');
    background-size: cover;
    background-repeat: no-repeat;
+}
+
+.el-dialog__header {
+   text-align: left;
 }

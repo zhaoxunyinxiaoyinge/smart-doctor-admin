@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-const range = reactive<Array<Date>>([new Date(2022, 7, 4), new Date(2022, 7, 20)]);
 const canler = ref<Date>(new Date(2022, 7, 14));
 const calendar = ref();
-const visible = ref<Boolean>(false);
+const visible = ref<boolean>(false);
 </script>
 
 <template>

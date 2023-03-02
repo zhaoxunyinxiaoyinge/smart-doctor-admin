@@ -1,28 +1,30 @@
-<script> 
-    import WangDeit from "./../../components/editor/index.vue"
+<script>
+import WangDeit from "./../../components/editor/index.vue"
+export default {
+    name: 'editor',
+    components: {
+        WangDeit
+    },
+    setup() {
 
-    export default {
-        name:'editor',
-        components:{
-            WangDeit
-        },
-        setup(){
-            const getValue=(val)=>{
-                console.log(val,"富文文本编辑器传过来的值");
-            }
+        const getValue = (val) => {
+            console.log(val, "富文文本编辑器传过来的值");
+        }
 
-            const handleRest=()=>{}
+        const handleRest = () => {
+            console.log("harst")
+        }
 
-            const handleAdd=()=>{
-
-            }
-            return {
-                getValue,
-                handleRest,
-                handleAdd
-            }
+        const handleAdd = () => {
+            console.log("harst")
+        }
+        return {
+            getValue,
+            handleRest,
+            handleAdd
         }
     }
+}
 </script>
 
 <template>

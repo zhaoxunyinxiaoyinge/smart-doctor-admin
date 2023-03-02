@@ -1,11 +1,11 @@
-// 自定义指令
-//href='https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'
+import { VueElement } from "vue";
+
 const showImage = {
-   mounted(el: any, binding: { instance: any }, vnode: any, prevVnode: any) {
-
-
+   mounted(el: Element, binding: { instance: VueElement }, vnode: Node, prevVnode: Node) {
+      console.log(el,binding,vnode,prevVnode);
    }
 }
+
 
 export {
    showImage

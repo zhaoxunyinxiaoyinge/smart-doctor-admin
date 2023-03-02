@@ -1,20 +1,18 @@
-
-
 // @use "common.scss" as contor;//导入一个scss文件，并且命名空间
 
 
 // .test-father {
-  // @extend contor,.test !optional  # 使用导入的scss文件并带上命名空间
+// @extend contor,.test !optional  # 使用导入的scss文件并带上命名空间
 // }
 
 $layoutHeight: 60px;
 $layoutAside: auto;
 $layoutMain: auto;
-$routeHeight:50px;
+$routeHeight: 50px;
 
 $bgColor: #f0f2f5;
 
-$routeContentHeight:calc(100vh - 180px);
+$routeContentHeight: calc(100vh - 180px);
 
 html,
 body {
@@ -22,14 +20,13 @@ body {
   background-color: $bgColor;
 }
 
-
 .header {
   height: $layoutHeight;
   padding: 0 10px;
   display: flex;
   justify-content: space-between;
   flex-direction: row-reverse;
-  background-color:#fff;
+  background-color: hsla(180, 8%, 92%, 0.613);
   border-bottom: 1px solid #eee;
   box-sizing: border-box;
 }
@@ -54,34 +51,80 @@ body {
 .route-list {
   height: $routeHeight;
   display: flex;
+  width: 100%;
+  box-sizing: border-box;
   align-items: center;
   padding: 0 10px;
-  background-color: #fff;
+  background-color: rgb(255, 255, 255);
   margin-bottom: 10px;
+
+  .scroll {
+    width: 100%;
+  }
+
+  .route-label-list {
+    flex:1;
+    text-align: left;
+    display: flex;
+    width:100%;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
   .svg-size {
     fill: #fff;
     margin-right: 5px;
   }
+  .svg-icon {
+    fill: #000;
+
+  }
+
   .route-btn {
+    flex-shrink: 0;
     height: 20px;
     padding: 6px 10px;
     line-height: 20px;
-    border-radius: 5px;
-    background-color: rgba(0, 0, 0, 0.78);
-    font-size: 12px;
+    color: #ccc;
+    font-size: 14px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    color:#fff;
     margin-right: 10px;
+
+    &.active {
+      color:var(--el-color-primary);
+      border-bottom: 1px solid var(--el-color-primary);
+    }
   }
 }
 
-.route-content  {
+.route-content {
+  display: flex;
+  flex-direction: column;
   height: calc(100vh - 180px);
-  $routeContentHeight:calc(100vh - 180px);
+  $routeContentHeight: calc(100vh - 180px);
   margin: 0 10px;
-  background-color: #fff;
+  background-color: #fff;  overflow: auto;
+}
+
+// rouut-list 被隐藏时的额类名
+.route-list-none {
+  height: calc(100vh - 120px);
+  $routeContentHeight: calc(100vh - 120px);
+
+}
+
+// footer隐藏时触发
+.footer-none {
+  height: calc(100vh - 120px);
+  $routeContentHeight: calc(100vh - 120px);
+}
+
+// fouter和route-list 隐藏时触发
+.route-list-and-footer-none {
+  height: calc(100vh - 60px);
+  $routeContentHeight: calc(100vh - 60px);
 }
 
 .bottom {
@@ -95,14 +138,16 @@ body {
 
 
 .el-menu {
-  border:none;
+  border: none;
 }
 
-.show-enter-active,.show-leave-active {
+.show-enter-active,
+.show-leave-active {
   transition: opacity 1s ease;
 }
 
-.show-enter-from,.show-leave-to {
+.show-enter-from,
+.show-leave-to {
   opacity: 0;
 }
 
@@ -116,12 +161,127 @@ body {
   }
 }
 
-// 导出一个内容高度给内容页面使用
-:export {
-  routeContentHeight:$routeContentHeight
+.classic-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.classic-header {
+  box-sizing: border-box;
+  display: flex;
+  height: 60px;
+  align-items: center;
+  padding-left: 10px;
+  justify-content: space-between;
 }
 
 
+.classic-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.classic-main {
+  flex: 1;
+  display: flex;
+  box-sizing: border-box;
+}
+
+.classic-right {
+  flex: 1;
+}
+
+.layout-transvers-header {
+  display: flex;
+  height: 60px;
+  align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
 
 
+.layout-transvers-header .el-menu {
+  background-color: inherit;
+}
 
+.layout-transvers-logo {
+  width: 200px;
+}
+
+.layout-transvers-right {
+  width: 500px;
+}
+
+.layout-transvers-aside {
+  flex: 1;
+}
+
+.layout-columns-container {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.layout-columns-main-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  font-size: 12px;
+  background-color: #1f1b1b;
+  color: #fff;
+
+}
+
+.layout-columns-right {
+  flex: 1;
+  display: flex;
+  width: calc(100vw - 80px);
+  box-sizing: border-box;
+}
+
+.layout-columns-aside {
+  //  width: auto;
+}
+
+.layout-columns-menu-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.icons+.layout-columns-title,
+.icons {
+  // margin: 0px;
+}
+
+.icons+.layout-columns-title {
+  margin-top: 4px;
+}
+
+.layou-columns-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.layout-column-content {
+  flex: 1;
+}
+
+
+.layout-column-active {
+  background-color: var(--el-color-primary);
+}
+
+// 导出一个内容高度给内容页面使用
+:export {
+  routeContentHeight: $routeContentHeight
+}
