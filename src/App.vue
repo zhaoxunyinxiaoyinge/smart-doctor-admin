@@ -10,12 +10,15 @@ Cookies.set("lang", lang.value);
 </script>
 
 <template>
-   <el-config-provider :size="size" :button="{ autoInsertSpace: true }"
-      :locale="lang == 'en' ? { ...dictMap.en, ...en } : { ...zhCn, ...dictMap.ch }">
-      <div class="app">
-         <router-view></router-view>
-      </div>
-   </el-config-provider>
+  <el-config-provider
+    :size="size"
+    :button="{ autoInsertSpace: true }"
+    :locale="lang == 'en' ? { ...dictMap.en, ...en } : { ...zhCn, ...dictMap.ch }"
+  >
+    <div class="app">
+      <router-view />
+    </div>
+  </el-config-provider>
 </template>
 
 <style>

@@ -6,9 +6,9 @@ import Cookies from "js-cookie";
 import { getMenu } from "@/store/api/index";
 import { jsonToTree } from "@/utils/common";
 import Layout from "@/layout/index.vue";
-import _ from "lodash";
+import _, { template } from "lodash";
 import { Component } from "vue";
-import { RouteRecordNormalized, RouteRecordRaw } from "vue-router";
+import { RouteRecordRaw } from "vue-router";
 
 export interface RouteList {
     title: string,
@@ -41,9 +41,9 @@ export const userstore = defineStore(names.USER, {
             size: <'' | 'small' | 'large' | 'default'>('default'),
             menuList: <MenuList[]>[],//生成得菜单
             routers: reactive<(RouteRecordRaw)[]>([]),//生成的路由
-            perssions: <any>[],
-            allMenuList:<MenuList[]>[]
-
+            perssions: <string[]>[],
+            allMenuList: <MenuList[]>[],
+            currentRoute: ref<string>(Cookies.get('current')||'/welcome')
         }
     },
 
@@ -85,7 +85,6 @@ export const userstore = defineStore(names.USER, {
 
         setRouteList(val: RouteList): void {
             const index = this.routeList.findIndex(item => item.path == val.path);
-            console.log(index, "index")
             if (index == -1) {
                 if (this.routeList.length == 10) {
                     this.routeList.shift();
@@ -107,14 +106,15 @@ export const userstore = defineStore(names.USER, {
 
         async getMenuList(id: number) {
             return getMenu({ id }).then(res => {
-                let data = res.data.filter((item: any) => item.isMenu != 2);
-                let buttonData=_.cloneDeep(res.data);
-                let allMenuList=jsonToTree(buttonData, "id");
-                this.allMenuList=allMenuList
+                const data = res.data.filter((item: any) => item.isMenu !== 2);
+                const perssionsList = res.data.filter((item: any) => item.isMenu === 2);
+                const buttonData = _.cloneDeep(res.data);
+                const allMenuList = jsonToTree(buttonData, "id");
+                this.allMenuList = allMenuList
 
-                this.setPerssions(data);
-                let menuList = jsonToTree(data, "id");
-                let routeList = this.filterAsyncRoutes(menuList);
+                this.setPerssions(perssionsList);
+                const menuList = jsonToTree(data, "id");
+                const routeList = this.filterAsyncRoutes(menuList);
                 this.menuList = menuList;
                 this.routers = routeList;
                 return Promise.resolve(true);
@@ -124,25 +124,30 @@ export const userstore = defineStore(names.USER, {
 
         setPerssions(list: Array<any>) {
             list.forEach(item => {
-                if (item.perssions) {
-                    this.perssions.push(item.perssions);
+                if (item.perssion) {
+                    this.perssions.push(item.perssion);
                 }
             })
         },
 
         filterAsyncRoutes(routes: { hidden: boolean, component: string | Component, parentId: number, children?: any, routePath: string, menuName: string, icon: string }[]) {
-            let res: RouteRecordRaw[] = [];
+            const res: RouteRecordRaw[] = [];
             routes.forEach(route => {
-                let tmp: any = {
+                const tmp: any = {
                     ...route,
                 };
 
-                if (tmp.parentId == 0) {
+                if (tmp.parentId == 0&&(tmp.component=='layout'||tmp.component=='')) {
                     tmp.component = Layout;
                 }
 
                 if (tmp.component && tmp.parentId != 0) {
-                    let componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
+                    const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
+                    tmp.component = this.loadView(componentPath);
+                }
+                
+                if(tmp.component&&tmp.parentId==0&&tmp.component!==Layout){
+                    const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
                     tmp.component = this.loadView(componentPath);
                 }
 
@@ -170,7 +175,7 @@ export const userstore = defineStore(names.USER, {
         },
 
         loadView(componentName: string) {
-            return defineAsyncComponent(() => import("./.." + componentName + ".vue"));
+            return defineAsyncComponent(() => import(/* @vite-ignore */"./.." + componentName + ".vue"));
         }
     }
 

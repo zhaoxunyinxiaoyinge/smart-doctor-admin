@@ -69,7 +69,8 @@
 .charts-list{
    display: flex;
    height: 45%;
-   justify-content: space-evenly;
+   justify-content: flex-start;
+   flex-wrap: wrap;
    padding-top: 10px;
    box-sizing: border-box;
 
@@ -82,6 +83,7 @@
    background-color: #333;
    box-sizing: border-box;
    padding: 10px;
+   margin-right: 10px;
    overflow: hidden;   
    .img {
       width: 100%;

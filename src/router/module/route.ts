@@ -11,6 +11,7 @@ const containRoute: Array<any> = [
     },
 
     { path: '/:pathMatch(.*)*', component: () => import('@/views/notFound/notFound.vue') },
+
 ];
 
 

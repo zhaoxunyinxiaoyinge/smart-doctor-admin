@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import SvgIcon from '@/components/icons/svg-icon.vue';
-
 import content from "@/assets/scss/layout.module.scss";
 import { copy } from "@/utils/common"
 

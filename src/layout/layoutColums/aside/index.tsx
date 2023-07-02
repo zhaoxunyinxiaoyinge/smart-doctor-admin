@@ -43,8 +43,7 @@ export default defineComponent({
         <el-menu
           default-active={currentRoute}
           mode='vertical'
-          collapse={store.getCollapseValue}
-          style={{ width: store.getCollapseValue ? '50px' : '200px' }}
+          style={{ width: '180px' }}
           open={handleOpen}
           close={handleClose}
           collapse-transition={true}
@@ -59,3 +58,6 @@ export default defineComponent({
     return rendDom;
   },
 });
+
+
+

@@ -7,11 +7,8 @@ import { getRoleList, postRole, deleteRole, getDetail, updateRole } from "@/view
 import { getMenuList } from "@/views/menu/api/index";
 import FormId from "@/components/forms/index.vue";
 import Tree from "@/components/tree/index.vue";
-import { userstore } from "@/store/expmle";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { jsonToTree } from "@/utils/common"
-
-const store = userstore();
 const formatters = (row: { status: number }) => {
     if (row.status === 0) {
         return "正常"
@@ -176,9 +173,9 @@ const handleDelete = (id: number) => {
             cancelButtonText: '取消',
             type: 'warning',
         }
-    ).then(res => {
+    ).then(() => {
         return deleteRole(id);
-    }).then(res => {
+    }).then(() => {
         getData({})
         ElMessage.success("删除成功")
     })
@@ -211,7 +208,6 @@ const handleCommit = () => {
         })
     }
 
-
 }
 
 const handlePage = (val: number) => {
@@ -228,50 +224,48 @@ const handleSize = (size: number) => {
 </script>
 
 <template>
-    <Fragment>
-        <From :formField="formConfig" @search="handleSearch" :inline="true"></From>
-        <PageHeader @add="handleInscrement"></PageHeader>
-        <div class="margin-top-20 margin-left-20 margin-right-20 margin-bottom-20 flex-1">
-            <el-table :data="tableData" v-loading="loading" height="100%">
-                <template :key="index" v-for="(item, index) in tableConfig">
-                    <el-table-column v-if="item.label !== '操作'" :width="item.width" :label="item.label"
-                        :formatter="item.formatter" :prop="item.props"></el-table-column>
-                    <el-table-column v-else :label="item.label">
-                        <template #default="scope">
-                            <el-button type="primary" @click="handleEdit(scope.row.id)">编辑</el-button>
-                            <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
-                        </template>
-                    </el-table-column>
-                </template>
-            </el-table>
-
-            <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
-                <FormId :form-field="formEdit" :inline="false" ref="formId">
-                    <template v-slot:tree>
-                        <span style="width:100px;display: inline-block;text-align: center;">
-                            <slot name="label">
-                                权限列表
-                            </slot>
-
-                        </span>
-                        <Tree :data="menuList" :default-props="{ label: 'title', child: 'children' }" ref="tree"
-                            :defaultCheckedKeys="defaultCheckedKeys">
-                        </Tree>
+    <From :formField="formConfig" @search="handleSearch" :inline="true" />
+    <PageHeader @add="handleInscrement" />
+    <div class=" flex-1">
+        <el-table :data="tableData" v-loading="loading" height="100%">
+            <template :key="index" v-for="(item, index) in tableConfig">
+                <el-table-column v-if="item.label !== '操作'" :width="item.width" :label="item.label"
+                    :formatter="item.formatter" :prop="item.props"></el-table-column>
+                <el-table-column v-else :label="item.label">
+                    <template #default="scope">
+                        <el-button type="primary" @click="handleEdit(scope.row.id)"
+                            v-hasperssion="['menu:role:edit']">编辑</el-button>
+                        <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
                     </template>
-                </FormId>
+                </el-table-column>
+            </template>
+        </el-table>
 
-                <template #footer>
-                    <span class="dialog-footer">
-                        <el-button @click="handleClose">取消</el-button>
-                        <el-button type="primary" @click="handleCommit">
-                            确定
-                        </el-button>
+        <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
+            <FormId :form-field="formEdit" :inline="false" ref="formId">
+                <template v-slot:tree>
+                    <span style="width:100px;display: inline-block;text-align: center;">
+                        <slot name="label">
+                            权限列表
+                        </slot>
+
                     </span>
+                    <Tree :data="menuList" :default-props="{ label: 'title', child: 'children' }" ref="tree"
+                        :defaultCheckedKeys="defaultCheckedKeys">
+                    </Tree>
                 </template>
-            </el-dialog>
-        </div>
-        <Pagetion :small="true" :current-page="page" :page-size="pageSize" :total="total" @page="handlePage"
-            @size="handleSize">
-        </Pagetion>
-    </Fragment>
+            </FormId>
+
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="handleClose">取消</el-button>
+                    <el-button type="primary" @click="handleCommit">
+                        确定
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
+    </div>
+    <Pagetion :small="true" :current-page="page" :page-size="pageSize" :total="total" @page="handlePage" @size="handleSize">
+    </Pagetion>
 </template>

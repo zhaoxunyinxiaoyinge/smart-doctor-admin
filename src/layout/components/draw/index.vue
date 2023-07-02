@@ -37,6 +37,14 @@ const changeColor = () => {
 const handleCurrentLayout = (val: 'vertical' | 'classic' | 'transverse' | 'columns',): void => {
     store.setLayoutName(val);
 }
+
+const handleColor=(flag,type)=>{
+    if(flag){
+        type==='grayscale'? document.body.style.filter='grayscale(100%)':document.body.style.filter='saturate(25%)'
+    }else{
+        type==='grayscale'? document.body.style.filter='none':document.body.style.filter='none'
+    }
+}
 </script>
 
 <template>
@@ -116,11 +124,11 @@ const handleCurrentLayout = (val: 'vertical' | 'classic' | 'transverse' | 'colum
                             </div>
                             <div class="list-item">
                                 <span>灰色模式</span>
-                                <el-switch></el-switch>
+                                <el-switch v-model="store.grayscale" @change="(flag)=>handleColor(flag,'grayscale')"></el-switch>
                             </div>
                             <div class="list-item">
                                 <span>色弱模式</span>
-                                <el-switch></el-switch>
+                                <el-switch  v-model="store.saturate" @change="(flag)=>handleColor(flag,'saturate')"></el-switch>
                             </div>
                         </div>
                     </div>

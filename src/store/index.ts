@@ -37,7 +37,7 @@ export const mainStore = defineStore(names.TEST, {
     },
 
     async getXinGuan() {
-      let res = await getList({
+      const res = await getList({
         url: "/lookDoctor/g2/getOnsInfo?name=disease_h5",
         method: "get",
         params: {},

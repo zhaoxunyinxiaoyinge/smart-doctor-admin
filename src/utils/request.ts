@@ -33,10 +33,10 @@ export function RequestData(url: string | Ref<string>): {data:Array<any>,error:E
 }
 
 
-export function MockData(url:string,data?:object):Promise<{datas:Array<object>,err:null|object,loading:Ref<Boolean>,pageSize:number,total:number}>{
-    let datas=reactive<Array<object>>([]);
-    let loading=ref<boolean>(false);
-    let err=ref(null);
+export function MockData(url:string,data?:object):Promise<{datas:Array<object>,err:null|object,loading:Ref<boolean>,pageSize:number,total:number}>{
+    const datas=reactive<Array<object>>([]);
+    const loading=ref<boolean>(false);
+    const err=ref(null);
     loading.value=true;
    return axios({
         url,

@@ -3,14 +3,15 @@ import { Directive, DirectiveBinding } from "vue";
 import Cookies from "js-cookie";
 
 const persssion: Directive = {
-    mounted(el: Element, binding: DirectiveBinding, vnode, prevVnode) {
+    mounted(el: Element, binding: DirectiveBinding) {
         const { value } = binding;
+        console.log(value)
         if (value && Array.isArray(value)) {
             const store = userstore();
             const perssonList = store.perssions;
-            let userinfo = Cookies.get("userinfo") as string;
+            const userinfo = Cookies.get("userinfo") as string;
             const name = JSON.parse(userinfo).userName;
-            let flag = name == "admin" || value.some(item => perssonList.includes(item));
+            const flag =name=='admin'|| value.some(item => perssonList.includes(item));
             if (!flag) {
                 el.parentNode?.removeChild(el);
             }

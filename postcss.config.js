@@ -1,12 +1,12 @@
-const postcssPresetEnv=require('postcss-preset-env')//处理css降级
-
-module.exports= ()=>{
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+module.exports = () => {
     return {
-        plugins:[postcssPresetEnv()],
-        extensions: ['.css'],
-        use: {
-            sass: null,
-            stylus: null,
+        plugins: {
+            'postcss-pxtorem': {
+                rootValue: 16,
+                propList: ['*'],
+            }
         },
-    }  
+    }
 }
+

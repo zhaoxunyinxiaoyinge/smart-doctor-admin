@@ -43,6 +43,7 @@ const key = Symbol("breakList") as InjectionKey<string>
 provide('breakList', breaList);
 
 const themes = theme();
+
 const mainList = computed(() => {
     return store.menuList.map((item) => {
         if (item.children && item.children.length > 1) {
@@ -74,10 +75,9 @@ const contenClass = computed(() => {
 })
 
 const activeMainMenuList = computed(() => {
-    let current: string = Cookies.get('current') || '/welcome';
     let route: any[] = [];
     mainList.value.length > 0 && mainList.value.forEach(items => {
-        if (items && current.includes(items.levelT) && items.path != '/') {
+        if (items && activeManMenu.value === (items.levelT) && items.path != '/') {
             activeManMenu.value = items.levelT;
             items.children && route.push(...items.children);
         } else if (activeManMenu.value == '/' && items && items.path == '/') {
@@ -101,12 +101,10 @@ watchEffect(() => {
     let len = breaList.length;
     breaList.splice(0, len,)
     route.matched && route.matched.forEach(element => {
-        if (!element.meta.hidden && !breaList.includes(element.path)) {
+        if (element.meta.hidden && !breaList.includes(element.path)) {
             breaList.push(element)
         }
     });
-    console.log(breaList, "breaklist")
-
     const path = route.path;
     Cookies.set('current', path);
     let title: string = route.meta.title as string;
@@ -144,7 +142,7 @@ watchEffect(() => {
                     <RouteMain></RouteMain>
                 </section>
                 <footer class="bottom" v-if="themes.isFooter">
-                    2022 © vite-Admin By zhaoxunyin Technology.
+                    2022 © vite-Admin By zhaoxunyin Technology.3
                 </footer>
 
             </div>
@@ -152,3 +150,22 @@ watchEffect(() => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.layout-columns-menu-item {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.icons+span {
+    margin-left: 0;
+}
+</style>

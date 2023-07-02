@@ -1,7 +1,6 @@
-import { defineComponent, ref, reactive, DefineComponent } from "vue";
+import { defineComponent, DefineComponent } from "vue";
 import Sitem from "./sItem";
 import { userstore } from "@/store/expmle"
-import Cookies from "js-cookie";
 
 export default defineComponent({
   setup() {
@@ -18,9 +17,6 @@ export default defineComponent({
     };
 
     const store = userstore();
-
-    const currentRoute = ref(Cookies.get('current') || '/welcome');
-
     const getMenu = (list: Array<List>) => {
       return list.map((item: any) => {
         if (item.meta.hidden) {
@@ -37,15 +33,15 @@ export default defineComponent({
     const rendDom = () => {
       return (
         <el-menu
-          default-active={currentRoute}
+          default-active={store.currentRoute}
           mode='vertical'
           collapse={store.getCollapseValue}
-          style={{ width: store.getCollapseValue ? 'auto' : '200px' }}
+          style={{ width: store.getCollapseValue ? '70px' : '245px' }}
           open={handleOpen}
           close={handleClose}
           collapse-transition={true}
           unique-opened={true}
-          router={false}
+          router={true}
         >
           {getMenu(store.menuList as any)}
         </el-menu>

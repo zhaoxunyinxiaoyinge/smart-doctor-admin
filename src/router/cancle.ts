@@ -15,6 +15,7 @@ const filterKeepAlive = (_route: RouteRecordRaw[], _cache: RouteRecordName[]) =>
 }
 
 const _cachelist:string[]=[];
+
 filterKeepAlive(routes,_cachelist);
 export  {
     _cachelist

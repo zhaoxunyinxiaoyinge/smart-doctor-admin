@@ -2,7 +2,7 @@
 import { ElDialog, ElForm, ElFormItem, ElRadioGroup, ElRadio, ElInput, ElButton, ElMessage } from 'element-plus';
 import { postMenu, putMenu } from "@/views/menu/api/index";
 import _ from "lodash";
-import { withDefaults, defineEmits } from "vue";
+import { withDefaults} from "vue";
 
 let form = reactive<{
     status: number, isMenu: number, parentMenu: string | number, routePath: string, menuName: string, icon: string, names: string, component: string,
@@ -91,7 +91,7 @@ const handleCommit = () => {
     }
 }
 
-watch(() => propss.dialogVisible, (current, old) => {
+watch(() => propss.dialogVisible, (current) => {
     // 对新增和不同的编辑值进行赋值
     if (current) {
         if (!propss.isEdit) {
@@ -108,7 +108,7 @@ watch(() => propss.dialogVisible, (current, old) => {
                         if (!propss.formData["parentId"]) {
                             form['parentMenu'] = 0;
                         } else {
-                            form['parentMenu'] = propss.formData["parentId"];;
+                            form['parentMenu'] = propss.formData["parentId"];
                         }
 
                     } else {
@@ -127,7 +127,7 @@ watch(() => propss.dialogVisible, (current, old) => {
 
 <template>
     <div>
-        <el-dialog :dialogVisible="propss.dialogVisible" :title="propss.isEdit ? '编辑' : '新增'" width="50%"
+        <el-dialog :model-value="propss.dialogVisible" :title="propss.isEdit ? '编辑' : '新增'" width="50%"
             :before-close="handleClose">
             <el-form :inline="false" label-width="100px">
                 <el-form-item label="选项">
@@ -137,11 +137,10 @@ watch(() => propss.dialogVisible, (current, old) => {
                         <el-radio :label="2">按钮</el-radio>
                     </el-radio-group>
                 </el-form-item>
-
                 <el-form-item label="上级菜单">
                     <el-tree-select v-if="propss.selectData" :disabled="isEdit" required clearable
-                        :propss="{ label: 'title', children: 'children' }" :node-key="'id'" v-model="form.parentMenu"
-                        :data="[{ title: 'Layout', id: 0 }, ...propss.selectData]" check-strictly
+                        :props="{ label: 'menuName', children: 'children' }" :node-key="'id'" v-model="form.parentMenu"
+                        :data="[{ menuName: 'Layout', id: 0 }, ...propss.selectData]" check-strictly
                         :render-after-expand="false" />
                 </el-form-item>
 

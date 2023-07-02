@@ -3,17 +3,21 @@ import { createApp } from 'vue'
 import App from '@/App.vue'
 
 import ElementPlus from 'element-plus';
-import {i18n} from "@/lang/index"
+import { i18n } from "@/lang/index"
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
-import {directers} from "@/directers/index";
+import DataVVue3 from '@kjgl77/datav-vue3'
+
+import { directers } from "@/directers/index";
 
 import router from "./router/index"
 
-import '@/assets/element/index.scss';
-
 import "@/assets/scss/common.scss";
+
+import "@/assets/front/index.css";
+import '@/assets/element/index.scss';
+import print from 'vue3-print-nb';
 
 //eslint-disable-line
 import svgIcon from "@/components/icons/svg-icon.vue"
@@ -35,7 +39,6 @@ import { createPinia } from 'pinia';
 
 // 使用pina
 const pina = createPinia();
-// pina.use(addState);
 
 import './perssion.ts'
 const app = createApp(App)
@@ -63,23 +66,23 @@ import * as echarts from 'echarts/core';
 import {
   BarChart,
   // 系列类型的定义后缀都为 SeriesOption
-  BarSeriesOption,
+  // BarSeriesOption,
   LineChart,
-  LineSeriesOption,
+  // LineSeriesOption,
   PieChart,
-  PieSeriesOption
+  // PieSeriesOption
 } from 'echarts/charts';
 import {
   TitleComponent,
   // 组件类型的定义后缀都为 ComponentOption
-  TitleComponentOption,
+  // TitleComponentOption,
   TooltipComponent,
-  TooltipComponentOption,
+  // TooltipComponentOption,
   GridComponent,
-  GridComponentOption,
+  // GridComponentOption,
   // 数据集组件
   DatasetComponent,
-  DatasetComponentOption,
+  // DatasetComponentOption,
   // 内置数据转换器组件 (filter, sort)
   TransformComponent,
   LegendComponent
@@ -89,16 +92,15 @@ import { LabelLayout, UniversalTransition } from 'echarts/features';
 import { CanvasRenderer } from 'echarts/renderers';
 
 // 通过 ComposeOption 来组合出一个只有必须组件和图表的 Option 类型
-type ECOption = echarts.ComposeOption<
-  | BarSeriesOption
-  | LineSeriesOption
-  | TitleComponentOption
-  | TooltipComponentOption
-  | GridComponentOption
-  | DatasetComponentOption
-  | PieSeriesOption
->;
-
+// type ECOption = echarts.ComposeOption<
+//   | BarSeriesOption
+//   | LineSeriesOption
+//   | TitleComponentOption
+//   | TooltipComponentOption
+//   | GridComponentOption
+//   | DatasetComponentOption
+//   | PieSeriesOption
+// >;
 // 注册必须的组件
 echarts.use([
   TitleComponent,
@@ -120,10 +122,13 @@ app.config.globalProperties.$http = () => { console.log("我是函数") }
 app.config.globalProperties.hello = 'hello';
 app.config.globalProperties.echarts = echarts;
 app.use(pina)
+window.store=pina
 app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 app.use(router);
 app.component('svg-icon', svgIcon)
 app.use(i18n);
 app.use(directers);
+app.use(print);
+app.use(DataVVue3);
 app.mount('#app');
 

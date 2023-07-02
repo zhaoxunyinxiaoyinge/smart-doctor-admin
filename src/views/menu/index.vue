@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Fragment, isProxy, onMounted } from "vue";
+import { onMounted } from "vue";
 import { getMenuList, deleteMenu } from "@/views/menu/api/index";
 import { jsonToTree } from "@/utils/common";
 import From from "@/components/forms/index.vue";
@@ -7,8 +7,6 @@ import PageHeader from "@/components/pageHeader/index.vue";
 import Add from "@/views/menu/components/addMenu.vue";
 import { ElMessageBox, ElMessage, ElTable, ElTableColumn, ElButton } from "element-plus";
 import { getDetail } from "@/views/menu/api/index";
-
-import { TableColumnCtx } from "element-plus/lib/components/table/src/table-column/defaults";
 
 type Menu = {
     id: number; menuName: string; routhPath: string; names: string; parentId: number; icon: string; status: number; hidden: boolean; isOutLink: boolean; orderNumber: number; isMenu: number; component: string; redirect: string
@@ -83,7 +81,6 @@ const getData = (data: object) => {
 
 const getDetails = (id: number) => {
     getDetail({ id }).then((res: any & { code: number, data: Menu, msg: string }) => {
-        console.log(res, "res")
         if (res.code == 1) {
             let arrs: Array<string> = Object.keys(res.data);
             arrs.forEach((item) => {
@@ -126,9 +123,9 @@ const handleDelete = (_id: number) => {
             cancelButtonText: '取消',
             type: 'warning',
         }
-    ).then(_res => {
+    ).then(() => {
         return deleteMenu(_id)
-    }).then(_res => {
+    }).then(() => {
         getData({})
         ElMessage.success("删除成功")
     })
@@ -137,32 +134,82 @@ const handleDelete = (_id: number) => {
 </script>
 
 <template>
-    <Fragment>
-        <From :formField="formConfig" @search="handleSearch" :inline="true"></From>
-        <div class="margin-left-20 margin-right-20 margin-top-20 margin-bottom-20 flex-1">
-            <PageHeader @add="handleAdd"></PageHeader>
-            <el-table :data="tableData" style="width: 100%" row-key="id" height="100%">
-                <el-table-column prop="menuName" label="菜单名称" />
-                <el-table-column prop="routePath" label="路由路径" />
-                <el-table-column prop="names" label="name名称" />
-                <el-table-column prop="icon" label="图标" />
-                <el-table-column prop="status" label="状态" :formatter="(row: any, _column: TableColumnCtx<any>, _cellValue: any, _index: number) => {
-                    return row.status == 1 ? '正常' : '暂停'
-                }" />
-                <el-table-column prop="component" label="组件路径" />
-                <el-table-column label="操作" width="250" fixed="right">
-                    <template #default="scope">
-                        <div class="flex">
-                            <el-button type="primary" @click="handleIncrement">新增</el-button>
-                            <el-button type="primary" @click="handleEdit(scope.row.id)">编辑</el-button>
-                            <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
-                        </div>
-
-                    </template>
-                </el-table-column>
-            </el-table>
-            <Add :dialogVisible="dialogVisible" :is-edit="isEdit" @close="dialogVisible = false" :opearte="opearte"
-                :formData="formData" :selectData="selectData"></Add>
-        </div>
-    </Fragment>
+  <From
+    :form-field="formConfig"
+    :inline="true"
+    @search="handleSearch"
+  />
+  <div class=" flex-1">
+    <PageHeader @add="handleAdd" />
+    <el-table
+      :data="tableData"
+      style="width: 100%"
+      row-key="id"
+      height="100%"
+    >
+      <el-table-column
+        prop="menuName"
+        label="菜单名称"
+      />
+      <el-table-column
+        prop="routePath"
+        label="路由路径"
+      />
+      <el-table-column
+        prop="names"
+        label="name名称"
+      />
+      <el-table-column
+        prop="icon"
+        label="图标"
+      />
+      <el-table-column
+        prop="status"
+        label="状态"
+        :formatter="(row: any, _column: TableColumnCtx<any>, _cellValue: any, _index: number) => {
+          return row.status == 1 ? '正常' : '暂停'
+        }"
+      />
+      <el-table-column
+        prop="component"
+        label="组件路径"
+      />
+      <el-table-column
+        label="操作"
+        width="250"
+        fixed="right"
+      >
+        <template #default="scope">
+          <div class="flex">
+            <el-button
+              type="primary"
+              @click="handleIncrement"
+            >
+              新增
+            </el-button>
+            <el-button
+              type="primary"
+              @click="handleEdit(scope.row.id)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="danger"
+              @click="handleDelete(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
+    <Add
+      :dialog-visible="dialogVisible"
+      :is-edit="isEdit"
+      :opearte="opearte"
+      :form-data="formData"
+      :select-data="selectData"
+      @close="dialogVisible = false"
+    />
+  </div>
 </template>

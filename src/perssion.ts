@@ -21,11 +21,12 @@ router.beforeEach((to: any, from: any, next: any) => {
         } else {
             // 这里需要根据token 获取用户请求
             if (store.menuList.length == 0) {
-                let users = Cookies.get("userinfo");
-                let info=users != undefined && JSON.parse(users);
-                user.setUserInfo({name:info.userName,phone:info.phone,work:info.work});
-                let id = users != undefined && JSON.parse(users).id;
+                const users = Cookies.get("userinfo");
+                const info=users != undefined && JSON.parse(users);
+                user.setUserInfo({name:info.userName,phone:info.phone,work:info.work,avatar:info.avatar});
+                const id = users != undefined && JSON.parse(users).id;
                 store.getMenuList(id).then((res) => {
+                    console.log(store.routers)
                     store.routers.forEach(item => {
                         router.addRoute(item);
                     })

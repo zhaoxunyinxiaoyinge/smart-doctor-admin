@@ -37,7 +37,6 @@ interface formField {
 }
 
 let list = reactive<Array<dataList>>([]);
-let show = ref(false)
 const dialogFormVisible = ref<boolean>(false);
 let form = reactive<Partial<dataList>>({})
 let title = ref("新增");
@@ -168,7 +167,9 @@ const handleEdit = (val: dataList) => {
     form.passWord = val.passWord;
     form.avatar = val.avatar;
     if (form.avatar != null) {
-        fileList.push({ name: "img", url: val.avatar });
+        fileList.push({
+            name: "img", url: val.avatar
+        })
     }
 
     form.idNum = val.idNum;
@@ -210,15 +211,14 @@ const handleAdd = () => {
     form.passWord = "";
     form.avatar = '';
     form.work = "";
-    fileList.splice(0, 1)
+    fileList.splice(0, 1);
     if (tree.value) {
         tree.value?.clearChecked();
     }
     dialogFormVisible.value = true;
 }
 
-
-const handleCommit = (val: any) => {
+const handleCommit = () => {
     let ids = tree.value?.getCheckedNodeKeys();
     if (title.value == '新增') {
         postUser({ ...form, ids }).then((res: any) => {
@@ -249,8 +249,6 @@ const handleCommit = (val: any) => {
             dialogFormVisible.value = false;
         })
     }
-
-
 }
 
 const handleRefsh = () => {
@@ -272,91 +270,177 @@ const handleSize = (size: number) => {
     getData(data);
 }
 
-const handleShow = () => {
-    if (show.value) {
-        show.value = false;
-    } else {
-        show.value = true;
-    }
-
-}
-
 const handleSuccess = (val: success) => {
     if (val.code == 1) {
         form.avatar = val.data;
     }
+    fileList.length = 0;
 }
 
 </script>
 
 <template>
-    <Fragment>
-        <define-form ref="formId" :form-field="defineFormField" :inline="true" @search="handleSearch" @refsh="handleRefsh">
-        </define-form>
-        <PageHeader @add="handleAdd"></PageHeader>
-        <div class="margin-top-20 margin-left-20 margin-right-20 margin-bottom-20 flex-1">
-            <el-table stripe ref="multeSelection" :data="list" width="100%" height="100%"
-                @selection-change="handleSelectionChange">
-                <el-table-column type="selection" width="55" />
-                <el-table-column type="index" width="55" label="#" />
-                <template v-for="item in tabelConfig">
-                    <el-table-column :key="item.label" v-if="!item.template" :width="item.width" :label="item.label"
-                        :prop="item.prop">
-                        <template #default="scope">
-                            <span v-show-image v-if="item.prop == 'avatar'">
-                                <el-image :src="scope.row.avatar"></el-image>
-                            </span>
-                            <span v-else>
-                                {{ item.prop && scope.row[item.prop] }}
-                            </span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column :key="item.prop" v-else :label="item.label">
-                        <template #default="scope">
-                            <el-button type="primary" @click="handleEdit(scope.row)"> 编辑</el-button>
-                            <el-button type="danger" @click="handleDelete(scope.row.id)"> 删除</el-button>
-                        </template>
-                    </el-table-column>
-                </template>
-            </el-table>
-            <el-dialog custom-class="headers" v-model="dialogFormVisible" :title="title">
-                <el-form :model="form">
-                    <el-form-item label="用户名" :label-width="130">
-                        <el-input v-model="form.userName" autocomplete="off" />
-                    </el-form-item>
-                    <el-form-item label="用户密码" :label-width="130" v-if="title == '新增'">
-                        <el-input v-model="form.passWord" autocomplete="off" />
-                    </el-form-item>
-                    <el-form-item label="用户头像" :label-width="130">
-                        <Upload :limit="1" :file-list="fileList" :plus="false" @success="handleSuccess" :showFileList="true"
-                            :headers="uploadCofig"></Upload>
-                    </el-form-item>
+  <define-form
+    ref="formId"
+    :form-field="defineFormField"
+    :inline="true"
+    @search="handleSearch"
+    @refsh="handleRefsh"
+  />
+  <PageHeader
+    :url="'/api/user/import'"
+    :name="'user'"
+    :add="true"
+    :export="true"
+    @add="handleAdd"
+  />
+  <div class="flex-1">
+    <el-table
+      ref="multeSelection"
+      stripe
+      :data="list"
+      width="100%"
+      height="100%"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column
+        type="selection"
+        width="55"
+      />
+      <el-table-column
+        type="index"
+        width="55"
+        label="#"
+      />
+      <template v-for="item in tabelConfig">
+        <el-table-column
+          v-if="!item.template"
+          :key="item.label"
+          :width="item.width"
+          :label="item.label"
+          :prop="item.prop"
+        >
+          <template #default="scope">
+            <span
+              v-if="item.prop == 'avatar'"
+              v-show-image
+            >
+              <el-image :src="scope.row.avatar" />
+            </span>
+            <span v-else>
+              {{ item.prop && scope.row[item.prop] }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          v-else
+          :key="item.prop"
+          :label="item.label"
+        >
+          <template #default="scope">
+            <el-button
+              type="primary"
+              @click="handleEdit(scope.row)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="danger"
+              @click="handleDelete(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </template>
+    </el-table>
+    <el-dialog
+      v-model="dialogFormVisible"
+      custom-class="headers"
+      :title="title"
+    >
+      <el-form :model="form">
+        <el-form-item
+          label="用户名"
+          :label-width="130"
+        >
+          <el-input
+            v-model="form.userName"
+            autocomplete="off"
+          />
+        </el-form-item>
+        <el-form-item
+          v-if="title == '新增'"
+          label="用户密码"
+          :label-width="130"
+        >
+          <el-input
+            v-model="form.passWord"
+            autocomplete="off"
+          />
+        </el-form-item>
+        <el-form-item
+          label="用户头像"
+          :label-width="130"
+        >
+          <Upload
+            :limit="1"
+            :file-list="fileList"
+            :plus="false"
+            :show-file-list="true"
+            :headers="uploadCofig"
+            @success="handleSuccess"
+          />
+        </el-form-item>
 
-                    <el-form-item label="电话号码" :label-width="130">
-                        <el-input v-model="form.phone"></el-input>
-                    </el-form-item>
+        <el-form-item
+          label="电话号码"
+          :label-width="130"
+        >
+          <el-input v-model="form.phone" />
+        </el-form-item>
 
-                    <el-form-item label="职业" :label-width="130">
-                        <el-input v-model="form.work"></el-input>
-                    </el-form-item>
+        <el-form-item
+          label="职业"
+          :label-width="130"
+        >
+          <el-input v-model="form.work" />
+        </el-form-item>
 
-                    <el-form-item label="身份证号码" :label-width="130">
-                        <el-input v-model="form.idNum"></el-input>
-                    </el-form-item>
+        <el-form-item
+          label="身份证号码"
+          :label-width="130"
+        >
+          <el-input v-model="form.idNum" />
+        </el-form-item>
 
-                    <el-form-item label="角色" :label-width="130">
-                        <Tree ref="tree" :default-props="defineProps" :data="treeData"></Tree>
-                    </el-form-item>
-                </el-form>
-                <template #footer>
-                    <span class="dialog-footer">
-                        <el-button @click="dialogFormVisible = false">取消</el-button>
-                        <el-button type="primary" @click="handleCommit">提交</el-button>
-                    </span>
-                </template>
-            </el-dialog>
-        </div>
-        <Pagegtion :current-page="listQuery.page" :page-size="listQuery.pageSize" :total="listQuery.total"
-            @page="handlePage" @size="handleSize"></Pagegtion>
-    </Fragment>
+        <el-form-item
+          label="角色"
+          :label-width="130"
+        >
+          <Tree
+            ref="tree"
+            :default-props="defineProps"
+            :data="treeData"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="handleCommit"
+          >提交</el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
+  <Pagegtion
+    :current-page="listQuery.page"
+    :page-size="listQuery.pageSize"
+    :total="listQuery.total"
+    @page="handlePage"
+    @size="handleSize"
+  />
 </template>

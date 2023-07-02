@@ -13,7 +13,7 @@ import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import { SlateElement, IToolbarConfig, IEditorConfig, IDomEditor } from '@wangeditor/editor';
 import { customCheckLinkFns } from "./index"
 import Cookies from 'js-cookie';
-import { defineEmits, withDefaults } from "vue";
+import { withDefaults } from "vue";
 
 const editorRef = shallowRef();
 
@@ -28,14 +28,14 @@ type RestFun = () => ({});
 
 
 const emits = defineEmits<{
-  (e: "currentVal", val: String): void
+  (e: "currentVal", val: string): void
 }>();
 
 
 const props = withDefaults(defineProps<{
   rest: RestFun
 }>(), {
-  rest: () =>({})
+  rest: () => ({})
 })
 
 const toolbarConfig: Partial<IToolbarConfig> = reactive({

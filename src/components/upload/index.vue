@@ -1,86 +1,92 @@
 <template>
-    <el-upload :file-list="fileList" class="upload-demo" :action="props.url" :on-preview="handlePreview"
-        :auto-upload="props.autoUpload" :show-file-list='props.showFileList' list-type="picture-card" :name="name"
-        :on-success="onsuccess" :on-remove="handleRemove" :before-remove="beforeRemove" :limit="props.limit"
-        :on-exceed="handleExceed" :headers="headers">
-        <el-button type="primary" v-if="props.plus">点击上传</el-button>
-        <el-icon v-else>
-            <Plus />
-        </el-icon>
-        <template #tip>
-            <div class="el-upload__tip">
-                {{ props.tips }}
-            </div>
-        </template>
-    </el-upload>
+  <el-upload ref="upload"
+   :file-list="fileList" class="upload-demo" :action="props.url" :auto-upload="props.autoUpload"
+    :show-file-list="props.showFileList" list-type="picture-card" :name="name" :on-success="onsuccess"
+    :limit="props.limit" :on-exceed="handleExceed" :headers="headers">
+    <el-icon>
+      <Plus />
+    </el-icon>
+    <template #file="{ file }">
+      <div>
+        <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+      </div>
+    </template>
+  </el-upload>
 </template>
 
 <script setup lang="ts">
-import { ElButton, ElMessage, ElUpload, UploadUserFile } from 'element-plus';
-import { defineEmits, withDefaults } from "vue";
-
+import { ElUpload, UploadUserFile } from 'element-plus';
+import type { UploadInstance } from "element-plus"
+import { withDefaults } from "vue";
 import type { success } from "./index";
+import { UploadRawFile } from 'element-plus/lib/components';
 
 type fun = () => ({});
 
 const emit = defineEmits<{
-    (e: "success", picture: success): void
+  (e: "success", picture: success): void
 }>()
 
+const upload = ref<UploadInstance | null>(null);
 
 const props = withDefaults(defineProps<{
-    limit: number,
-    tips: string,
-    url: string,
-    autoUpload: boolean,
-    httpRequest: fun,
-    disabled: boolean,
-    showFileList: boolean,
-    name: string,
-    multiple: boolean,
-    method: string
-    headers: any,
-    fileList: UploadUserFile[] | [],
-    plus: boolean
+  limit: number,
+  tips: string,
+  url: string,
+  autoUpload: boolean,
+  httpRequest: fun,
+  disabled: boolean,
+  showFileList: boolean,
+  name: string,
+  multiple: boolean,
+  method: string
+  headers: any,
+  fileList: UploadUserFile[] | [],
+  plus: boolean
 }>(), {
-    tips: 'jpg/png files with a size less than 500KB.',
-    url: "/api/common/upload",
-    autoUpload: true,
-    httpRequest: () => ({}),
-    disabled: false,
-    showFileList: false,
-    name: "file",
-    multiple: false,
-    method: 'post',
-    headers: {
-    },
-    limit: 1,
-    fileList: () => ([]),
-    plus: true
+  tips: 'jpg/png files with a size less than 500KB.',
+  url: "/api/common/stream",
+  autoUpload: true,
+  httpRequest: () => ({}),
+  disabled: false,
+  showFileList: true,
+  name: "file",
+  multiple: false,
+  method: 'post',
+  headers: {
+  },
+  limit: 1,
+  fileList: () => ([]),
+  plus: true
 })
-
 
 /*
   自动义上传规则
 */
-const handlePreview = () => {
-    console.log("123");
-}
 
-const handleRemove = () => {
-    console.log("123");
-}
-
-const beforeRemove = () => {
-    return true
-}
-
-const handleExceed = () => {
-    ElMessage.warning("当前上传图片的数量超过最大上传量");
+const handleExceed = (files) => {
+  upload.value?.clearFiles();
+  const file = files[0] as UploadRawFile;
+  upload.value?.handleStart(file);
+  upload.value?.submit();
 }
 
 const onsuccess = (data: success) => {
-    emit("success", data);
+  emit("success", data);
 }
+
+const clearFile = () => {
+  (upload.value as UploadInstance).clearFiles();
+}
+
+const handleStart=(file)=>{
+  (upload.value as UploadInstance).handleStart(file);
+}
+
+defineExpose({
+  clearFile,
+  upload,
+  handleStart
+})
 
 </script>

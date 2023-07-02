@@ -108,9 +108,9 @@ const handleDelete = (id: number) => {
             cancelButtonText: '取消',
             type: 'warning',
         }
-    ).then(res => {
+    ).then(() => {
         return deleteDivsion(id);
-    }).then(res => {
+    }).then(() => {
         getData({})
         ElMessage.success("删除成功")
     })
@@ -129,27 +129,62 @@ const handleSize = (size: number) => {
 </script>
 
 <template>
-    <Fragment>
-        <From :formField="formConfig" @search="handleSearch" :inline="true"></From>
-        <PageHeader @add="handleAdd"></PageHeader>
-        <div class="margin-top-20 margin-left-20 margin-right-20 margin-bottom-20 flex-1">
-            <el-table :data="tableData" height="100%">
-                <template :key="index" v-for="(item, index) in tableConfig">
-                    <el-table-column v-if="item.label !== '操作'" :width="item.width" :label="item.label"
-                        :prop="item.props"></el-table-column>
-                    <el-table-column v-else :label="item.label">
-                        <template #default="scope">
-                            <el-button type="primary" @click="handleEdit(scope.row.id)">编辑</el-button>
-                            <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
-                        </template>
-                    </el-table-column>
-                </template>
-            </el-table>
-            <Add :is-edit="isEdit" :dialog-visible="dialogVisible" :form-data="formData" @close="handleClose"
-                @update="handleUpdate"></Add>
-        </div>
-        <Pagetion :small="true" :current-page="page" :page-size="pageSize" :total="total" @page="handlePage"
-            @size="handleSize">
-        </Pagetion>
-    </Fragment>
+  <From
+    :form-field="formConfig"
+    :inline="true"
+    @search="handleSearch"
+  />
+  <PageHeader @add="handleAdd" />
+  <div class=" flex-1">
+    <el-table
+      :data="tableData"
+      height="100%"
+    >
+      <template
+        v-for="(item, index) in tableConfig"
+        :key="index"
+      >
+        <el-table-column
+          v-if="item.label !== '操作'"
+          :width="item.width"
+          :label="item.label"
+          :prop="item.props"
+        />
+        <el-table-column
+          v-else
+          :label="item.label"
+        >
+          <template #default="scope">
+            <el-button
+              type="primary"
+              @click="handleEdit(scope.row.id)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="danger"
+              @click="handleDelete(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </template>
+    </el-table>
+    <Add
+      :is-edit="isEdit"
+      :dialog-visible="dialogVisible"
+      :form-data="formData"
+      @close="handleClose"
+      @update="handleUpdate"
+    />
+  </div>
+  <Pagetion
+    :small="true"
+    :current-page="page"
+    :page-size="pageSize"
+    :total="total"
+    @page="handlePage"
+    @size="handleSize"
+  />
 </template>

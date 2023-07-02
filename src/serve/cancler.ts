@@ -13,7 +13,7 @@ class CreateCancle {
      */
     public addPengHttp(config: AxiosRequestConfig) {
         this.removePendHttp(config);
-        let url: string = getUrl(config);
+        const url: string = getUrl(config);
         config.cancelToken = config.cancelToken || new axios.CancelToken((cancel) => {
             if (!map.has(url)) {
                 map.set(url, cancel);
@@ -26,9 +26,9 @@ class CreateCancle {
      * @param config AxiosRequestConfig
      */
     public removePendHttp(config: AxiosRequestConfig) {
-        let url: string = getUrl(config);
+        const url: string = getUrl(config);
         if (map.has(url)) {
-            let cancel = map.get(url);
+            const cancel = map.get(url);
             cancel && cancel();
             map.delete(url);
         }

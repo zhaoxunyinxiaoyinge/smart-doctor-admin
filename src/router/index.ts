@@ -19,7 +19,7 @@ const routes = <Array<RouteRecordRaw>>[];
 // 动态导入路由文件
 const modules = await import.meta.glob('./module/route.ts', { import: 'default', eager: true });
 Object.keys(modules).forEach(async keys => {
-  let res: any = modules[keys];
+  const res: any = modules[keys];
   res.forEach((item: any) => {
     routes.push(item);
   })

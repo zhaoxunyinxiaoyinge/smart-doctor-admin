@@ -1,40 +1,36 @@
-// 引用指定的样式文件并传递参数
 
-@use "./../scss/var.scss";
+@import "./../scss/var.scss";
+@import "element-plus/theme-chalk/src/index.scss";
 
-
-// 替代@import 的使用引入一个外部样式表， 命名空间为全局
-@use "element-plus/theme-chalk/src/index.scss" as *;
-
-// @forward 'element-plus/theme-chalk/src/common/var.scss' with (
-//   $colors: (
-//     'primary': (
-//       'base': green,
-//     ),
-//   ),
-// );
-
-$el-sub-menu__title_hover_bg:rgba(0, 0, 0, 0.923);
-
+$el-sub-menu__title_hover_bg:hsla(1, 76%, 25%, 0.522);
 $breaum-height:50px;
 $router-list-height:50px;
-
 $breaum-bg:auto;
 $router-list-bg:auto;
 
-.el-aside {
-  background-color:rgba(0, 1, 1, 0.778);
+.dark {
+  .el-aside {
+    background-color:inherit;
+  }
+  
+  .el-menu {
+    background-color:inherit;
+  }
+}
+
+  .el-aside {
+  background-color:#4d1616f7;
 }
 
 .el-menu {
-  background-color:rgba(0, 1, 1, 0.296);
+  background-color:#450b0bc5;
 }
 
-
-
 .el-menu-item,.el-sub-menu {
+  margin: 0 auto;
+  border-radius: 5px;
   span,.el-icon {
-     color: #bdbdc0 !important;
+     color: #f1e3e3c9 !important;
   }
 }
 
@@ -90,7 +86,7 @@ $router-list-bg:auto;
 }
 
 .icons {
-    fill:#bdbdc0;
+    fill:#f1e3e3c9;
     margin-right: 5px;
 }
 
@@ -101,4 +97,17 @@ $router-list-bg:auto;
 
 .el-main {
   padding: 0px;
+}
+.page-header {
+  padding: 10px 0 10px 0;
+  background-color: #fff;
+}
+.dark {
+  .page-header {
+    background-color: inherit;
+  }
+}
+
+ .animate__fadeOut {
+  display: none;
 }

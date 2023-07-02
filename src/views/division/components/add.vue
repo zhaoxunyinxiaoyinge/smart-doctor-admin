@@ -2,7 +2,7 @@
 import Form from "@/components/forms/index.vue";
 import { postDivison, putDivison } from "@/views/division/api/index";
 import { ElMessage } from "element-plus";
-import { defineEmits, withDefaults } from "vue";
+import { withDefaults } from "vue";
 const formConfig = reactive([
     {
         type: 'input',
@@ -68,7 +68,7 @@ const props = withDefaults(defineProps<{
     formData: {}
 })
 
-watch(() => props.dialogVisible, (next, current) => {
+watch(() => props.dialogVisible, () => {
     if (props.dialogVisible && props.isEdit) {
         nextTick(() => {
             Object.keys(props.formData).forEach(name => {
@@ -93,7 +93,7 @@ watch(() => props.dialogVisible, (next, current) => {
 
 </script>
 <template>
-    <el-dialog :dialogVisible="dialogVisible" :title="props.isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
+    <el-dialog :model-value="dialogVisible" :title="props.isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
         <Form ref="formId" :form-field="formConfig"></Form>
         <template #footer>
             <span class="dialog-footer">

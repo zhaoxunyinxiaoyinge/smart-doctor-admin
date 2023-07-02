@@ -16,15 +16,18 @@ import AutoImport from "unplugin-auto-import/vite";
 
 import eslintPlugin from "vite-plugin-eslint";
 
+import { createHtmlPlugin } from 'vite-plugin-html'
+import externalGlobals from "rollup-plugin-external-globals";
+
 // 提供对旧版浏览器的支持
 import legacy from "@vitejs/plugin-legacy"
 
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode, ssrBuild }) => {
+export default defineConfig(({ command }) => {
+
   if (command === "serve") {
-    const prodMock = true;
     return {
       test: {
         globals: true,
@@ -40,7 +43,6 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         }),
         vueJsx(),
         AutoImport({
-          // resolvers: [ElementPlusResolver()],
           imports: ["vue", 'vue-router'],
           dts: "src/auto-imports.d.ts",
           eslintrc: {
@@ -95,7 +97,6 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         alias: {
           "@": path.resolve(__dirname, "src"),
         },
-
       },
 
       define: {
@@ -103,11 +104,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
           NODE_ENV: 'development'
         }
       },
-
-
-
       server: {
-        cors: true,
         open: true,
         port: 8080,
         proxy: {
@@ -126,10 +123,66 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         alias: {
           "@": path.resolve(__dirname, "src"),
         },
-
       },
 
       plugins: [
+        createHtmlPlugin({
+          template: './index.html',
+          inject: {
+            tags: [
+              {
+                injectTo: 'body',
+                tag: 'script',
+                attrs: {
+                  src: 'https://lib.baomitu.com/vue/3.2.47/vue.esm-browser.prod.js',
+                  defer: true
+                }
+              },
+              {
+                injectTo: 'body',
+                tag: 'script',
+                attrs: {
+                  src: 'https://lib.baomitu.com/vue-router/4.1.6/vue-router.cjs.js',
+                  defer: true
+                }
+              },
+              {
+                injectTo: 'body',
+                tag: 'script',
+                attrs: {
+                  src: 'https://lib.baomitu.com/axios/0.27.2/axios.js',
+                  defer: true
+                }
+              },
+              {
+                injectTo: 'body',
+                tag: 'script',
+                attrs: {
+                  src: 'https://lib.baomitu.com/js-cookie/latest/js.cookie.min.js',
+                  defer: true
+                }
+              },
+
+              {
+                injectTo: 'body',
+                tag: 'script',
+                attrs: {
+                  src: '//unpkg.com/element-plus',
+                  defer: true
+                }
+              },
+              
+              {
+                injectTo: 'head',
+                tag: 'link',
+                attrs: {
+                 href: 'https://lib.baomitu.com/element-plus/latest/index.css',
+                  defer: true
+                }
+              },
+           ]
+          }
+        }),
         topLevelAwait({
           // The export name of top-level await promise for each chunk module
           promiseExportName: '__tla',
@@ -158,30 +211,39 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         }),
       ],
 
-
-
-
       define: {
         "process.env": {
           NODE_ENV: 'production'
         }
       },
       build: {
+        // target: {
+        //   module: 'modules',
+        // },
         // 打包分类
         rollupOptions: {
+          external: ["vue", "vue-router", "axios", "element-plus", "js-cookie"],
           output: {
             chunkFileNames: 'static/js/[name]-[hash].js',
             entryFileNames: 'static/js/[name]-[hash].js',
             assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
-          }
+          },
+          plugins: [
+            externalGlobals({
+              vue: "vue",
+              "vue-router": 'vue-router',
+              axios: 'axios',
+              "js-cookie": "Cookies",
+              "element-plus": "elementPlus"
+            })
+          ]
         },
-        minify:"terser",
+        minify: "terser",
         terserOptions: {
           compress: {
             // keep_infinity: true,//chrome性能优化
             drop_console: true//删除console
           },
-          // toplevel: true
         }
       }
     }

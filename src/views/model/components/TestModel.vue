@@ -2,13 +2,12 @@
 /**
  * @ 这里主要是外部使用v-model时的指定的属性值
  */
-import { ref, reactive, defineProps, defineEmits } from "vue";
-const props = withDefaults(defineProps<{modelValue:String,modelModifiers:Function}>(), {
+const props = withDefaults(defineProps<{modelValue:string,modelModifiers:()=>any}>(), {
     modelModifiers:()=>({})
 });
 
 const emit = defineEmits<{
-    (e: "update:modelValue",val:String|undefined|null): void
+    (e: "update:modelValue",val:string|undefined|null): void
 }>();
 
 const changeValue = (target:Event) => {
@@ -20,7 +19,11 @@ const changeValue = (target:Event) => {
 </script>
 
 <template>
-    <input class="input" :value="props.modelValue" @input="changeValue($event)" />
+  <input
+    class="input"
+    :value="props.modelValue"
+    @input="changeValue($event)"
+  >
 </template>
 <style scoped>
     .input {

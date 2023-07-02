@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import { getCurrentInstance, Suspense } from "vue"
 import content from "@/assets/scss/layout.module.scss";
 const loading = ref<boolean>(true);
-const currentDate = ref<String>(new Date().toLocaleString());
+const currentDate = ref<string>(new Date().toLocaleString());
 
 setTimeout(() => {
   loading.value = false;
@@ -20,7 +19,7 @@ const handleFallback = () => {
 
 <template>
   <el-scrollbar :height="content.routeContentHeight">
-    <div class="padding-top-10 padding-left-10 padding-right-10 padding-bottom-10">
+    <div class="">
       <div style="display: flex;justify-content:flex-start;flex-wrap: wrap;">
         <el-skeleton :key="item" style="margin-top:20px;margin-right: 20px;width: 240px;" :loading="loading" animated
           v-for="item in 10">
@@ -30,16 +29,15 @@ const handleFallback = () => {
               <div style="padding: 14px;width: 240px;padding-left: 0;">
                 <el-skeleton-item variant="h3" style="width:240px" />
                 <div style="
-                  display: flex;
-                align-items: center;
-                justify-content: space-around;
-                margin-top: 16px;
-                height: 16px;
-              ">
+                      display: flex;
+                    align-items: center;
+                    justify-content: space-around;
+                    margin-top: 16px;
+                    height: 16px;
+                  ">
                   <el-skeleton-item variant="text" style="width: 33%" />
                 </div>
               </div>
-
           </div>
 
           </template>
@@ -60,8 +58,8 @@ const handleFallback = () => {
 
       <Suspense @fallback="handleResolve" @resolve="handleFallback">
         <!-- <Progress a="1111" name="arrtas" ref="progress" :width="16" :status="'success'" :percentage="100"
-            @submit="submit">
-          </Progress> -->
+                @submit="submit">
+              </Progress> -->
         <template #fallback>
           <span>正在加载中。。。。</span>
         </template>

@@ -1,14 +1,20 @@
 <script lang="ts" setup>
-import { _cachelist } from "@/router/cancle"
 </script>
 
 <template>
-    <router-view v-slot="{ Component, route }">
-        <transition  appear name="fade">
-            <keep-alive :include="_cachelist">
-                <component :is="Component" :key="route.path">
-                </component>
-            </keep-alive>
-        </transition>
-    </router-view>
+  <router-view v-slot="{ Component, route }">
+    <transition
+      enter-active-class="animate__animated animate__fadeIn"
+      leave-active-class="animate__animated animate__fadeOut"
+      appear
+      name="fade"
+    >
+      <keep-alive>
+        <component
+          :is="Component"
+          :key="route.path"
+        />
+      </keep-alive>
+    </transition>
+  </router-view>
 </template>

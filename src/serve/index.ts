@@ -13,7 +13,7 @@ axios.defaults.baseURL = import.meta.env.BASE_URL;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 // 创建axios配置实列，会覆盖默认值
-let serve = axios.create({
+const serve = axios.create({
   timeout: 5000,
 });
 
@@ -27,24 +27,31 @@ serve.interceptors.request.use((config: any) => {
   return Promise.reject(err);
 })
 
-serve.interceptors.response.use((response: { data: { code: number; msg: MessageParamsWithType; }, config: any }) => {
+serve.interceptors.response.use((response: { data: { code?: number; msg?: MessageParamsWithType; }, config: any }) => {  
   cancleToken.removePendHttp(response.config);
+  if (response.config.responseType == 'blob') {
+    return Promise.resolve(response.data);
+  }
   if (response.data.code == 500) {
     ElMessage.error(response.data.msg);
     return Promise.reject(response.data.msg)
   }
 
-  if (response.data.code == 0 && response.data.msg == "not login") {
+  if (response.data.code === 0 && response.data.msg == "not login") {
     Cookies.set("token", "");
     router.push("/login");
   }
 
-  if (response.data.code !== 500 && response.data.code !== 1) {
-    ElMessage.error(response.data.msg);
+  if (response.data.code !== 500 && response.data.code !== 1&&response.data) {
     return Promise.reject(response.data.msg)
   }
 
+  if(!response.data){
+    return Promise.reject("请求未作错误");
+  }
+
   return Promise.resolve(response.data);
+  
 }, (err: any) => {
   return Promise.reject(err);
 })

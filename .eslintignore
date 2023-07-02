@@ -1,7 +1,4 @@
-.eslintignore
 node_modules
-/src/assets/**/*
 /node_modules/*
 **/node_modules/*
-
-
+!.eslintignore

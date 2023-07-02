@@ -1,39 +1,64 @@
 <template>
   <div class="content">
     <el-aside class="aside">
-      <section class="flex justifly-center align-items">
-        <el-image style="height:60px" :fit="'contain'"
-          src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fi-1.lanrentuku.com%2F2020%2F11%2F6%2F9232f107-4dac-4006-9c7e-e825df5e52e1.png%3FimageView2%2F2%2Fw%2F500&refer=http%3A%2F%2Fi-1.lanrentuku.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1659237413&t=b141420c6ec2506048d76681aa122469" />
-        <span v-if="!store.isCollapse" class="white">vue3后台</span>
+      <section
+        class="flex justifly-center align-items"
+        style="text-align: center;padding: 0;margin:0"
+      >
+        <el-image
+          style="width:50px"
+          :fit="'contain'"
+          src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fi-1.lanrentuku.com%2F2020%2F11%2F6%2F9232f107-4dac-4006-9c7e-e825df5e52e1.png%3FimageView2%2F2%2Fw%2F500&refer=http%3A%2F%2Fi-1.lanrentuku.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1659237413&t=b141420c6ec2506048d76681aa122469"
+        />
+        <span
+          v-if="!store.isCollapse"
+          class="white"
+        >医疗智慧系统</span>
       </section>
-      <side-bar></side-bar>
+      <side-bar />
     </el-aside>
     <el-main class="main">
       <div class="header">
-        <Header></Header>
+        <Header />
         <!-- 路由导航，和展开栏 ,面包屑-->
         <section class="breaum">
-          <el-icon @click="toggle" :size="24" style="margin-left: -20px; margin-right: 20px">
+          <el-icon
+            :size="24"
+            style="margin-left: -20px; margin-right: 20px"
+            @click="toggle"
+          >
             <Expand />
           </el-icon>
-          <el-breadcrumb v-if="themes.isBrearum" class="hamburger-container" id="hamburger-container">
-            <el-breadcrumb-item :key="item.path" v-for="item in breaList" :to="{ path: item.path }">{{
-              item.meta.title
-            }}
+          <el-breadcrumb
+            v-if="themes.isBrearum"
+            id="hamburger-container"
+            class="hamburger-container"
+          >
+            <el-breadcrumb-item
+              v-for="item in breaList"
+              :key="item.path"
+              :to="{ path: item.path }"
+            >
+              {{
+                item.meta.title
+              }}
             </el-breadcrumb-item>
           </el-breadcrumb>
         </section>
       </div>
 
       <!-- <section class='route-list' v-if="themes.tabbar"> -->
-      <route-tag></route-tag>
+      <route-tag />
       <!-- </section> -->
 
       <section :class="['route-content', contenClass]">
-        <RouteMain></RouteMain>
+        <RouteMain />
       </section>
-      <footer class="bottom" v-if="themes.isFooter">
-        20224 © vite-Admin By zhaoxunyin Technology.
+      <footer
+        v-if="themes.isFooter"
+        class="bottom"
+      >
+        2023 © vite-Admin By zhaoxunyin Technology.
       </footer>
     </el-main>
   </div>
@@ -42,7 +67,7 @@
 
 import Header from "@/layout/components/header/index.vue";
 import SideBar from "@/layout/layoutVecity/aside/index";
-import { watchEffect, reactive, watch } from "vue";
+import { reactive, watch } from "vue";
 import { userstore } from "@/store/expmle";
 import { theme } from "@/store/theme";
 import { useRoute } from "vue-router"
@@ -50,7 +75,6 @@ import { ElBreadcrumb, ElAside, ElBreadcrumbItem, ElMain } from "element-plus";
 import RouteTag from "@/layout/components/routeTag/index.vue";
 import RouteMain from "@/layout/components/main/index.vue";
 import Cookies from "js-cookie"
-import { val } from "dom7";
 
 let route = useRoute();
 let store = userstore();
@@ -86,7 +110,7 @@ watch(route, function () {
   let icon: string = route.meta.icon as string;
   let data = { path, title, icon };
   store.setRouteList(data);
-}, {immediate: true });
+}, { immediate: true });
 
 </script>
 

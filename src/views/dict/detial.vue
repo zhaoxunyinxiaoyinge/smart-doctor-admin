@@ -152,9 +152,9 @@ const handleDelete = (id: number) => {
             cancelButtonText: '取消',
             type: 'warning',
         }
-    ).then(res => {
+    ).then(() => {
         return delDictDetail(id);
-    }).then(res => {
+    }).then(() => {
         const formData = formId.value && formId.value.formData;
         const query = route.query ? route.query : { dictId: 1 };
         getData({ page: listQuery.page, pageSize: listQuery.pageSize, ...query, ...formData })
@@ -195,9 +195,9 @@ const handleSize = (size: number) => {
 
 </script>
 <template>
-    <div class="margin-top-20 margin-left-20 margin-right-20 margin-bottom-20">
-        <From :form-field="formField" :inline="true" @search="handleSearch" ref="formId"></From>
-        <PageHeader @add="handleAdd"></PageHeader>
+    <From :form-field="formField" :inline="true" @search="handleSearch" ref="formId"></From>
+    <PageHeader @add="handleAdd"></PageHeader>
+    <div class="margin-top-20 margin-left-20 margin-right-20 margin-bottom-20 flex-1">
         <el-table :data="tableData">
             <template :key="sIndex" v-for="(item, sIndex) in tableConfig">
                 <el-table-column v-if="item.label !== '操作'" :label="item.label" :prop="item.prop" :width="item.width"
@@ -210,11 +210,11 @@ const handleSize = (size: number) => {
                 </el-table-column>
             </template>
         </el-table>
-        <DictDetail @update="handleUpdate" :deitalData="deitalData" :dialogVisible="dialogVisible" @close="handleClose"
-            :is-edit="isEdit">
-        </DictDetail>
-        <Pagetion @page="handlePage" @size="handleSize" :small="false" :page-size="listQuery.pageSize"
-            :total="listQuery.total" :page="listQuery.page">
-        </Pagetion>
     </div>
+    <DictDetail @update="handleUpdate" :deitalData="deitalData" :dialogVisible="dialogVisible" @close="handleClose"
+        :is-edit="isEdit">
+    </DictDetail>
+    <Pagetion  v-bind:small="true" @page="handlePage" @size="handleSize" :small="false" :page-size="listQuery.pageSize" :total="listQuery.total"
+        :page="listQuery.page">
+    </Pagetion>
 </template>

@@ -8,6 +8,8 @@ const theme=defineStore(names.THEME,{
             layout:ref<Component>(),
             layoutName:ref<"vertical"|"classic"|"transverse"|"columns">('vertical'),
             themeColor:ref<string>("#409eff"),
+            grayscale:false,
+            saturate:false,
             gray:ref<string>(''),
             isBrearum:ref<boolean>(true),
             tabbar:ref<boolean>(true),

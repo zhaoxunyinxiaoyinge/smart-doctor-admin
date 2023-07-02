@@ -3,7 +3,7 @@ import { Tree } from "@/components/tree/index";
 import { TreeNode } from "element-plus/lib/components/table/src/table/defaults";
 import { ElTree } from "element-plus";
 import { TreeKey } from "element-plus/es/components/tree/src/tree.type";
-import { withDefaults, defineExpose } from "vue";
+import { withDefaults } from "vue";
 import { fun } from "./index"
 
 const treeRef = ref<InstanceType<typeof ElTree>>();
@@ -11,7 +11,7 @@ const treeRef = ref<InstanceType<typeof ElTree>>();
 const getCheckedNodeKeys = (): TreeKey[] => {
     let arr: TreeKey[] = [];
     if (treeRef.value != null) {
-        let arrs = treeRef.value.getCheckedKeys(true);
+        let arrs = treeRef.value.getCheckedKeys();
         let sendconds = treeRef.value.getHalfCheckedKeys();
         arr = [...arrs, ...sendconds]
         return arr;
@@ -89,7 +89,7 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-::v-deep .el-tree__empty-block {
+:deep(.el-tree__empty-block) {
     min-height: auto;
     width: 150px;
 }

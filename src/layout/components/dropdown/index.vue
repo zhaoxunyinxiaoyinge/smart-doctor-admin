@@ -1,4 +1,4 @@
-import Cookies from "js-cookie";
+
 <script lang="ts" >
 import { defineComponent } from "vue";
 import { userstore } from "@/store/expmle";
@@ -23,6 +23,16 @@ export default defineComponent({
         })
       } else if (command == 'center') {
         router.push({ path: "/stylems/index" });
+
+        /**
+         * 设置路由跳转之后的当前激活之后的路由
+         */
+
+        Cookies.set("current","/stylems/index");
+        store.$patch({
+          currentRoute: "/stylems/index"
+        })
+
       }
     }
 

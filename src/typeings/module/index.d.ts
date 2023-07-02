@@ -12,3 +12,9 @@ export {
 export namespace test {
     const age=13;
 }
+
+ interface Window {
+    pdfjsWorker:any,
+    cacleList:string[]
+}
+window.pdfjsWorker=null

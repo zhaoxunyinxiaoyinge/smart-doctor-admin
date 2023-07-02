@@ -18,15 +18,13 @@ module.exports = {
         "parser": "@typescript-eslint/parser",
         "sourceType": "module",
     },
-    "ecmaFeatures": {
-        "jsx": false
-    },
     "plugins": [
         "vue",
         "@typescript-eslint"
     ],
     "rules": {
         "vue/no-v-model-argument": "off",
+        "vue/no-multiple-template-root":0,
         "vue/multi-word-component-names": "off",
         "@typescript-eslint/ban-types": [
             "error",
@@ -37,6 +35,7 @@ module.exports = {
                 }
             }
         ],
+        '@typescript-eslint/no-non-null-assertion': 'off',
         "@typescript-eslint/no-explicit-any": ["off"],
         "space-before-function-paren": 0,
         "vue/no-v-for-template-key": 0,

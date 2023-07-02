@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { defineEmits, withDefaults } from "vue";
+import { withDefaults } from "vue";
 const props = withDefaults(defineProps<{
     currentPage: number,
     pageSize: number,
@@ -35,11 +35,16 @@ const handleCurrentChange = (size: number) => {
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+.dark {
+    .pagetions {
+        background-color: inherit;  
+    }
+}
 .pagetions {
-    margin: 0 20px;
     height: 50px;
     display: flex;
     align-items: center;
+    background-color: #fff;
 }
 </style>

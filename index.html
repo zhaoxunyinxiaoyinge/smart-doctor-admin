@@ -1,13 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue + TS</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智慧医院系统</title>
+</head>
+
+<body style="font-size: 14px;">
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+  <script>
+    function loadSize() {
+      const scale = document.documentElement.clientWidth / 1440
+      const baseSize=16;
+            // 设置页面根节点字体大小, 字体大小最小为12
+      let fontSize = (baseSize * Math.min(scale, 2)) <= 12 ? 12:(baseSize * Math.min(scale, 2))>16 ?16 : (baseSize * Math.min(scale, 2))
+      document.documentElement.fontSize = fontSize + 'px'
+    }
+    loadSize();
+    window.onresize = () => {
+      loadSize();
+    }
+  </script>
+</body>
+
 </html>

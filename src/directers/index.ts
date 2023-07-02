@@ -1,4 +1,4 @@
-import type { Directive, App } from "vue";
+import type { App } from "vue";
 import { directer } from "./modules/longPress";
 import { persssion } from "./modules/perssion";
 

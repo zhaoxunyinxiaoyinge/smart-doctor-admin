@@ -1,6 +1,6 @@
 import { serve as request } from "@/serve/index";
 
-export const getUser = (params: { page: number, pageSize: number }) => {
+export const getUser = (params: { page: number, pageSize: number,[propName:string]:any}) => {
    return request({
       url: "/api/user/list",
       method: "GET",

@@ -1,44 +1,43 @@
 <script lang="tsx" setup>
-import {
-  ElButton,
-  Column
-} from 'element-plus'
+import { CheckboxValueType, ElButton, ElCheckbox, TableV2FixedDir, TableV2Instance } from 'element-plus'
+import { CENTERED_ALIGNMENT } from 'element-plus/es/components/virtual-list/src/defaults';
+import { FunctionalComponent } from 'vue';
 
-import { resolveDynamicComponent, unref } from "vue"
-import type { FunctionalComponent } from 'vue'
-import ElCheckbox from 'element-plus/lib/components/checkbox';
-import Pagetions from "@/components/pagetions/index.vue";
+const onChange = () => { }
 
-const Checkbox = resolveDynamicComponent('ElCheckbox') as typeof ElCheckbox;
-
-type checkboxType = {
-  value: boolean,
+type SelectionCellProps = {
+  value: boolean
   intermediate?: boolean
-  onChange: (value: any) => any
+  onChange: (value: CheckboxValueType) => void
 }
 
-
-const checkboxRender: FunctionalComponent<checkboxType> = ({
+const SelectionCell: FunctionalComponent<SelectionCellProps> = ({
   value,
   intermediate = false,
   onChange,
 }) => {
-  return (<><Checkbox onChange={onChange} modelValue={value} indeterminate={intermediate} ></Checkbox></>);
+  return (
+    <ElCheckbox
+      onChange={onChange}
+      modelValue={value}
+      indeterminate={intermediate}
+    />
+  )
 }
-
 
 const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
   Array.from({ length }).map((_, columnIndex) => ({
     ...props,
     key: `${prefix}${columnIndex}`,
-    dataKey: `${prefix}${columnIndex}`,
-    title: columnIndex == 10 ? '操作' : `Column ${columnIndex}`,
+    dataKey: columnIndex === 9 ? null : `${prefix}${columnIndex}`,
+    title: columnIndex === 9 ? '操作' : `Column ${columnIndex}`,
+    align:CENTERED_ALIGNMENT,
     width: 150,
-  }));
-const widths = (document.querySelector('.aside')?.getBoundingClientRect().width) as number;
-const documentWidth = document.documentElement.clientWidth;
-let realWidth = documentWidth - widths - 40;
-const contentWidth = ref<number>(realWidth);
+    cellRenderer: columnIndex === 9 ? () => <><ElButton size="small" type='primary'>编辑</ElButton>
+      <ElButton size="small" type="danger">
+        删除
+      </ElButton></> : ""
+  }))
 
 const generateData = (
   columns: ReturnType<typeof generateColumns>,
@@ -48,18 +47,7 @@ const generateData = (
   Array.from({ length }).map((_, rowIndex) => {
     return columns.reduce(
       (rowData, column, columnIndex) => {
-        if (columnIndex == 10) {
-          column.cellRenderer = () => {
-            return <>
-              <ElButton size="small">Edit</ElButton>
-              <ElButton size="small" type="danger">
-                Delete
-              </ElButton>
-            </>
-          }
-        } else {
-          rowData[column.dataKey] = `Row ${rowIndex} - Col ${columnIndex}`
-        }
+        rowData[column.dataKey] = `Row ${rowIndex} - Col ${columnIndex}`
         return rowData
       },
       {
@@ -67,20 +55,22 @@ const generateData = (
         parentId: null,
       }
     )
-  });
+  })
 
-const columns: Column<any>[] = generateColumns(10);
+const columns = generateColumns(10)
+columns[9].fixed = TableV2FixedDir.RIGHT;
 
 columns.unshift({
   key: 'selection',
   width: 50,
-  cellRenderer: ({ rowData }): any => {
-    const onChange = (value: any): any => (rowData.checked = value)
-    return <checkboxRender value={rowData.checked} onChange={onChange} />
+  cellRenderer: ({ rowData }) => {
+    const onChange = (value: CheckboxValueType) => (rowData.checked = value)
+    return <SelectionCell value={rowData.checked} onChange={onChange} />
   },
+
   headerCellRenderer: () => {
-    const _data = unref(data);
-    const onChange = (value: boolean) =>
+    const _data = unref(data)
+    const onChange = (value: CheckboxValueType) =>
     (data.value = _data.map((row) => {
       row.checked = value
       return row
@@ -89,26 +79,40 @@ columns.unshift({
     const containsChecked = _data.some((row) => row.checked)
 
     return (
-      <checkboxRender
+      <SelectionCell
         value={allSelected}
         intermediate={containsChecked && !allSelected}
         onChange={onChange}
       />
     )
   },
-
-
 })
 
+let data: any = generateData(columns, 200)
 
-const data = ref(generateData(columns, 1000));
-const handleSizeChange = () => { }
-const handleCurrentChange = () => { }
+const tableRef = ref<TableV2Instance>()
+const scrollDelta = ref(200)
+const scrollRows = ref(10)
+
+function scrollByPixels() {
+  tableRef.value?.scrollToTop(scrollDelta.value)
+}
+
+function scrollByRows() {
+  tableRef.value?.scrollToRow(scrollRows.value)
+}
+
+
 </script>
 
 <template>
   <div class="margin-bottom-20 margin-top-20 margin-left-20 margin-right-20 flex-1">
-    <el-table-v2 :columns="columns" :data="data" height="100%" fixed />
+    <div style="height:100%">
+      <el-auto-resizer>
+        <template #default="{ height, width }">
+          <el-table-v2 :columns="columns" :data="data" :width="width" :height="height" fixed />
+        </template>
+      </el-auto-resizer>
+    </div>
   </div>
-  <Pagetions @page="handleCurrentChange" @size="handleSizeChange" :total="10000"></Pagetions>
 </template>

@@ -9,14 +9,13 @@ import { userstore } from "@/store/expmle";
 import SvgIcon from '@/components/icons/svg-icon.vue';
 import path from "path";
 import { isOutLink } from "@/utils/common"
-import { RouterLink } from "vue-router";
 
 interface List {
   path: string,
-  children: Array<List>;
+  children?: Array<List>;
   meta: {
     title: string;
-    hidden: Boolean;
+    hidden: boolean;
     icon?: string
   };
   component: DefineComponent;
@@ -39,10 +38,9 @@ const SitemBar = defineComponent({
       default: ''
     }
   },
-  setup(props, { slots }) {
+  setup(props) {
 
     let onlyOneChild = reactive<any>([])
-
     const linkProps = (to: any) => {
       if (isOutLink(to.path)) {
         return {
@@ -55,13 +53,12 @@ const SitemBar = defineComponent({
         to: to.path
       }
     }
-
-    let store = userstore();
+    const store = userstore();
 
     const hasOnyChild = (children: Array<List> = [], parent: any) => {
       children = children ? children : [];
       // 获取当前菜单下的路由是否需要显示
-      let onlyChild = children.filter((item) => {
+      const onlyChild = children.filter((item) => {
         if (item.meta.hidden) {
           return false;
         } else {
@@ -86,22 +83,22 @@ const SitemBar = defineComponent({
       return false;
     };
 
-    let resovlePath = (val: string) => {
+    const resovlePath = (val: string) => {
       return path.resolve(props.basePath, val)
     }
 
-    let slot = {
+    const slot = {
       title: () => {
         return <div style={{ display: 'flex', alignItems: 'center' }}>
-          <svg-icon names={props.item.meta.icon} class='icons'></svg-icon>
+          <svg-icon names={props.item.meta?.icon} class='icons'></svg-icon>
           <span style={{ marginLeft: store.isCollapse ? '0px' : 'auto', width: store.isCollapse ? '0px' : 'auto', display: store.isCollapse ? 'none' : 'inline-block', }}>{props.item.meta.title}</span>
         </div>
       }
     }
 
-    let menuSolt = {
+    const menuSolt = {
       title: () => {
-        return <div>{isOutLink(onlyOneChild.path) ? <a{...linkProps(onlyOneChild)} > <span>{onlyOneChild.meta.title}</span></a> : <RouterLink to={linkProps(onlyOneChild).to} ><span style="color:#bdbdc0">{onlyOneChild.meta.title}</span></RouterLink>}</div>
+        return <div>{isOutLink(onlyOneChild.path) ? <a{...linkProps(onlyOneChild)}  > <span>{onlyOneChild.meta.title}</span></a> : <span style="color:#bdbdc0">{onlyOneChild.meta.title}</span>}</div>
       }
     }
 
@@ -109,7 +106,7 @@ const SitemBar = defineComponent({
       // 当前菜单路由下只有一个子菜单或者没有子菜单
       if (hasOnyChild(props.item.children, props.item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren)) {
         return <el-menu-item v-slots={menuSolt} index={resovlePath(onlyOneChild.path)}>
-          <svg-icon names={onlyOneChild.meta.icon} class='icons other'></svg-icon>
+          <svg-icon names={onlyOneChild.meta?.icon} class='icons other'></svg-icon>
         </el-menu-item>
       } else {
         return <el-sub-menu v-slots={slot} index={resovlePath(props.item.path)}>

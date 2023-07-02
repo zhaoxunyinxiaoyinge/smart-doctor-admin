@@ -74,7 +74,7 @@ const props = withDefaults(defineProps<{
     formData: {}
 })
 
-watch(() => props.dialogVisible, (next, current) => {
+watch(() => props.dialogVisible, () => {
     if (props.dialogVisible && props.isEdit) {
         nextTick(() => {
             Object.keys(props.formData).forEach(name => {
@@ -91,7 +91,7 @@ watch(() => props.dialogVisible, (next, current) => {
 
 </script>
 <template>
-    <el-dialog :dialogVisible="dialogVisible" :title="props.isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
+    <el-dialog :model-value="dialogVisible" :title="props.isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
         <Form ref="formId" :form-field="formConfig"></Form>
         <template #footer>
             <span class="dialog-footer">
