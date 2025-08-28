@@ -1,29 +1,37 @@
-1. 引入tyscript 支持类型编写javascript;
-2. 引入pina 替代vuex 全局库的使用;
-3. 使用vite脚手架进行项目创建;
-4. 使用vue3最新语法完进行单页面开发;
-5. 引入element-plus 进行组件库的使用;
-6. 使用eslint 进行语法效验;
-7. husky 进行代码提交验证，保证代码风格一致;
-8. 中台暂时只支持中英文两种语言切换
-9. 支持动态配置菜单栏,权限认证;
-10. 使用vitetest 进行组件测试
+# smart-admin
+
+#### 介绍
+使用vue3和ts+pina+router+eslints+axios，构建后台管理系统模板
+
+#### 软件架构
+软件架构说明
 
 
-## 使用方法
-    npm install
+#### 安装教程
 
-## 运行命令
-    npm run dev
+1.  xxxx
+2.  xxxx
+3.  xxxx
 
-## 打包命令
-    npm run build
-    test
-## 移动端适配
-    1.rem布局，相对于根字体大小,rem主要用于布局的缩放，字体的多端适配需要设置媒体查询,设置不同的大小，布局结构不是简单的适配，缩放可以适配布局，这样是紧紧不够的，需要结合媒体查询，在不同端对布局更改和适配，是否对图片资源适配（使用image-set)处理多端中的事件适配，移动端和pc端的事件不同的（modernizr），移动端的200ms的点击延迟怎么处理？(现代浏览器已经消除延迟，老版本浏览器使用fastClick来处理延迟) rem 怎么和屏幕怎么联系起来（1.首先根字体我们设置为基准的16px,那就是1rem,同时设计稿，我们对应的时750,这是一个基准,如果移动端屏幕该边，只需要设置，按赵 实际屏幕宽度/设计稿基准宽度*基准值获取的不同的根字体大小）pc端和移动端一起用rem进行适配吗？（pc端设计稿设计，设置字体大小为16px为1rem,设计稿可以设置为基准1080p,大屏幕适配按照移动端进行比例放大，根字体大小）
+#### 使用说明
 
-    2.vw和vh的适配方案,vh和vw是指屏幕的分成的等份（暂不实行）
+1.  xxxx
+2.  xxxx
+3.  xxxx
 
-    3.一般大屏适配数据可视化图表怎么适配的（rem布局适配）
+#### 参与贡献
 
- 
+1.  Fork 本仓库
+2.  新建 Feat_xxx 分支
+3.  提交代码
+4.  新建 Pull Request
+
+
+#### 特技
+
+1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
+2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
+3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
+4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
+5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
+6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
