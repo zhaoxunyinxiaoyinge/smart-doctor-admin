@@ -60,12 +60,6 @@ export const userstore = defineStore(names.USER, {
 
         clearMenuList(){
             this.$reset();
-            // this.menuList = [];
-            // this.routeList = [];
-            // this.routers = [];
-            // this.perssions = [];
-            // this.allMenuList = [];
-            // this.currentRoute = ('/welcome');
         },
 
         setToken(token: string) {
@@ -157,14 +151,15 @@ export const userstore = defineStore(names.USER, {
                     tmp.component = Layout;
                 }
 
+                 // 添加路由懒加载
                 if (tmp.component && tmp.parentId != 0) {
                     const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
-                    tmp.component = this.loadView(componentPath,modules);
+                   tmp.component =import(this.loadviewPath(componentPath));
                 }
-                
+                // 添加路由懒加载
                 if(tmp.component&&tmp.parentId==0&&tmp.component!==Layout){
                     const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
-                    tmp.component = this.loadView(componentPath,modules);
+                    tmp.component =import(this.loadviewPath(componentPath));
                 }
 
                 tmp.meta.title = tmp.menuName;
@@ -190,9 +185,14 @@ export const userstore = defineStore(names.USER, {
             return res;
         },
 
-        loadView(componentName: string,modules) {     
-            return modules[".."+componentName+".vue"];
+        // loadView(componentName: string,modules) {     
+        //     return modules[".."+componentName+".vue"];
+        // },
+
+        loadviewPath(componentName:string){
+            return `/src${componentName}.vue`;
         }
+
     }
 
 })

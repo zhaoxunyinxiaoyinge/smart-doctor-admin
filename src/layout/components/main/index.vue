@@ -10,10 +10,15 @@
       name="fade"
     >
       <keep-alive>
-        <component
-          :is="Component"
-          :key="route.path"
-        />
+        <suspense>
+          <component
+            :is="Component"
+            :key="route.path"
+          />
+          <template #fallback>
+            .......loading
+          </template>
+        </suspense>
       </keep-alive>
     </transition>
   </router-view>

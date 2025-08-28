@@ -3,7 +3,7 @@ module.exports = {
         '@commitlint/config-conventional' // scoped packages are not prefixed
     ],
     rules: {
-        'type-enum': [2, 'aways', ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'revert']],
+        'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'revert']],
         
     }
 }

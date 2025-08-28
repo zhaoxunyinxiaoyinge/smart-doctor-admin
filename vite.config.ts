@@ -4,15 +4,14 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-
 // import { viteMockServe } from 'vite-plugin-mock'
 
 import viteCompression from 'vite-plugin-compression'
-
-import Components from "unplugin-vue-components/vite";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import AutoImport from "unplugin-auto-import/vite";
+
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // import eslintPlugin from "vite-plugin-eslint";
 
@@ -41,7 +40,7 @@ export default defineConfig(({ command,mode}) => {
             ElementPlusResolver(),
           ],
           imports: ["vue", 'vue-router'],
-          dts: "src/auto-imports.d.ts",
+          dts: true,
           eslintrc: {
             enabled: false,
             filepath: './.eslintrc-auto-import.json',
@@ -98,7 +97,7 @@ export default defineConfig(({ command,mode}) => {
 
       resolve: {
         alias: {
-          "@": path.resolve(__dirname, "./src"),
+          "@": path.resolve(__dirname, "src"),
         },
       },
 
