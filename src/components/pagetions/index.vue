@@ -28,11 +28,19 @@ const handleCurrentChange = (size: number) => {
 </script>
 
 <template>
-    <div class="pagetions">
-        <el-pagination :currentPage="props.currentPage" :page-size="props.pageSize" :page-sizes="[10, 20, 30, 40]"
-            :small="props.small" :background="background" layout="total, sizes, prev, pager, next, jumper"
-            :total="props.total" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
-    </div>
+  <div class="pagetions">
+    <el-pagination
+      :current-page="props.currentPage"
+      :page-size="props.pageSize"
+      :page-sizes="[10, 20, 30, 40]"
+      :small="props.small"
+      :background="background"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="props.total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
+  </div>
 </template>
 
 <style scoped lang="scss">

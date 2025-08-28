@@ -1,12 +1,12 @@
 
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 
-import topLevelAwait from 'vite-plugin-top-level-await'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-import { viteMockServe } from 'vite-plugin-mock'
+// import { viteMockServe } from 'vite-plugin-mock'
 
 import viteCompression from 'vite-plugin-compression'
 
@@ -14,35 +14,32 @@ import Components from "unplugin-vue-components/vite";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import AutoImport from "unplugin-auto-import/vite";
 
-import eslintPlugin from "vite-plugin-eslint";
-
-import { createHtmlPlugin } from 'vite-plugin-html'
-import externalGlobals from "rollup-plugin-external-globals";
-
-// 提供对旧版浏览器的支持
-import legacy from "@vitejs/plugin-legacy"
+// import eslintPlugin from "vite-plugin-eslint";
 
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
-
+export default defineConfig(({ command,mode}) => {
   if (command === "serve") {
     return {
       test: {
         globals: true,
-        environment: "jsdom"
+        environment: "jsdom",
       },
       base: './',
+      warmup: {
+        clientFiles: [
+          "./src/perssion.ts"
+        ]
+      },
       plugins: [
-        legacy({
-          targets: ['defaults', 'not IE 11']
-        }),
-        Components({
-          // resolvers: [ElementPlusResolver()],
-        }),
+        vue(),
         vueJsx(),
         AutoImport({
+          resolvers: [
+            // auto import element plus components
+            ElementPlusResolver(),
+          ],
           imports: ["vue", 'vue-router'],
           dts: "src/auto-imports.d.ts",
           eslintrc: {
@@ -63,14 +60,6 @@ export default defineConfig(({ command }) => {
            */
           customDomId: '__svg__icons__dom__',
         }),
-        vue(),
-        viteCompression({
-          verbose: true,
-          disable: false,
-          threshold: 10240,
-          algorithm: 'gzip',
-          ext: '.gz',
-        }),
         // viteMockServe({
         //   // default
         //   mockPath: "mock",
@@ -78,6 +67,10 @@ export default defineConfig(({ command }) => {
         //   localEnabled: command === 'serve',
         // }),
         // eslintPlugin()
+
+        Components({
+          resolvers: [ElementPlusResolver()],
+        }),
       ],
 
       // 对css module提供支持
@@ -88,34 +81,47 @@ export default defineConfig(({ command }) => {
         preprocessorOptions: {
           // 设置scss 的全局变量。全局引入css 文件
           scss: {
-            additionalData: `$color:blue;`,
+            additionalData: `@use "/src/assets/element/var.scss" as *;`,
+            api: "modern-compiler",
           }
         }
+      },
+      optimizeDeps: {
+        include: [
+          "vue",
+          "vue-router",
+          "axios",
+          "element-plus",
+          "js-cookie"
+        ]
       },
 
       resolve: {
         alias: {
-          "@": path.resolve(__dirname, "src"),
+          "@": path.resolve(__dirname, "./src"),
         },
       },
 
       define: {
-        "process.env": {
-          NODE_ENV: 'development'
+        process: {
+          env:{
+            NODE_ENV:mode,
+            VITE_API_URL: JSON.stringify(loadEnv(mode, "./").VITE_API_URL || "http://localhost:3000"),
+            VITE_PORT: JSON.stringify(loadEnv(mode, "./").VITE_PORT || 3000)
+          }
         }
       },
       server: {
         open: true,
-        port: 8080,
+        port:parseInt(loadEnv(mode,"./").VITE_PORT) || 3000,
         proxy: {
           "^/api": {
-            target: 'http://127.0.0.1:8081',
+            target:loadEnv(mode,"./").VITE_API_URL || "http://localhost:3000",
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, '')
           }
         }
-      }
-
+      },
     }
   } else {
     return {
@@ -124,71 +130,7 @@ export default defineConfig(({ command }) => {
           "@": path.resolve(__dirname, "src"),
         },
       },
-
       plugins: [
-        createHtmlPlugin({
-          template: './index.html',
-          inject: {
-            tags: [
-              {
-                injectTo: 'body',
-                tag: 'script',
-                attrs: {
-                  src: 'https://lib.baomitu.com/vue/3.2.47/vue.esm-browser.prod.js',
-                  defer: true
-                }
-              },
-              {
-                injectTo: 'body',
-                tag: 'script',
-                attrs: {
-                  src: 'https://lib.baomitu.com/vue-router/4.1.6/vue-router.cjs.js',
-                  defer: true
-                }
-              },
-              {
-                injectTo: 'body',
-                tag: 'script',
-                attrs: {
-                  src: 'https://lib.baomitu.com/axios/0.27.2/axios.js',
-                  defer: true
-                }
-              },
-              {
-                injectTo: 'body',
-                tag: 'script',
-                attrs: {
-                  src: 'https://lib.baomitu.com/js-cookie/latest/js.cookie.min.js',
-                  defer: true
-                }
-              },
-
-              {
-                injectTo: 'body',
-                tag: 'script',
-                attrs: {
-                  src: '//unpkg.com/element-plus',
-                  defer: true
-                }
-              },
-              
-              {
-                injectTo: 'head',
-                tag: 'link',
-                attrs: {
-                 href: 'https://lib.baomitu.com/element-plus/latest/index.css',
-                  defer: true
-                }
-              },
-           ]
-          }
-        }),
-        topLevelAwait({
-          // The export name of top-level await promise for each chunk module
-          promiseExportName: '__tla',
-          // The function to generate import names of top-level await promise in each chunk module
-          promiseImportName: i => `__tla_${i}`
-        }),
         createSvgIconsPlugin({
           // Specify the icon folder to be cached
           iconDirs: [path.resolve(process.cwd(), 'src/icons')],
@@ -202,6 +144,14 @@ export default defineConfig(({ command }) => {
           customDomId: '__svg__icons__dom__',
         }),
         vue(),
+         vueJsx(),
+        AutoImport({
+          resolvers: [
+            // auto import element plus components
+            ElementPlusResolver(),
+          ],
+          imports: ["vue", 'vue-router'],
+        }),
         viteCompression({
           verbose: true,
           disable: false,
@@ -210,35 +160,31 @@ export default defineConfig(({ command }) => {
           ext: '.gz',
         }),
       ],
-
-      define: {
-        "process.env": {
-          NODE_ENV: 'production'
-        }
-      },
+      base:"/",
       build: {
-        // target: {
-        //   module: 'modules',
-        // },
+        sourcemap:false,
+        target:"es2022",
         // 打包分类
         rollupOptions: {
-          external: ["vue", "vue-router", "axios", "element-plus", "js-cookie"],
+          // external: ["vue", "vue-router", "axios", "element-plus", "js-cookie"],
           output: {
-            chunkFileNames: 'static/js/[name]-[hash].js',
-            entryFileNames: 'static/js/[name]-[hash].js',
-            assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
-          },
-          plugins: [
-            externalGlobals({
-              vue: "vue",
-              "vue-router": 'vue-router',
-              axios: 'axios',
-              "js-cookie": "Cookies",
-              "element-plus": "elementPlus"
-            })
-          ]
+            chunkFileNames: 'js/[name]-[hash].js',
+            entryFileNames: 'js/[hash].js',
+            assetFileNames: (chunkInfo) => {
+                const extName=chunkInfo.name?.split('.').pop();
+                if(extName){
+                  if(extName=='svg'||extName=='png'||extName=='gif'){
+                    return `img/[name]-[hash].[ext]`;
+                  }
+                  if(['css','scss'].includes(extName)){
+                    return `css/[name]-[hash].[ext]`;
+                  }
+                }
+                return `[ext]/[name]-[hash].[ext]`;
+            }
+          }
         },
-        minify: "terser",
+        // minify: "terser",
         terserOptions: {
           compress: {
             // keep_infinity: true,//chrome性能优化

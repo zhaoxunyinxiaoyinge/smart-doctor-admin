@@ -16,6 +16,7 @@ export default defineComponent({
       if (command == 'exit') {
         handleExit().then(res => {
           store.clearToken();
+          store.clearMenuList();
           Cookies.set('token', "");
           router.push({ path: '/login' });
         }).catch(err => {

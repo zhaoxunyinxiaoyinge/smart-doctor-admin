@@ -1,14 +1,28 @@
 <template>
-  <el-upload ref="upload"
-   :file-list="fileList" class="upload-demo" :action="props.url" :auto-upload="props.autoUpload"
-    :show-file-list="props.showFileList" list-type="picture-card" :name="name" :on-success="onsuccess"
-    :limit="props.limit" :on-exceed="handleExceed" :headers="headers">
+  <el-upload
+    ref="upload"
+    :file-list="fileList"
+    class="upload-demo"
+    :action="props.url"
+    :auto-upload="props.autoUpload"
+    :show-file-list="props.showFileList"
+    list-type="picture-card"
+    :name="name"
+    :on-success="onsuccess"
+    :limit="props.limit"
+    :on-exceed="handleExceed"
+    :headers="headers"
+  >
     <el-icon>
       <Plus />
     </el-icon>
     <template #file="{ file }">
       <div>
-        <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+        <img
+          class="el-upload-list__item-thumbnail"
+          :src="file.url"
+          alt=""
+        >
       </div>
     </template>
   </el-upload>
@@ -30,16 +44,16 @@ const emit = defineEmits<{
 const upload = ref<UploadInstance | null>(null);
 
 const props = withDefaults(defineProps<{
-  limit: number,
-  tips: string,
-  url: string,
-  autoUpload: boolean,
-  httpRequest: fun,
-  disabled: boolean,
+  limit?: number,
+  tips?: string,
+  url?: string,
+  autoUpload?: boolean,
+  httpRequest?: fun,
+  disabled?: boolean,
   showFileList: boolean,
-  name: string,
-  multiple: boolean,
-  method: string
+  name?: string,
+  multiple?: boolean,
+  method?: string
   headers: any,
   fileList: UploadUserFile[] | [],
   plus: boolean

@@ -40,7 +40,9 @@ module.exports = {
         "space-before-function-paren": 0,
         "vue/no-v-for-template-key": 0,
         "vue/comment-directive": "off",
-        "vue/valid-v-on": "off"
+        "vue/valid-v-on": "off",
+        "vue/v-on-event-hyphenation":"off",
+        "@typescript-eslint/no-unused-vars": "off"
 
     }
 }

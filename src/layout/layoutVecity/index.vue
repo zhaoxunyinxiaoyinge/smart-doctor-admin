@@ -1,21 +1,23 @@
 <template>
   <div class="content">
     <el-aside class="aside">
-      <section
-        class="flex justifly-center align-items"
-        style="text-align: center;padding: 0;margin:0"
-      >
-        <el-image
-          style="width:50px"
-          :fit="'contain'"
-          src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fi-1.lanrentuku.com%2F2020%2F11%2F6%2F9232f107-4dac-4006-9c7e-e825df5e52e1.png%3FimageView2%2F2%2Fw%2F500&refer=http%3A%2F%2Fi-1.lanrentuku.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1659237413&t=b141420c6ec2506048d76681aa122469"
-        />
-        <span
-          v-if="!store.isCollapse"
-          class="white"
-        >医疗智慧系统</span>
-      </section>
-      <side-bar />
+      <el-scrollbar height="100vh">
+        <section
+          class="flex justifly-center align-items "
+          style="text-align: center;padding: 0;margin:0;height: 69px; border-bottom: 1px solid #eee;"
+        >
+          <el-image
+            style="width:40px"
+            :fit="'contain'"
+            src="/lion.png"
+          />
+          <span
+            v-if="!store.isCollapse"
+            class="white"
+          >医疗智慧系统</span>
+        </section>
+        <side-bar />
+      </el-scrollbar>
     </el-aside>
     <el-main class="main">
       <div class="header">
@@ -23,6 +25,7 @@
         <!-- 路由导航，和展开栏 ,面包屑-->
         <section class="breaum">
           <el-icon
+            id="hamburger-collapse"
             :size="24"
             style="margin-left: -20px; margin-right: 20px"
             @click="toggle"
@@ -58,7 +61,7 @@
         v-if="themes.isFooter"
         class="bottom"
       >
-        2023 © vite-Admin By zhaoxunyin Technology.
+        2025 © vite-Admin By zhaoxunyin Technology.
       </footer>
     </el-main>
   </div>
@@ -106,6 +109,11 @@ watch(route, function () {
   });
   let path = route.path;
   Cookies.set('current', path);
+
+  store.$patch({
+    currentRoute: path
+  })
+
   let title: string = route.meta.title as string;
   let icon: string = route.meta.icon as string;
   let data = { path, title, icon };
@@ -115,5 +123,5 @@ watch(route, function () {
 </script>
 
 <style scoped lang="scss">
-@use "@/assets/scss/layout.module.scss";
+@use "/src/assets/scss/layout.module.scss";
 </style>

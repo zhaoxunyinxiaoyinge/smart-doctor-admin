@@ -195,26 +195,63 @@ const handleSize = (size: number) => {
 
 </script>
 <template>
-    <From :form-field="formField" :inline="true" @search="handleSearch" ref="formId"></From>
-    <PageHeader @add="handleAdd"></PageHeader>
-    <div class="margin-top-20 margin-left-20 margin-right-20 margin-bottom-20 flex-1">
-        <el-table :data="tableData">
-            <template :key="sIndex" v-for="(item, sIndex) in tableConfig">
-                <el-table-column v-if="item.label !== '操作'" :label="item.label" :prop="item.prop" :width="item.width"
-                    :formatter="item.formatter"></el-table-column>
-                <el-table-column v-else :label="item.label" fixed="right" width="200">
-                    <template #default="scope">
-                        <el-button type="primary" @click="handleEdit(scope.row.id)">编辑</el-button>
-                        <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </template>
-        </el-table>
-    </div>
-    <DictDetail @update="handleUpdate" :deitalData="deitalData" :dialogVisible="dialogVisible" @close="handleClose"
-        :is-edit="isEdit">
-    </DictDetail>
-    <Pagetion  v-bind:small="true" @page="handlePage" @size="handleSize" :small="false" :page-size="listQuery.pageSize" :total="listQuery.total"
-        :page="listQuery.page">
-    </Pagetion>
+  <From
+    ref="formId"
+    :form-field="formField"
+    :inline="true"
+    @search="handleSearch"
+  />
+  <PageHeader @add="handleAdd" />
+  <div class="margin-top-20 margin-left-20 margin-right-20 margin-bottom-20 flex-1">
+    <el-table :data="tableData">
+      <template
+        v-for="(item, sIndex) in tableConfig"
+        :key="sIndex"
+      >
+        <el-table-column
+          v-if="item.label !== '操作'"
+          :label="item.label"
+          :prop="item.prop"
+          :width="item.width"
+          :formatter="item.formatter"
+        />
+        <el-table-column
+          v-else
+          :label="item.label"
+          fixed="right"
+          width="200"
+        >
+          <template #default="scope">
+            <el-button
+              type="primary"
+              @click="handleEdit(scope.row.id)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="danger"
+              @click="handleDelete(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </template>
+    </el-table>
+  </div>
+  <DictDetail
+    :deital-data="deitalData"
+    :dialog-visible="dialogVisible"
+    :is-edit="isEdit"
+    @update="handleUpdate"
+    @close="handleClose"
+  />
+  <Pagetion
+    :small="true"
+    :page-size="listQuery.pageSize"
+    :total="listQuery.total"
+    :current-page="listQuery.page"
+    @page="handlePage"
+    @size="handleSize"
+  />
 </template>

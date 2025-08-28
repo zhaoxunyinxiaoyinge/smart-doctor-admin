@@ -1,7 +1,7 @@
 <script setup lang="ts" >
 import DefineForm from "./../../../components/forms/index.vue";
 
-const props = withDefaults(defineProps<{ dialogVisible: boolean, title: string, editConfig: { label: string, name: string | number, type: string }[], editData: { [key: string]: any } }>(), {
+const props = withDefaults(defineProps<{ dialogVisible: boolean, title: string, editConfig: { label: string, name: string , type: string }[], editData: { [key: string]: any } }>(), {
   dialogVisible: false,
   title: "新增",
   editConfig: () => ([]),
@@ -68,13 +68,25 @@ watchEffect(() => {
 
 <template>
   <div>
-    <el-dialog :model-value="props.dialogVisible" :title="title" width="50%" :before-close="handleClose">
-      <DefineForm ref="form" v-if="props.dialogVisible" :form-field="props.editConfig" />
+    <el-dialog
+      :model-value="props.dialogVisible"
+      :title="title"
+      width="50%"
+      :before-close="handleClose"
+    >
+      <DefineForm
+        v-if="props.dialogVisible"
+        ref="form"
+        :inline="false"
+        :form-field="props.editConfig"
+      />
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="handleClose">Cancel</el-button>
-          <el-button type="primary"
-                     @click="handleConfirm">
+          <el-button
+            type="primary"
+            @click="handleConfirm"
+          >
             Confirm
           </el-button>
         </span>

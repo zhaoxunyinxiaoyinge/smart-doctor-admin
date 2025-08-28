@@ -1,21 +1,15 @@
-import axios from "axios";
+import axios,{AxiosInstance} from "axios";
 import Cookies from "js-cookie";
-import { ElMessage, MessageParamsWithType } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import router from "@/router/index";
 import cancleToken from "./cancler";
-// 设置axios的默认配置
-/**
- * ts 类型不明确
- * 
- */
-// axios.defaults.headers['X-Requested-With']  = 'XMLHttpRequest'
-axios.defaults.baseURL = import.meta.env.BASE_URL;
-axios.defaults.headers.post['Content-Type'] = 'application/json';
-
 // 创建axios配置实列，会覆盖默认值
-const serve = axios.create({
+const serve: AxiosInstance = axios.create({
   timeout: 5000,
 });
+
+serve.defaults.headers.post['Content-Type'] = 'application/json';
+serve.defaults.baseURL ="/";
 
 
 serve.interceptors.request.use((config: any) => {
@@ -27,7 +21,7 @@ serve.interceptors.request.use((config: any) => {
   return Promise.reject(err);
 })
 
-serve.interceptors.response.use((response: { data: { code?: number; msg?: MessageParamsWithType; }, config: any }) => {  
+serve.interceptors.response.use((response) => {  
   cancleToken.removePendHttp(response.config);
   if (response.config.responseType == 'blob') {
     return Promise.resolve(response.data);
@@ -42,12 +36,17 @@ serve.interceptors.response.use((response: { data: { code?: number; msg?: Messag
     router.push("/login");
   }
 
+    if (response.data.code == 200) {
+    return Promise.resolve({data:{...response.data}})
+  }
+
   if (response.data.code !== 500 && response.data.code !== 1&&response.data) {
     return Promise.reject(response.data.msg)
   }
 
+
   if(!response.data){
-    return Promise.reject("请求未作错误");
+    return Promise.reject(JSON.stringify(response));
   }
 
   return Promise.resolve(response.data);

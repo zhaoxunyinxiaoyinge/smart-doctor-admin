@@ -1,9 +1,25 @@
 <template>
-  <div class="wrap" id="editor—wrapper">
-    <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="'default'" />
-    <Editor style="height: 500px; overflow-y: hidden;" v-model="valueHtml" :defaultConfig="editorConfig" :mode="mode"
-      @onCreated="handleCreated" @onDestroyed="handleDestroyed" @onChange="handleChange" @onBlur="hangleBur"
-      @customPaste="customPaste" />
+  <div
+    id="editor—wrapper"
+    class="wrap"
+  >
+    <Toolbar
+      style="border-bottom: 1px solid #ccc"
+      :editor="editorRef"
+      :default-config="toolbarConfig"
+      :mode="'default'"
+    />
+    <Editor
+      v-model="valueHtml"
+      style="height: 500px; overflow-y: hidden;"
+      :default-config="editorConfig"
+      :mode="mode"
+      @onCreated="handleCreated"
+      @onDestroyed="handleDestroyed"
+      @onChange="handleChange"
+      @onBlur="hangleBur"
+      @customPaste="customPaste"
+    />
   </div>
 </template>
 

@@ -224,48 +224,98 @@ const handleSize = (size: number) => {
 </script>
 
 <template>
-    <From :formField="formConfig" @search="handleSearch" :inline="true" />
-    <PageHeader @add="handleInscrement" />
-    <div class=" flex-1">
-        <el-table :data="tableData" v-loading="loading" height="100%">
-            <template :key="index" v-for="(item, index) in tableConfig">
-                <el-table-column v-if="item.label !== '操作'" :width="item.width" :label="item.label"
-                    :formatter="item.formatter" :prop="item.props"></el-table-column>
-                <el-table-column v-else :label="item.label">
-                    <template #default="scope">
-                        <el-button type="primary" @click="handleEdit(scope.row.id)"
-                            v-hasperssion="['menu:role:edit']">编辑</el-button>
-                        <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </template>
-        </el-table>
+  <From
+    :form-field="formConfig"
+    :inline="true"
+    @search="handleSearch"
+  />
+  <PageHeader @add="handleInscrement" />
+  <div class=" flex-1">
+    <el-table
+      v-loading="loading"
+      :data="tableData"
+      height="100%"
+    >
+      <template
+        v-for="(item, index) in tableConfig"
+        :key="index"
+      >
+        <el-table-column
+          v-if="item.label !== '操作'"
+          :width="item.width"
+          :label="item.label"
+          :formatter="item.formatter"
+          :prop="item.props"
+        />
+        <el-table-column
+          v-else
+          :label="item.label"
+        >
+          <template #default="scope">
+            <el-button
+              v-hasperssion="['menu:role:edit']"
+              type="primary"
+              @click="handleEdit(scope.row.id)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="danger"
+              @click="handleDelete(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </template>
+    </el-table>
 
-        <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
-            <FormId :form-field="formEdit" :inline="false" ref="formId">
-                <template v-slot:tree>
-                    <span style="width:100px;display: inline-block;text-align: center;">
-                        <slot name="label">
-                            权限列表
-                        </slot>
+    <el-dialog
+      v-model="dialogVisible"
+      :title="isEdit ? '编辑' : '新增'"
+      width="50%"
+      :before-close="handleClose"
+    >
+      <FormId
+        ref="formId"
+        :form-field="formEdit"
+        :inline="false"
+      >
+        <template #tree>
+          <span style="width:100px;display: inline-block;text-align: center;">
+            <slot name="label">
+              权限列表
+            </slot>
 
-                    </span>
-                    <Tree :data="menuList" :default-props="{ label: 'title', child: 'children' }" ref="tree"
-                        :defaultCheckedKeys="defaultCheckedKeys">
-                    </Tree>
-                </template>
-            </FormId>
+          </span>
+          <Tree
+            ref="tree"
+            :data="menuList"
+            :default-props="{ label: 'title', child: 'children' }"
+            :default-checked-keys="defaultCheckedKeys"
+          />
+        </template>
+      </FormId>
 
-            <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="handleClose">取消</el-button>
-                    <el-button type="primary" @click="handleCommit">
-                        确定
-                    </el-button>
-                </span>
-            </template>
-        </el-dialog>
-    </div>
-    <Pagetion :small="true" :current-page="page" :page-size="pageSize" :total="total" @page="handlePage" @size="handleSize">
-    </Pagetion>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="handleClose">取消</el-button>
+          <el-button
+            type="primary"
+            @click="handleCommit"
+          >
+            确定
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
+  <Pagetion
+    :small="true"
+    :current-page="page"
+    :page-size="pageSize"
+    :total="total"
+    @page="handlePage"
+    @size="handleSize"
+  />
 </template>

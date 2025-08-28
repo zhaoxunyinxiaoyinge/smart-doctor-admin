@@ -1,4 +1,6 @@
-
+window.addEventListener('unhandledrejection', event => {
+  console.error('Unhandled promise rejection:', event.reason);
+});
 import { createApp } from 'vue'
 import App from '@/App.vue'
 
@@ -12,11 +14,12 @@ import DataVVue3 from '@kjgl77/datav-vue3'
 import { directers } from "@/directers/index";
 
 import router from "./router/index"
-
+import "@/assets/css/reset.css";
 import "@/assets/scss/common.scss";
-
 import "@/assets/front/index.css";
 import '@/assets/element/index.scss';
+import "animate.css";
+
 import print from 'vue3-print-nb';
 
 //eslint-disable-line
@@ -25,14 +28,9 @@ import svgIcon from "@/components/icons/svg-icon.vue"
 import 'virtual:svg-icons-register';
 
 import 'element-plus/theme-chalk/dark/css-vars.css'
-import "@/assets/scss/var.scss";
-
-import "@/assets/css/reset.css";
-
-import "animate.css";
+// import "@/assets/scss/var.scss";
 
 
-// import addState from "./../plugins/pina-plugins"
 // vue3最新缓存文件
 import { createPinia } from 'pinia';
 
@@ -41,25 +39,26 @@ import { createPinia } from 'pinia';
 const pina = createPinia();
 
 import './perssion.ts'
-const app = createApp(App)
+const app = createApp(App);
 
+// Sentry.init({
+//   app,
+//  integrations: [
+//     Sentry.browserTracingIntegration({ router }),
+//     Sentry.replayIntegration(),
+//   ],
+//   tracesSampleRate: 1.0,
+//   replaysSessionSampleRate: 0.1,
+// }); 
+
+// Sentry.captureException(new Error("本地测试错误"));
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
+
 // import { setupProdMockServer } from "./createMockServe";
 // setupProdMockServer();
-
-console.log(import.meta.env, 666);
-
-// 挂载全局变量使用的函数声明
-// declare module "@vue/runtime-core" {
-//     export interface ComponentCustomProperties {
-// $http: Function,
-//         hello: string
-//     }
-// }
-
 
 import * as echarts from 'echarts/core';
 
@@ -91,16 +90,6 @@ import {
 import { LabelLayout, UniversalTransition } from 'echarts/features';
 import { CanvasRenderer } from 'echarts/renderers';
 
-// 通过 ComposeOption 来组合出一个只有必须组件和图表的 Option 类型
-// type ECOption = echarts.ComposeOption<
-//   | BarSeriesOption
-//   | LineSeriesOption
-//   | TitleComponentOption
-//   | TooltipComponentOption
-//   | GridComponentOption
-//   | DatasetComponentOption
-//   | PieSeriesOption
-// >;
 // 注册必须的组件
 echarts.use([
   TitleComponent,
@@ -125,7 +114,7 @@ app.use(pina)
 window.store=pina
 app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 app.use(router);
-app.component('svg-icon', svgIcon)
+app.component('SvgIcon', svgIcon)
 app.use(i18n);
 app.use(directers);
 app.use(print);

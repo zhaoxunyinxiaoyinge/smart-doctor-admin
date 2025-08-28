@@ -13,9 +13,9 @@ const propsData = defineProps(
 </script>
 
 <template>
-    <svg class="svg-size">
-        <use :xlink:href="symbolId"/>
-    </svg>
+  <svg class="svg-size">
+    <use :xlink:href="symbolId" />
+  </svg>
 </template>
 
 <style scoped>

@@ -25,11 +25,10 @@ let mapChart;
 const lineOptions = reactive<echarts.EChartsOption>({
     xAxis: {
         type: 'category',
-        data: ['0:0:0', '12:00', '24:00',]
+        data: ['0:0:0', '12:00', '24:00',],
     },
     yAxis: {
         type: 'value',
-        data: [10, 20, 30, 40, 50]
     },
     series: [
         {
@@ -509,73 +508,120 @@ const handleResize = () => {
 
 </script>
 <template>
-    <el-scrollbar height="100%">
-        <div class="box">
-            <div class="top">
-                <div class="firsts">
-                    <div class="title">
-                        活动实时交易情况
-                    </div>
-                    <div class="list">
-                        <div class="list-item">
-                            <div class="list-item-title">今日交易总额(元)</div>
-                            <div class="list-item-mount">126,560</div>
-                        </div>
-                        <div class="list-item">
-                            <div class="list-item-title">今日交易总额(元)</div>
-                            <div class="list-item-mount">126,560</div>
-                        </div>
-                        <div class="list-item">
-                            <div class="list-item-title">今日交易总额(元)</div>
-                            <div class="list-item-mount">126,560</div>
-                        </div>
-                        <div class="list-item">
-                            <div class="list-item-title">今日交易总额(元)</div>
-                            <div class="list-item-mount">126,560</div>
-                        </div>
-                    </div>
-                    <div id="map" class="map"></div>
-                </div>
-                <div class="sencond">
-                    <div class="sencond-title">活动情况预测</div>
-                    <div class="sub-title">目标评估</div>
-                    <div class="sencond-text">有望达到预期</div>
-                    <div class="line" id="line"></div>
-                </div>
-                <div class="three sencond">
-                    <div class="sencond-title">活动情况预测</div>
-                    <div class="speed line" id="speed"></div>
-                </div>
+  <el-scrollbar height="100%">
+    <div class="box">
+      <div class="top">
+        <div class="firsts">
+          <div class="title">
+            活动实时交易情况
+          </div>
+          <div class="list">
+            <div class="list-item">
+              <div class="list-item-title">
+                今日交易总额(元)
+              </div>
+              <div class="list-item-mount">
+                126,560
+              </div>
             </div>
-            <div class="bottoms">
-                <div class="category bottoms-item">
-                    <div class="bottoms-title">
-                        <span>各品类占比 </span>
-                        <span>查看更多</span>
-                    </div>
-                    <div class="category-list">
-                        <div class="category-list-item" id="category_one"></div>
-                        <div class="category-list-item" id="category_two"></div>
-                        <div class="category-list-item" id="category_three"></div>
-                    </div>
-                </div>
-                <div class="hot category bottoms-item">
-                    <div class="bottoms-title">
-                        <span>热门搜索 </span>
-                    </div>
-                    <div class="content" id="content">
-
-                    </div>
-                </div>
+            <div class="list-item">
+              <div class="list-item-title">
+                今日交易总额(元)
+              </div>
+              <div class="list-item-mount">
+                126,560
+              </div>
+            </div>
+            <div class="list-item">
+              <div class="list-item-title">
+                今日交易总额(元)
+              </div>
+              <div class="list-item-mount">
+                126,560
+              </div>
+            </div>
+            <div class="list-item">
+              <div class="list-item-title">
+                今日交易总额(元)
+              </div>
+              <div class="list-item-mount">
+                126,560
+              </div>
+            </div>
+          </div>
+          <div
+            id="map"
+            class="map"
+          />
+        </div>
+        <div class="sencond">
+          <div class="sencond-title">
+            活动情况预测
+          </div>
+          <div class="sub-title">
+            目标评估
+          </div>
+          <div class="sencond-text">
+            有望达到预期
+          </div>
+          <div
+            id="line"
+            class="line"
+          />
+        </div>
+        <div class="three sencond">
+          <div class="sencond-title">
+            活动情况预测
+          </div>
+          <div
+            id="speed"
+            class="speed line"
+          />
+        </div>
+      </div>
+      <div class="bottoms">
+        <div class="category bottoms-item">
+          <div class="bottoms-title">
+            <span>各品类占比 </span>
+            <span>查看更多</span>
+          </div>
+          <div class="category-list">
+            <div
+              id="category_one"
+              class="category-list-item"
+            />
+            <div
+              id="category_two"
+              class="category-list-item"
+            />
+            <div
+              id="category_three"
+              class="category-list-item"
+            />
+          </div>
+        </div>
+        <div class="hot category bottoms-item">
+          <div class="bottoms-title">
+            <span>热门搜索 </span>
+          </div>
+          <div
+            id="content"
+            class="content"
+          />
+        </div>
         <div class="source category bottoms-item">
           <div class="bottoms-title">
-                        <span>资源剩余 </span>
-                    </div>
-                    <ChartIcon :id="'source'" :options="sourceOptions" :styles="'width: 176px;height: 176px'" />
-                </div>
-            </div>
+            <span>资源剩余 </span>
+          </div>
+          <ChartIcon
+            :id="'source'"
+            :options="sourceOptions"
+            :styles="'width: 176px;height: 176px'"
+          />
         </div>
-    </el-scrollbar>
+      </div>
+    </div>
+  </el-scrollbar>
 </template>
 <style lang="scss" scoped>
 .box {

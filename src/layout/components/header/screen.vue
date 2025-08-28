@@ -1,6 +1,7 @@
 <script lang="ts">
 import screenfull from "screenfull";
 import svgIconVue  from "@/components/icons/svg-icon.vue";
+import {defineComponent} from "vue"
 
 export default defineComponent({
   components:{
@@ -30,5 +31,5 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-  @import "@/assets/scss/layout.module.scss";
+  @use "@/assets/scss/layout.module.scss";
 </style>

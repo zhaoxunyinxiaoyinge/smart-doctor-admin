@@ -24,15 +24,18 @@ let copys = function (obj: string, text: string) {
 
 </script>
 <template>
-    <el-scrollbar :height="content.routeContentHeight">
-        <div style="display:flex;justify-content:flex-start;padding:10px;height: 100%;box-sizing: border-box;flex-wrap: wrap;">
-            <div :id="item" @click="()=>{copys('#'+item,item)}"
-                :style="{display:'inline-flex',width:'100px',height:'70px',flexDirection:'column',alignItems:'center'}"
-                v-for="item in list" :key="item">
-                <svg-icon :names="item"></svg-icon>
-                <span :style="{fontSize:'12px'}">{{item}}</span>
-            </div>
-        </div>
-    </el-scrollbar>
-
+  <el-scrollbar :height="content.routeContentHeight">
+    <div style="display:flex;justify-content:flex-start;padding:10px;background-color:#fff;height: 100%;box-sizing: border-box;flex-wrap: wrap;">
+      <div
+        v-for="item in list"
+        :id="item"
+        :key="item"
+        :style="{display:'inline-flex',width:'100px',height:'70px',flexDirection:'column',alignItems:'center'}"
+        @click="()=>{copys('#'+item,item)}"
+      >
+        <svg-icon :names="item" />
+        <span :style="{fontSize:'12px'}">{{ item }}</span>
+      </div>
+    </div>
+  </el-scrollbar>
 </template>

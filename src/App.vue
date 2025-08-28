@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import { ElConfigProvider } from 'element-plus'
-import zhCn from 'element-plus/lib/locale/lang/zh-cn'
-import en from 'element-plus/lib/locale/lang/en';
+import { computed } from 'vue'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import en from 'element-plus/dist/locale/en.mjs'
 import { userstore } from './store/expmle';
 import { dictMap } from "@/lang/common";
 import Cookies from 'js-cookie';
-const { lang, size } = toRefs(userstore());
+const store = userstore();
+const lang = computed(() => store.lang);
+const size = computed(() => store.size);
 Cookies.set("lang", lang.value);
 </script>
 
@@ -23,12 +26,12 @@ Cookies.set("lang", lang.value);
 
 <style>
 .app {
-   font-family: Avenir, Helvetica, Arial, sans-serif;
-   -webkit-font-smoothing: antialiased;
-   -moz-osx-font-smoothing: grayscale;
-   text-align: center;
-   color: #2c3e50;
-   height: 100%;
-   /* margin-top: 60px; */
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  height: 100%;
+  /* margin-top: 60px; */
 }
 </style>

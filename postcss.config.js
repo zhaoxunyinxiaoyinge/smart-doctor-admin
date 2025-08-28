@@ -5,7 +5,8 @@ module.exports = () => {
             'postcss-pxtorem': {
                 rootValue: 16,
                 propList: ['*'],
-            }
+            },
+            "autoprefixer":{}
         },
     }
 }

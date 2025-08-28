@@ -1,58 +1,132 @@
 <template>
-  <div class="contanier" ref="div">
+  <div
+    ref="div"
+    class="contanier"
+  >
     <div class="fixed">
-      <el-image class="logo" :src="Logo" />
+      <el-image
+        class="logo"
+        :src="Logo"
+      />
 
       <div class="login">
-        <el-image class="login-img" :src="loginImg"></el-image>
+        <el-image
+          class="login-img"
+          :src="loginImg"
+        />
         <div class="tab">
           <span
             :class="!isPhoneLogin ? 'active' : ''"
-            @click="toggleLogin(false,canvas as HTMLCanvasElement)">账号密码登录</span>
+            @click="toggleLogin(false, canvas as HTMLCanvasElement)"
+          >账号密码登录</span>
           <span
-:class="isPhoneLogin ? 'active' : ''"
-@click="toggleLogin(true,canvas as HTMLCanvasElement)">手机号登录</span>
+            :class="isPhoneLogin ? 'active' : ''"
+            @click="toggleLogin(true, canvas as HTMLCanvasElement)"
+          >手机号登录</span>
         </div>
 
-        <el-form v-if="!isPhoneLogin" class="form" :model="formData" :rules="rules" ref="formEl">
-          <el-form-item class="form-item" prop="username">
-            <el-input placeholder="请输入您的账号" size="default" v-model="formData.username"></el-input>
+        <el-form
+          v-if="!isPhoneLogin"
+          ref="formEl"
+          class="form"
+          :model="formData"
+          :rules="rules"
+        >
+          <el-form-item
+            class="form-item"
+            prop="username"
+          >
+            <el-input
+              v-model="formData.username"
+              placeholder="请输入您的账号"
+              size="default"
+            />
           </el-form-item>
 
-          <el-form-item class="form-item" prop="password">
-            <el-input placeholder="请输入密码" type="password" size="default" v-model="formData.password"
-              show-password></el-input>
+          <el-form-item
+            class="form-item"
+            prop="password"
+          >
+            <el-input
+              v-model="formData.password"
+              placeholder="请输入密码"
+              type="password"
+              size="default"
+              show-password
+            />
           </el-form-item>
 
-          <el-form-item class="form-item" prop="code" style="width: 100%;">
-            <div class="flex" style="justify-content: flex-start;width:100%;align-items: center;">
-              <span class="margin-right-20">验证码:</span>
-              <canvas id="canvas" ref="canvas" width="150" height="50"></canvas>
-              <el-input placeholder="请输入您的验证码" size="default" v-model="formData.code" input-style="width:auto"></el-input>
-
+          <el-form-item
+            class="form-item"
+            style="width: 100%;"
+            label="验证码"
+          >
+            <div
+              class="flex"
+              style="justify-content: flex-start;width:100%;align-items: center;"
+            >
+              <ValidCode />
             </div>
           </el-form-item>
 
-          <div class="wan">忘记密码？</div>
+          <div class="wan">
+            忘记密码？
+          </div>
 
           <el-form-item class="form-item btn-left">
-            <el-button class="btn" type="primary" @click="login(formEl)" size="default">登录</el-button>
+            <el-button
+              class="btn"
+              type="primary"
+              size="default"
+              @click="login(formEl)"
+            >
+              登录
+            </el-button>
           </el-form-item>
         </el-form>
 
-        <el-form v-else :model="formData" :rules="rules" ref="formEl">
-          <el-form-item class="form-item" prop="phone">
-            <el-input placeholder="请输入您的手机号" size="default" v-model="formData.phone"></el-input>
+        <el-form
+          v-else
+          ref="formEl"
+          :model="formData"
+          :rules="rules"
+        >
+          <el-form-item
+            class="form-item"
+            prop="phone"
+          >
+            <el-input
+              v-model="formData.phone"
+              placeholder="请输入您的手机号"
+              size="default"
+            />
           </el-form-item>
 
-          <el-form-item class="form-item" prop="code">
-            <el-input placeholder="请输入验证码" type="input" size="default" v-model="formData.code">
-              <template #append><span @click="handleCode">{{ isCode ? '当前还有' + time + '秒钟' : '点击获取验证码'
-              }}</span></template>
+          <el-form-item
+            class="form-item"
+            prop="code"
+          >
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入验证码"
+              type="input"
+              size="default"
+            >
+              <template #append>
+                <span @click="handleCode">{{ isCode ? '当前还有' + time + '秒钟' : '点击获取验证码'
+                }}</span>
+              </template>
             </el-input>
           </el-form-item>
           <el-form-item class="form-item btn-left">
-            <el-button class="btn" type="primary" @click="login(formEl)" size="default">登录</el-button>
+            <el-button
+              class="btn"
+              type="primary"
+              size="default"
+              @click="login(formEl)"
+            >
+              登录
+            </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -66,18 +140,20 @@ import { useRoute } from "vue-router";
 import { ElInput, ElForm, ElFormItem, ElButton, FormInstance, ElImage } from "element-plus";
 import Logo from "@/assets/login/logo.png";
 import loginImg from "@/assets/login/login.png";
-import { getValiteCode, getOtherQuery, useLogin, handleCode,toggleLogin } from "@/hooks/useLogin";
+import { getOtherQuery, useLogin, handleCode, toggleLogin } from "@/hooks/useLogin";
+import ValidCode from "@/components/validCode/index.vue";
+
+
 
 let div = ref<any>(null);
 let formEl = ref<FormInstance>();
-const canvas = ref<HTMLCanvasElement|null>(null);
+const canvas = ref<HTMLCanvasElement | null>(null);
 const { formData, rules, redirect, otherQuery, isCode, isPhoneLogin, time, login } = useLogin();
 const routes = useRoute();
 
 onMounted(() => {
   const height = document.documentElement.clientHeight;
   div.value.style.height = height + "px";
-  getValiteCode(canvas.value as HTMLCanvasElement);
 });
 
 watchEffect(() => {
@@ -186,7 +262,7 @@ watchEffect(() => {
   font-size: 16px;
 }
 
-.login :deep(.el-form-item__label ) {
+.login :deep(.el-form-item__label) {
   color: #000;
   font-weight: 700;
 }

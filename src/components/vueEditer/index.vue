@@ -2,7 +2,7 @@
 import Quill from 'quill';
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
-import { reactive, ref, onMounted } from "vue"
+import { reactive, ref } from "vue"
 import * as Emoji from "quill-emoji";
 import "quill-emoji/dist/quill-emoji.css";
 import ImageUploader from "quill-image-uploader";
@@ -11,7 +11,7 @@ import { upload } from "@/api/index"
 Quill.register("modules/imageUploader", ImageUploader);
 Quill.register("modules/emoji", Emoji);
 
-const props = withDefaults(defineProps<{ descrtion: string }>(), {
+const props = withDefaults(defineProps<{ descrtion?:string }>(), {
   descrtion: ""
 })
 
@@ -63,7 +63,7 @@ let form = reactive<{ content: string, options: any }>({
   }
 })
 
-const handleChange = (event: any) => {
+const handleChange = () => {
   if (editer.value) {
     let content = editer.value.getContents();
     emits("change", content)

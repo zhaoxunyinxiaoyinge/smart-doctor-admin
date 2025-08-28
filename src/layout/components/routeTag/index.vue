@@ -2,7 +2,7 @@
 import { theme } from "@/store/theme";
 import { userstore } from "@/store/expmle"
 import { seetMoveRouteTag } from "@/hooks/useTheme";
-import { ScrollbarInstance, IconInstance } from "element-plus/lib/components";
+import { type ScrollbarInstance, type IconInstance } from "element-plus";
 import type { RouteList } from "@/store/expmle"
 import Cookies from "js-cookie";
 
@@ -22,6 +22,7 @@ const jumpTo = (val: string) => {
   store.$patch({
     currentRoute: val
   })
+  
   router.push(val);
 
 }
@@ -60,16 +61,33 @@ watchEffect(() => {
 </script>
 
 <template>
-  <section v-if="themes.tabbar" class="route-list">
+  <section
+    v-if="themes.tabbar"
+    class="route-list"
+  >
     <el-icon ref="left">
       <ArrowLeft />
     </el-icon>
-    <el-scrollbar ref="srcollBar" class="scroll" :wrap-style="'display:flex;align-items:center;'">
-      <div ref="routeTag" class="route-label-list">
-        <span v-for="(item) in store.routeList" :key="item.path"
-          :class="['route-btn', activeRoute == item.path ? 'active' : '']" @click="() => jumpTo(item.path)">
+    <el-scrollbar
+      ref="srcollBar"
+      class="scroll"
+      :wrap-style="'display:flex;align-items:center;'"
+    >
+      <div
+        ref="routeTag"
+        class="route-label-list"
+      >
+        <span
+          v-for="(item) in store.routeList"
+          :key="item.path"
+          :class="['route-btn', activeRoute == item.path ? 'active' : '']"
+          @click="() => jumpTo(item.path)"
+        >
           {{ item.title }}
-          <el-icon class="close" @click.navtive.stop="(event: any) => delRouter(item, event)">
+          <el-icon
+            class="close"
+            @click.navtive.stop="(event: any) => delRouter(item, event)"
+          >
             <Close />
           </el-icon>
         </span>
@@ -82,5 +100,5 @@ watchEffect(() => {
 </template>
 
 <style lang="scss">
-@use "@/assets/scss/layout.module.scss";
+@use "/src/assets/scss/layout.module.scss";
 </style>

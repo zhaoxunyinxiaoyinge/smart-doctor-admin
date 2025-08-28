@@ -5,15 +5,21 @@ export function RequestData(url: string | Ref<string>): {data:Array<any>,error:E
 {
     const loading=ref<boolean>(false);
     let data = reactive([]);
-    let error = ref<any>(null);
+    let error ={
+        name:"",
+        message:""
+    }
     function getData() {
         loading.value=true;
         fetch(unref(url)).then(res => {
             return res.json();
         }).then(res => {
             data = res;
-        }).catch(err => {
-            error = err;
+        }).catch(() => {
+        error={
+            name:"请求错误",
+            message:"请求消息错误"
+        };
         }).finally(()=>{
             loading.value=false;
         })
@@ -36,7 +42,7 @@ export function RequestData(url: string | Ref<string>): {data:Array<any>,error:E
 export function MockData(url:string,data?:object):Promise<{datas:Array<object>,err:null|object,loading:Ref<boolean>,pageSize:number,total:number}>{
     const datas=reactive<Array<object>>([]);
     const loading=ref<boolean>(false);
-    const err=ref(null);
+
     loading.value=true;
    return axios({
         url,

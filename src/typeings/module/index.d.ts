@@ -10,11 +10,10 @@ export {
 
 // 导出一个命名空间
 export namespace test {
-    const age=13;
 }
 
  interface Window {
     pdfjsWorker:any,
+    process:object
     cacleList:string[]
 }
-window.pdfjsWorker=null

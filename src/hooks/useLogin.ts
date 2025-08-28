@@ -4,6 +4,7 @@ import { ElMessage, FormInstance } from "element-plus";
 import Cookies from "js-cookie";
 import { LocationQueryValue,useRouter } from "vue-router";
 import { createValiteCode } from "@/utils/common";
+import {ref,reactive} from "vue"
 
 interface formFileds {
   username?: string,
@@ -17,7 +18,9 @@ interface queryType {
 }
 
 const isPhoneLogin = ref(false);
-const otherQuery = ref<any>({});
+const otherQuery = ref<{
+  [key: string]: string|string[]|null
+}>({});
 const store = userstore();
 const user = userInfo();
 const isCode = ref(false);
@@ -95,10 +98,10 @@ export const useLogin = () => {
               Cookies.set('token', res.data.token, { expires: date.setDate(date.getDate() + 10) });
               Cookies.set('userinfo', JSON.stringify(res.data))
               store.$patch({ token: res.data.token });
-              user.setUserInfo({ name: res.data.userName, phone: res.data.phone, work: res.data.work, avatar: res.data.avatar });
+              user.setUserInfo({ name: res.data.userName, phone: res.data.phone, work: res.data.work, avatar: res.data.avatar,id:res.data.id });
               router.push({
                 path: redirect.value as string || "/",
-                query: otherQuery,
+                query: otherQuery.value
               });
               ElMessage.success("登录成功");
             }

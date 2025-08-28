@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, DefineComponent } from "vue";
+import { defineComponent, ref, DefineComponent } from "vue";
 import Sitem from "./sItem";
 import { userstore } from "@/store/expmle"
 import Cookies from "js-cookie";
@@ -27,19 +27,12 @@ export default defineComponent({
       });
     };
 
-    const handleOpen = () => { console.log(345)};
-
-    const handleClose = () => {console.log(345) };
-
     const rendDom = () => {
       return (
         <el-menu
           default-active={currentRoute}
+          ellipsis
           mode='horizontal'
-          open={handleOpen}
-          close={handleClose}
-          unique-opened={true}
-          collapse-transition={true}
           router={true}
         >
           {getMenu(store.menuList as any)}

@@ -46,18 +46,24 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div class="container">
-        <el-header class="layout-transvers-header">
-            <Logo :height="60" class="layout-transvers-logo"></Logo>
-            <Aside class="layout-transvers-aside"></Aside>
-            <Header class="layout-transvers-right"></Header>
-        </el-header>
-        <route-tag></route-tag>
-        <section :class="['route-content', contenClass]">
-            <RouteMain></RouteMain>
-        </section>
-        <footer class="bottom" v-if="themes.isFooter">
-            2022 © vite-Admin By zhaoxunyin Technology.
-        </footer>
-    </div>
+  <div class="container">
+    <el-header class="layout-transvers-header">
+      <Logo
+        :height="60"
+        class="layout-transvers-logo"
+      />
+      <Aside class="layout-transvers-aside" />
+      <Header class="layout-transvers-right" />
+    </el-header>
+    <route-tag />
+    <section :class="['route-content', contenClass]">
+      <RouteMain />
+    </section>
+    <footer
+      v-if="themes.isFooter"
+      class="bottom"
+    >
+      2025 © vite-Admin By zhaoxunyin Technology.
+    </footer>
+  </div>
 </template>

@@ -154,7 +154,9 @@ onMounted(() => {
     :inline="true"
     @search="handleSearch"
   />
-  <PageHeader @add="handleAdd" />
+  <PageHeader
+    @add="handleAdd"
+  />
   <div class="flex-1">
     <el-table
       :data="tableData"

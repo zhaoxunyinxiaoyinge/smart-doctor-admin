@@ -1,9 +1,11 @@
 import { serve as request } from "@/serve/index";
 
-export const getData = (params: ({}) & { page: number, pageSize: number }) => {
+const GOODS_API_URL = "/api/goods";
+
+export const getData = (params) => {
     return request({
         url: "/api/babaner",
-        method: "GET",
+        method: "get",
         params
     })
 }
@@ -21,6 +23,13 @@ export const putData = (data) => {
         url: "/api/babaner",
         method: "put",
         data
+    })
+}
+
+export const deleteData = (id) => {
+    return request({
+        url: "/api/babaner/" + id,
+        method: "delete",
     })
 }
 
@@ -47,23 +56,22 @@ export const putCategoryData=(data)=>{
         data
     })
 }
-export const deleteCategoryData=(params)=>{
+export const deleteCategoryData=(id)=>{
     return request({
-        url: "/api/category",
+        url: "/api/category/"+id,
         method: "DELETE",
-        params
     })
 }
 
-export const getGoodsData=(params)=>{
+export const getGoodsData=(params):any=>{
     return request({
-        url: "/api/goods",
+        url: GOODS_API_URL,
         method: "GET",
         params
     })
 }
 
-export const postGoodsData=(data)=>{
+export const postGoodsData = (data: Record<string, any>) => {
     return request({
         url: "/api/goods",
         method: "POST",
@@ -77,10 +85,42 @@ export const putGoodsData=(data)=>{
         data
     })
 }
-export const deleteGoodsData=(data)=>{
+export const deleteGoodsData=(id)=>{
+    // This API endpoint is used to delete goods data from the server
     return request({
-        url: "/api/goods",
+        url: "/api/goods/"+id,
         method: "DELETE",
+    })
+}
+
+
+export const getHostData=(params)=>{
+    return request({
+        url:"/api/hots",
+        method:"get",
+        params
+    })
+}
+
+
+export const postHostData=(data)=>{
+    return request({
+        url:"/api/hots",
+        method:"post",
         data
+    })
+}
+export const putHostData=(data)=>{
+    return request({
+        url:"/api/hots",
+        method:"put",
+        data
+    })
+}
+export const deleteHostData=(id)=>{
+    return request({
+        url:"/api/hots/"+id,
+        method:"delete",
+        
     })
 }

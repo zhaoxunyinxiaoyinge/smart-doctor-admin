@@ -1,6 +1,8 @@
-<script setup lang="ts" name="DataView">
-import { reactive } from "vue";
-
+<script setup lang="ts">
+import { reactive,defineOptions } from "vue";
+defineOptions({
+  name:"DataView"
+})
 const config = reactive({
   data: [
     {
@@ -29,8 +31,15 @@ const config = reactive({
 const mapConfig = reactive({
   centerPoint: [0.48, 0.35],
   points: [
-    [0.52, 0.23],
-    [0.43, 0.29],
+    {
+     position: [0.52, 0.23],
+     text:"湖南"
+    },
+    {
+      position: [0.43, 0.29],
+      text:"湖北"
+    },
+   
     [0.59, 0.35],
     [0.53, 0.47],
     [0.45, 0.54],
@@ -84,47 +93,73 @@ const option = reactive({
   <div class="box">
     <div class="box-list">
       <div class="box-item">
-        <dv-border-box-9 class="center">
-          <dv-capsule-chart :config="config" style="width:70%;height:70%;margin: 30px auto;" />
+        <dv-border-box-8 class="center">
+          <dv-capsule-chart
+            :config="config"
+            style="width:70%;height:70%;margin: 30px auto;"
+          />
+        </dv-border-box-8>
+      </div>
+      <div class="box-item">
+        <dv-border-box-9
+          class="center"
+          title="数据可视化"
+        >
+          <dv-active-ring-chart
+            :config="config"
+            style="width:70%;height:70%;margin: 30px auto;"
+          />
         </dv-border-box-9>
       </div>
       <div class="box-item">
-        <dv-border-box-11 class="center" title="数据可视化">
-          <dv-active-ring-chart :config="config" style="width:70%;height:70%;margin: 30px auto;" />
-        </dv-border-box-11>
-      </div>
-      <div class="box-item">
-        <dv-border-box-10>
-          <dv-water-level-pond :config="{ data: [22] }" style="width:70%;height:70%;margin: 30px auto;" />
-        </dv-border-box-10>
+        <dv-border-box-1>
+          <dv-water-level-pond
+            :config="{ data: [22] }"
+            style="width:70%;height:70%;margin: 30px auto;"
+          />
+        </dv-border-box-1>
       </div>
     </div>
     <div class="box-list">
       <div class="box-item colspan">
-        <dv-border-box-13 class="center">
-          <dv-flyline-chart :config="mapConfig" style="width:100%;height:100%; " />
-        </dv-border-box-13>
+        <dv-border-box-8 class="center">
+          <dv-flyline-chart
+            :config="mapConfig"
+            style="width:100%;height:100%; "
+          />
+        </dv-border-box-8>
       </div>
     </div>
     <div class="box-list">
       <div class="box-item">
-        <dv-border-box-5 class="center">
-          <dv-percent-pond :config="{ value: 66 }" style="width:70%;height:70%;margin: 30px auto;" />
-        </dv-border-box-5>
+        <dv-border-box-8 class="center">
+          <dv-percent-pond
+            :config="{ value: 66 }"
+            style="width:70%;height:70%;margin: 30px auto;"
+          />
+        </dv-border-box-8>
       </div>
       <div class="box-item">
-        <dv-border-box-6 class="center"><dv-charts :option="option"
-            style="width:70%;height:70%;margin: 30px auto;" /></dv-border-box-6>
+        <dv-border-box-8 class="center">
+          <dv-charts
+            :option="option"
+            style="width:70%;height:70%;margin: 30px auto;"
+          />
+        </dv-border-box-8>
       </div>
       <div class="box-item">
-        <dv-border-box-9 class="center"><dv-scroll-ranking-board :config="config"
-            style="width:70%;height:70%;margin: 30px auto;" /></dv-border-box-9>
+        <dv-border-box-8 class="center">
+          <dv-scroll-ranking-board
+            :config="config"
+            style="width:70%;height:70%;margin: 30px auto;"
+          />
+        </dv-border-box-8>
       </div>
     </div>
   </div>
 </template>
 
-<sstyle lang="scss">
+<style lang="scss"  scope>
 .box {
   display: flex;
   flex-direction: column;
@@ -153,4 +188,4 @@ const option = reactive({
     }
   }
 }
-</sstyle>
+</style>

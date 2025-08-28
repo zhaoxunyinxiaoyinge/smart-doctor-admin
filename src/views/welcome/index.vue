@@ -10,7 +10,9 @@
           <span class="icon iconfont">&#xe634;</span>
           <span class="mount">126,560</span>
         </div>
-        <div class="desc">日均销售额 ￥12,423</div>
+        <div class="desc">
+          日均销售额 ￥12,423
+        </div>
         <div class="text">
           <span>周同比 12%</span>
           <span>日环比 12%</span>
@@ -21,28 +23,43 @@
           <span>访问量</span>
           <span class="iconfont">&#xe679;</span>
         </div>
-        <div class="chengj"><span class="iconfont icon">&#xe674;</span><span class="mount">8,846</span></div>
-        <div class="desc">日访问量 1,423</div>
-        <div id="catgory"></div>
+        <div class="chengj">
+          <span class="iconfont icon">&#xe674;</span><span class="mount">8,846</span>
+        </div>
+        <div class="desc">
+          日访问量 1,423
+        </div>
+        <div id="catgory" />
       </div>
       <div class="card-item">
         <div class="card-title">
           <span>支付笔数</span>
           <span class="iconfont">&#xe679;</span>
         </div>
-        <div class="chengj"><span class="iconfont icon">&#xe610;</span><span class="mount">6,560</span></div>
-        <div class="desc">转化率 60%</div>
-        <div class="k" id="ke"></div>
+        <div class="chengj">
+          <span class="iconfont icon">&#xe610;</span><span class="mount">6,560</span>
+        </div>
+        <div class="desc">
+          转化率 60%
+        </div>
+        <div
+          id="ke"
+          class="k"
+        />
       </div>
       <div class="card-item">
         <div class="card-title">
           <span>线上购物转化率</span>
           <span class="iconfont">&#xe679;</span>
         </div>
-        <div class="chengj"><span class="iconfont icon">&#xe600;</span><span class="mount">60%</span></div>
-        <div class="desc"><span>周同比 12%</span><span>日环比 24%</span></div>
+        <div class="chengj">
+          <span class="iconfont icon">&#xe600;</span><span class="mount">60%</span>
+        </div>
+        <div class="desc">
+          <span>周同比 12%</span><span>日环比 24%</span>
+        </div>
         <div class="process">
-          <div class="process-item"></div>
+          <div class="process-item" />
         </div>
       </div>
     </div>
@@ -53,13 +70,11 @@
       </div>
       <div class="right">
         <span class="active">今日</span><span>本周</span><span>本月</span><span>全年</span>
-        <el-input type="date"></el-input>
+        <el-input  type="date" />
       </div>
     </div>
     <div id="zhu">
-      <div id="tong">
-
-      </div>
+      <div id="tong" />
       <div class="list">
         <div class="list-title">
           <span>门店销售排行榜</span>
@@ -130,7 +145,7 @@
             <span>8,910</span>
           </div>
           <div class="process">
-            <div class="kedu"></div>
+            <div class="kedu" />
           </div>
         </div>
         <div class="bar">
@@ -139,7 +154,7 @@
             <span>8,910</span>
           </div>
           <div class="process">
-            <div class="kedu"></div>
+            <div class="kedu" />
           </div>
         </div>
         <div class="bar">
@@ -148,7 +163,7 @@
             <span>8,910</span>
           </div>
           <div class="process">
-            <div class="kedu"></div>
+            <div class="kedu" />
           </div>
         </div>
         <div class="bar">
@@ -157,7 +172,7 @@
             <span>8,910</span>
           </div>
           <div class="process">
-            <div class="kedu"></div>
+            <div class="kedu" />
           </div>
         </div>
       </div>
@@ -171,32 +186,33 @@
           </div>
         </div>
         <div class="pie-content">
-          <div class="pie-icon" id="pies">
-
-          </div>
+          <div
+            id="pies"
+            class="pie-icon"
+          />
           <div class="product-list">
             <div class="product-list-item">
-              <span><mark style="background:rgba(251, 73, 124, 1) ;"></mark>母婴产品</span>
+              <span><mark style="background:rgba(251, 73, 124, 1) ;" />母婴产品</span>
               <span>38.57%</span>
             </div>
             <div class="product-list-item">
-              <span><mark style="background: rgba(255, 199, 96, 1);"></mark>家用电器</span>
+              <span><mark style="background: rgba(255, 199, 96, 1);" />家用电器</span>
               <span>31.30%</span>
             </div>
             <div class="product-list-item">
-              <span><mark style="background:rgba(111, 230, 33, 1) ;"></mark>食用酒水</span>
+              <span><mark style="background:rgba(111, 230, 33, 1) ;" />食用酒水</span>
               <span>21.21%</span>
             </div>
             <div class="product-list-item">
-              <span><mark style="background:rgba(79, 204, 255, 1) ;"></mark>个人健康</span>
+              <span><mark style="background:rgba(79, 204, 255, 1) ;" />个人健康</span>
               <span>10.91%</span>
             </div>
             <div class="product-list-item">
-              <span><mark style="background: rgba(77, 123, 243, 1);"></mark>服饰箱包</span>
+              <span><mark style="background: rgba(77, 123, 243, 1);" />服饰箱包</span>
               <span>0.91%</span>
             </div>
             <div class="product-list-item">
-              <span><mark style="background:rgba(29, 73, 153, 1) ;"></mark>其他</span>
+              <span><mark style="background:rgba(29, 73, 153, 1) ;" />其他</span>
               <span>0.21%</span>
             </div>
           </div>
@@ -207,31 +223,30 @@
       <div class="pie-list">
         <div class="pie-list-item">
           <span>门店一</span>
-          <div id="pieOne"></div>
+          <div id="pieOne" />
         </div>
         <div class="pie-list-item">
           <span>门店二</span>
-          <div id="pieTwo"></div>
+          <div id="pieTwo" />
         </div>
         <div class="pie-list-item">
           <span>门店三</span>
-          <div id="pieThree"></div>
+          <div id="pieThree" />
         </div>
         <div class="pie-list-item">
           <span>门店四</span>
-          <div id="pieFour"></div>
+          <div id="pieFour" />
         </div>
         <div class="pie-list-item">
           <span>门店五</span>
-          <div id="pieFive"></div>
+          <div id="pieFive" />
         </div>
         <div class="pie-list-item">
           <span>门店六</span>
-          <div id="pieSix"></div>
+          <div id="pieSix" />
         </div>
       </div>
-      <div id="shop">
-      </div>
+      <div id="shop" />
     </div>
   </el-scrollbar>
 </template>
@@ -300,6 +315,12 @@ onMounted(() => {
 
 let option: EChartsOption;
 option = {
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
   title: {
     text: "销售额趋势"
   },
@@ -319,12 +340,15 @@ option = {
       data: [10, 50, 100, 150, 10, 50, 100, 150, 20, 50, 100, 150],
       type: 'bar',
       showBackground: true,
-      barWidth: 8,
+      barWidth: 50,
       backgroundStyle: {
         color: "rgba(255, 255, 255, 1)"
       },
       itemStyle:{
         color:'rgba(182, 32, 224, 1)'
+      },
+      label:{
+        show:true
       }
     }
   ]
@@ -376,7 +400,8 @@ let optionShop: EChartsOption = {
 
 let optionPie: EChartsOption = {
   tooltip: {
-    trigger: 'item'
+    trigger: 'item',
+    
   },
 
   series: [
@@ -386,18 +411,17 @@ let optionPie: EChartsOption = {
       radius: ['50%', '70%'],
       avoidLabelOverlap: false,
       label: {
-        show: false,
-        position: 'center'
+        show: true,
       },
       emphasis: {
         label: {
-          show: true,
+          show: false,
           fontSize: 40,
           fontWeight: 'bold'
         }
       },
       labelLine: {
-        show: false
+        show: true
       },
       data: [
         {
@@ -417,8 +441,12 @@ let optionPie: EChartsOption = {
 };
 
 let optionPies: EChartsOption = {
+  tooltip: {
+    trigger: 'item',
+    formatter: '{a} <br/>{b} : {c} ({d}%)'
+  },
   toolbox: {
-    show: true,
+    show: false,
     feature: {
       mark: { show: true },
       dataView: { show: true, readOnly: false },
@@ -431,23 +459,21 @@ let optionPies: EChartsOption = {
       name: 'Nightingale Chart',
       type: 'pie',
       radius: [25, 160],
-      center: ['50%', '50%'],
+      center: ['70%', '50%'],
       roseType: 'area',
       label: {
-        show: false
+        show: true
       },
       itemStyle: {
         borderRadius: 8
       },
       data: [
-        { value: 40, },
-        { value: 38, },
-        { value: 32, },
-        { value: 30, },
-        { value: 28, },
-        { value: 26, },
-        { value: 22, },
-        { value: 18, }
+        { value: 40,name:"母婴产品" },
+        { value: 38,name:"家用电器" },
+        { value: 32,name:"实用酒水" },
+        { value: 30, name:"个人健康"},
+        { value: 28, name:"服饰箱包"},
+        { value: 26,name:"其他" },
       ]
     }
   ]

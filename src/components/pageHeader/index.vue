@@ -7,7 +7,7 @@ const emits = defineEmits<{
   (e: 'add'): void
 }>();
 
-const props = withDefaults(defineProps<{ url: string, name: string, add: boolean, print: boolean, export: boolean }>(), {
+const props = withDefaults(defineProps<{ url?: string, name?: string, add?: boolean, print?: boolean, export?: boolean }>(), {
   url: "",
   name: "",
   add: true,
@@ -38,18 +38,31 @@ const [handleImport] = useHeader({ name: props.name, url: props.url });
 </script>
 <template>
   <div class="page-header flex padding-left-10 justifly-betwwen">
-    <el-button v-if="props.add" type="primary" @click="handleAdd">
+    <el-button
+      v-if="props.add"
+      type="primary"
+      @click="handleAdd"
+    >
       <el-icon>
         <Plus />
       </el-icon>新增
     </el-button>
     <div class="margin-right-20">
-      <el-button v-if="props.print" v-print="printObj" type="primary">
+      <el-button
+        v-if="props.print"
+        v-print="printObj"
+        type="primary"
+      >
         <el-icon>
           <Printer />
         </el-icon>打印
       </el-button>
-      <el-button v-if="props.export" type="success"  :loading="loading" @click="handleImport">
+      <el-button
+        v-if="props.export"
+        type="success"
+        :loading="loading"
+        @click="handleImport"
+      >
         <el-icon>
           <Files />
         </el-icon>导出

@@ -175,6 +175,16 @@ html:not(.dark) {
   border: none;
 }
 
+.el-menu--vertical.el-menu--collapse {
+  .el-sub-menu.is-active {
+    background: hsla(180, 1%, 46%, 0.2);
+    color:#fff;
+    .icons {
+        fill: #fff;
+    }
+}
+}
+
 .show-enter-active,
 .show-leave-active {
   transition: opacity 1s ease;
@@ -199,7 +209,11 @@ html:not(.dark) {
   display: flex;
   flex-direction: column;
   width: 100%;
+  box-sizing: border-box;
   height: 100%;
+  .el-aside {
+    width: auto;
+  }
 }
 
 .classic-header {
@@ -209,6 +223,7 @@ html:not(.dark) {
   align-items: center;
   padding-left: 10px;
   justify-content: space-between;
+  background-color:#ebebf5
 }
 
 
@@ -218,13 +233,21 @@ html:not(.dark) {
 }
 
 .classic-main {
-  flex: 1;
+  display: inline-block;
   display: flex;
-  box-sizing: border-box;
-}
+  flex-direction: row;
+  .aside {
+    max-width: 250px;
+  }
 
-.classic-right {
-  flex: 1;
+  .classic-right {
+    flex:1;
+    overflow: hidden;
+    box-sizing:border-box;
+    flex-direction: column;
+  }
+  
+
 }
 
 .layout-transvers-header {
@@ -233,11 +256,50 @@ html:not(.dark) {
   align-items: center;
   background-color: #fff;
   border-bottom: 1px solid #eee;
+  color:#333 ;
+  .el-menu-item {
+    background-color: #fff;
+    color:#333
+  }
 }
 
 
 .layout-transvers-header .el-menu {
-  background-color: inherit;
+  background-color: #fff;
+  li.el-menu-item {
+    color: #333 !important;;
+    &.is-active {
+      background-color: #000;
+    }
+  }
+  .el-sub-menu {
+    color: #333 !important;;
+  }
+
+}
+
+.layout-transvers {
+  .el-popper {
+    .el-menu-item span, .el-menu-item .el-icon, .el-sub-menu span, .el-sub-menu .el-icon {
+      color:#000 !important
+    }
+  }
+}
+
+.el-menu--horizontal .el-menu .el-menu-item, .el-menu--horizontal .el-menu .el-sub-menu__title {
+  background-color: #fff;
+}
+.el-menu--horizontal {
+  .el-menu-item span, .el-menu-item .el-icon, .el-sub-menu span, .el-sub-menu .el-icon {
+    color:#000 !important
+  }
+  .el-sub-menu__title:hover, .el-menu-item:hover, .el-sub-menu__title:hover, .el-menu-item.is-active, .el-sub-menu__title.el-active {
+    background-color: #fff;
+  }
+
+  .el-menu {
+    background-color: #fff;
+  }
 }
 
 .layout-transvers-logo {
@@ -249,7 +311,7 @@ html:not(.dark) {
 }
 
 .layout-transvers-aside {
-  flex: 1;
+  max-width: 500px;
 }
 
 .layout-columns-container {
@@ -306,12 +368,16 @@ html:not(.dark) {
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+
 }
 
-.icons+.layout-columns-title,
-.icons {
-  // margin: 0px;
+.layout-columns-title {
+   text-overflow: ellipsis;
+   overflow: hidden;
+   line-clamp: 1;
+   width: 50px; 
 }
+
 
 .icons+.layout-columns-title {
   margin-top: 4px;
@@ -328,16 +394,32 @@ html:not(.dark) {
   flex: 1;
 }
 
+.layout-columns-aside {
+  padding-top: 20px;
+  max-width: 180px;
+  box-sizing: border-box;
+}
+
 
 .layout-column-active {
- background-color: #fff;;
+ position: relative;
+ background-color: #fff;
   color:#222;
   .icons {
     fill: #222;
   }
 }
 
+.layout-column-active::after {
+    width: 0px;
+    height: 30px;
+    border: 1.5px solid #409eff;
+    position: absolute;
+    content: "";
+    right: 0px;
+    }
+
 // 导出一个内容高度给内容页面使用
 :export {
-  routeContentHeight: $routeContentHeight,
+  routeContentHeight: $routeContentHeight
 }

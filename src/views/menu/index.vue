@@ -5,7 +5,7 @@ import { jsonToTree } from "@/utils/common";
 import From from "@/components/forms/index.vue";
 import PageHeader from "@/components/pageHeader/index.vue";
 import Add from "@/views/menu/components/addMenu.vue";
-import { ElMessageBox, ElMessage, ElTable, ElTableColumn, ElButton } from "element-plus";
+import { ElMessageBox, ElMessage, ElTable, ElTableColumn, ElButton, TableColumnCtx } from "element-plus";
 import { getDetail } from "@/views/menu/api/index";
 
 type Menu = {

@@ -23,13 +23,13 @@ router.beforeEach((to: any, from: any, next: any) => {
             if (store.menuList.length == 0) {
                 const users = Cookies.get("userinfo");
                 const info=users != undefined && JSON.parse(users);
-                user.setUserInfo({name:info.userName,phone:info.phone,work:info.work,avatar:info.avatar});
+                user.setUserInfo({name:info.userName,phone:info.phone,work:info.work,avatar:info.avatar,id:info.id});
                 const id = users != undefined && JSON.parse(users).id;
-                store.getMenuList(id).then((res) => {
-                    console.log(store.routers)
+                store.getMenuList(id).then(() => {
                     store.routers.forEach(item => {
                         router.addRoute(item);
-                    })
+                    })  
+
                     next({ path:to.path, replace: true })
                 });
 
@@ -56,6 +56,6 @@ router.beforeEach((to: any, from: any, next: any) => {
     }
 })
 
-router.afterEach((to, form, next) => {
+router.afterEach(() => {
     NProgress.done();
 })

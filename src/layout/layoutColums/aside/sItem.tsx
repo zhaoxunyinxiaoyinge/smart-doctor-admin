@@ -5,7 +5,6 @@ import {
   DefineComponent,
   PropType,
 } from "vue";
-import { userstore } from "@/store/expmle";
 import SvgIcon from '@/components/icons/svg-icon.vue';
 import path from "path";
 
@@ -37,12 +36,9 @@ const SitemBar = defineComponent({
       default: ''
     }
   },
-  setup(props, { slots }) {
+  setup(props) {
 
     let onlyOneChild = reactive<any>({})
-
-    const store = userstore();
-
     const hasOnyChild = (children: Array<List> = [], parent: any) => {
       children = children ? children : [];
       const onlyChild = children.filter((item) => {
@@ -89,9 +85,6 @@ const SitemBar = defineComponent({
     const getSubMenu = () => {
       if (hasOnyChild(props.item.children||[], props.item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren)) {
         return <el-menu-item v-slots={menuSolt} index={resovlePath(onlyOneChild.path)}>
-          {/* 提供svg icon 的支持 */}
-          <svg-icon names={onlyOneChild.meta?.icon} class='icons other'></svg-icon>
-          {/* <span>{props.item.meta.title}</span> */}
         </el-menu-item>
       } else {
         return <el-sub-menu v-slots={slot} index={resovlePath(props.item.path)}>

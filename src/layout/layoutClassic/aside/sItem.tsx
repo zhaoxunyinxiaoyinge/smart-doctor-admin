@@ -14,7 +14,7 @@ interface List {
   children: Array<List>;
   meta: {
     title: string;
-    hidden: Boolean;
+    hidden: boolean;
     icon?:string
   };
   component: DefineComponent;
@@ -37,15 +37,15 @@ const SitemBar = defineComponent({
       default: ''
     }
   },
-  setup(props, { slots }) {
+  setup(props) {
 
     let onlyOneChild = reactive<any>([]);
 
-    let store = userstore();
+    const store = userstore();
 
     const hasOnyChild = (children: Array<List> = [], parent: any) => {
       children = children ? children : [];
-      let onlyChild = children.filter((item) => {
+      const onlyChild = children.filter((item) => {
         if (item.meta.hidden) {
           return false;
         } else {
@@ -65,11 +65,11 @@ const SitemBar = defineComponent({
       return false;
     };
 
-    let resovlePath = (val: string) => {
+    const resovlePath = (val: string) => {
       return path.resolve(props.basePath, val)
     }
 
-    let slot = {
+    const  slot = {
       title: () => {
         return <div style={{display:'flex',alignItems:'center'}}>
           <svg-icon names={props.item.meta.icon} class='icons'></svg-icon>
@@ -78,7 +78,7 @@ const SitemBar = defineComponent({
       }
     }
 
-    let menuSolt = {
+    const menuSolt = {
       title: () => {
         return <div>
           <span>{onlyOneChild.meta.title}</span>

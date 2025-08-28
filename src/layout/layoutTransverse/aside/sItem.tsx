@@ -5,7 +5,6 @@ import {
   DefineComponent,
   PropType,
 } from "vue";
-import { userstore } from "@/store/expmle";
 import SvgIcon from '@/components/icons/svg-icon.vue';
 import path from "path";
 
@@ -22,10 +21,10 @@ interface List {
 }
 
 const SitemBar = defineComponent({
+  name: "Sitem",
   components: {
     SvgIcon
   },
-  name: "sitem",
 
   props: {
     item: {
@@ -39,7 +38,6 @@ const SitemBar = defineComponent({
   },
   setup(props) {
     let onlyOneChild = reactive<any>([])
-    const store = userstore();
 
     const hasOnyChild = (children: Array<List> = [], parent: any) => {
       children = children ? children : [];
@@ -69,35 +67,25 @@ const SitemBar = defineComponent({
 
     const slot = {
       title: () => {
-        return <div style={{ display: 'flex', alignItems: 'center' }}>
-          <svg-icon names={props.item.meta.icon} class='icons'></svg-icon>
-          <span style={{ marginLeft: store.isCollapse ? '0px' : 'auto', width: store.isCollapse ? '0px' : 'auto', display: store.isCollapse ? 'none' : 'inline-block', }}>{props.item.meta.title}</span>
-        </div>
-      }
-    }
-
-    const menuSolt = {
-      title: () => {
         return <div>
-          <span>{onlyOneChild.meta.title}</span>
+          <span >{props.item.meta.title}</span>
         </div>
       }
     }
 
     const getSubMenu = () => {
       if (hasOnyChild(props.item.children, props.item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren)) {
-        return <el-menu-item v-slots={menuSolt} index={resovlePath(onlyOneChild.path)}>
-          {/* 提供svg icon 的支持 */}
-          <svg-icon names={onlyOneChild.meta.icon} class='icons other'></svg-icon>
-          {/* <span>{props.item.meta.title}</span> */}
-        </el-menu-item>
-      } else {
+        return <el-menu-item  index={resovlePath(onlyOneChild.path)}>
+                    <span>{onlyOneChild.meta.title}</span>
+               </el-menu-item>
+      }
+       else {
         return <el-sub-menu v-slots={slot} index={resovlePath(props.item.path)}>
-          {
-            props.item.children && props.item.children.map(sitem => {
+          {/* {
+              props.item.children && props.item.children.map(sitem => {
               return <SitemBar basePath={resovlePath(sitem.path)} item={sitem}></SitemBar>
             })
-          }
+          } */}
         </el-sub-menu>
       }
 

@@ -1,24 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import Form from "@/components/forms/index.vue";
 import PageHeader from "@/components/pageHeader/index.vue";
 import Pagetions from "@/components/pagetions/index.vue";
 import { useTable } from "@/hooks/useTable";
 import { onMounted, reactive } from "vue";
 import Edit from "./components/CarouseEdit.vue";
-import { getData, postData, putData } from "@/views/goods/api/index";
-
-
-onMounted(() => {
-  getList({});
-})
+import { getData, postData, putData,deleteData } from "@/views/goods/api/index";
 
 const listQuery = reactive({ page: 1, pageSize: 10, total: 0 });
-const form = ref(null);
+const form = ref<typeof Form>();
 
-const list = reactive([]);
+const list = reactive<Array<{[key:string]:any}>>([]);
 const formField = reactive([{ label: "babaner名称", name: "name", type: "input", width: 100 },
 { label: "是否可用", name: 'status', type: 'select', width: 100, options: [{ label: "是", value: 1 }, { label: '否', value: 0 }] }]);
-const { initTableConfig, tableConfig } = useTable();
+const { initTableConfig, tableConfig,handleDelete } = useTable();
 
 const dialogVisible = ref(false);
 const title = ref("新增");
@@ -29,22 +24,25 @@ const editConfig = reactive([{ label: '名称', name: 'name', type: "input", wid
 
 const editData = reactive({});
 
-onMounted(() => {
-  tableConfig.length = 0;
+onMounted(async () => {
   initTableConfig([{ label: "id", prop: "id" }, { label: "name", prop: "name" },
   { label: "status", prop: "status", format: (row) => row.status == 1 ? '正在使用' : '未使用' }, { label: "icon", prop: "imgUrl" }, { label: "updateTime", width: 150, prop: "updateTime" }, { label: "createTime", width: 150, prop: "createTime" }
   ]);
+  await getList({});
 })
 
 const getList = async (params) => {
   list.length = 0;
-  let res = await getData({ ...params, page: listQuery.page, pageSize: listQuery.pageSize });
-  if (res.code == 1) {
-    list.push(...res.data.records);
-    listQuery.page = res.data.current;
-    listQuery.pageSize = res.data.size;
-    listQuery.total = res.data.total
-  }
+  getData({ ...params, page: listQuery.page, pageSize: listQuery.pageSize }).then(res => {
+    if (res.code == 1) {
+      list.push(...res.data.records);
+      listQuery.page = res.data.current;
+      listQuery.pageSize = res.data.size;
+      listQuery.total = res.data.total
+    }
+  }).catch(err => {
+    console.log(err, '请求失败');
+  })
 }
 
 const handleResh = () => {
@@ -52,7 +50,6 @@ const handleResh = () => {
 };
 const handleSearch = (formData) => {
   listQuery.page = 1;
-  console.log(formData, "456789")
   getList(formData);
 }
 
@@ -73,17 +70,23 @@ const handleConfirm = async (data) => {
   }
 
   dialogVisible.value = false;
-  await getList(form.value.formData);
+  if(form.value!=undefined){
+    await getList(form.value.formData);
+  }
 }
 
 const handlePage = (val) => {
   listQuery.page = val;
-  getList(form.value.formData);
+    if(form.value!=undefined){
+    getList(form.value.formData);
+    }
 }
 
 const handleSize = (val) => {
   listQuery.pageSize = val;
+    if(form.value!=undefined){
   getList(form.value.formData);
+    }
 }
 
 const handleEdit = (row) => {
@@ -95,8 +98,16 @@ const handleEdit = (row) => {
   })
 }
 
-const handleDelete = () => {
-  console.log(23456);
+const handleDeletes = (id) => {
+  let  querySelectData={pageSize:listQuery.pageSize,page:1}
+  if(form.value!=null){
+      querySelectData={...form.value.formData,...querySelectData}
+  }
+  handleDelete(id,deleteData,getList,querySelectData);
+}
+
+const handleSelectionChange=()=>{
+  console.log("选中的数据");
 }
 
 </script>
@@ -123,7 +134,7 @@ const handleDelete = () => {
         type="selection"
         width="55"
       />
-      <template v-for="item in tableConfig">
+      <template v-for="(item,index) in tableConfig">
         <el-table-column
           v-if="item.label == 'icon'"
           :key="item.label"
@@ -135,7 +146,7 @@ const handleDelete = () => {
             <span v-show-image>
               <el-image
                 :src="scope.row['imgUrl']"
-                style="width:100px"
+                style="width:50px"
               />
             </span>
           </template>
@@ -143,14 +154,14 @@ const handleDelete = () => {
 
         <el-table-column
           v-else-if="!item.template"
-          :key="item.label"
+          :key="index"
           :formatter="item.format"
           :width="item.width"
           :label="item.label"
           :prop="item.prop"
         />
       </template>
-      <el-table-column label="操作">
+      <el-table-column label="操作" width="180"  fixed="right">
         <template #default="scope">
           <el-button
             type="primary"
@@ -160,7 +171,7 @@ const handleDelete = () => {
           </el-button>
           <el-button
             type="danger"
-            @click="handleDelete(scope.row.id)"
+            @click="handleDeletes(scope.row.id)"
           >
             删除
           </el-button>
@@ -169,6 +180,7 @@ const handleDelete = () => {
     </el-table>
   </div>
   <Pagetions
+    :small="false"
     :current-page="listQuery.page"
     :page-size="listQuery.pageSize"
     :total="listQuery.total"

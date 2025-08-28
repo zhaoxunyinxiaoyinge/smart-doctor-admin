@@ -20,10 +20,19 @@ const breaList = inject<Array<List>>('breakList');
 
 <template>
   <section class="breaum">
-    <el-breadcrumb v-if="themes.isBrearum">
-      <el-breadcrumb-item :key="item.path" v-for="item in breaList" :to="{ path: item.path }">{{
-        item.meta.title
-      }}
+    <el-breadcrumb
+      v-if="themes.isBrearum"     
+      id="hamburger-container"
+      class="hamburger-container"
+    >
+      <el-breadcrumb-item
+        v-for="item in breaList"
+        :key="item.path"
+        :to="{ path: item.path }"
+      >
+        {{
+          item.meta.title
+        }}
       </el-breadcrumb-item>
     </el-breadcrumb>
   </section>

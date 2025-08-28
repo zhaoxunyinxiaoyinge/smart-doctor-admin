@@ -27,3 +27,20 @@ export const upload=(data)=>{
         data
     })
 }
+
+export const changeAvatar=(data)=>{
+    return request({
+        url:"/api/user/avatar",
+        method:"put",
+        data
+        
+    })
+}
+
+export const getWeather = (params) => {
+    return request({
+        url: "https://cn.apihz.cn/api/tianqi/tqyb.php",
+        method: "get",
+        params
+    })
+}

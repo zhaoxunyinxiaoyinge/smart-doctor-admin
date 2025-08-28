@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, DefineComponent } from "vue";
+import { defineComponent, ref,type DefineComponent } from "vue";
 import Sitem from "./sItem";
 import { userstore } from "@/store/expmle"
 import Cookies from "js-cookie";
@@ -35,9 +35,10 @@ export default defineComponent({
     const rendDom = () => {
       return (
         <el-menu
-          default-active={currentRoute}
+          mode='horizontal'
+          default-active={store.currentRoute||currentRoute}
           collapse={store.getCollapseValue}
-          style={{ width: store.getCollapseValue ? 'auto' : '200px' }}
+          style={{ width: store.getCollapseValue ? 'auto' : '250px' }}
           open={handleOpen}
           close={handleClose}
           unique-opened={true}

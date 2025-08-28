@@ -1,6 +1,23 @@
+import { Axios } from "axios";
 
-declare module 'headers' {
-    export interface requestConfig {
-        name: string
+declare module "axios" {
+    type create=(config:any)=>AxiosInstance
+        export  interface AxiosInstance{
+        defaults: {
+            timeout: number;
+            responseType: string;
+            headers: {
+                post: {
+                    'Content-Type': string;
+                };
+            };
+            baseURL: string;
+        }
+        headers: {
+            post: {
+                'Content-Type': string;
+            };
+        };
+        baseURL: string;
     }
 }

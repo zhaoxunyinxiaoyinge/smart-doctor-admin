@@ -1,8 +1,7 @@
 
-@import "./../scss/var.scss";
-@import "element-plus/theme-chalk/src/index.scss";
-
-$el-sub-menu__title_hover_bg:hsla(1, 76%, 25%, 0.522);
+@use "element-plus/theme-chalk/src/index.scss";
+@use "./../scss/var.scss";
+$el-sub-menu__title_hover_bg:hsla(180, 1%, 46%, 0.2);
 $breaum-height:50px;
 $router-list-height:50px;
 $breaum-bg:auto;
@@ -19,24 +18,24 @@ $router-list-bg:auto;
 }
 
   .el-aside {
-  background-color:#4d1616f7;
+  background-color:#fff;
 }
 
 .el-menu {
-  background-color:#450b0bc5;
+  background-color:#fff;
 }
 
 .el-menu-item,.el-sub-menu {
   margin: 0 auto;
   border-radius: 5px;
   span,.el-icon {
-     color: #f1e3e3c9 !important;
+     color: #333 !important;
   }
 }
 
 .el-menu-item.is-active,.el-sub-menu__title.el-active {
   span,.el-icon {
-    color:#fff !important;;
+    color:#fff!important;;
  }
 }
 
@@ -86,7 +85,7 @@ $router-list-bg:auto;
 }
 
 .icons {
-    fill:#f1e3e3c9;
+    fill:#333;
     margin-right: 5px;
 }
 

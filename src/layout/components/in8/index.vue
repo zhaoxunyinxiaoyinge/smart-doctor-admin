@@ -30,5 +30,5 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
-    @import  "./../../../assets/scss/common.scss";
+    @use  "./../../../assets/scss/common.scss";
 </style>

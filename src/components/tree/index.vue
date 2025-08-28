@@ -43,17 +43,17 @@ const handleNodeClick = (val: TreeNode) => {
 const property = withDefaults(defineProps<{
     defaultProps: any,
     data: Tree[] | Array<any>,
-    lazy: boolean,
-    load: fun,
-    nodeKey: string,
-    renderContent: fun,
-    customClassName: string,
-    filterNodeMethod: fun,
-    accordion: boolean,
-    emptyText: string,
-    checkOnClickNode: boolean,
-    showCheckbox: boolean,
-    defaultCheckedKeys: TreeKey[] | null
+    lazy?: boolean,
+    load?: fun,
+    nodeKey?: string,
+    renderContent?: fun,
+    customClassName?: string,
+    filterNodeMethod?: fun,
+    accordion?: boolean,
+    emptyText?: string,
+    checkOnClickNode?: boolean,
+    showCheckbox?: boolean,
+    defaultCheckedKeys?: TreeKey[] | undefined
 }>(
 
 ), {
@@ -68,7 +68,7 @@ const property = withDefaults(defineProps<{
     emptyText: "暂无数据",
     checkOnClickNode: false,
     showCheckbox: true,
-    defaultCheckedKeys: null,
+    defaultCheckedKeys: undefined,
     defaultProps: { label: "label", child: "children" }
 })
 
@@ -81,11 +81,18 @@ defineExpose({
 </script>
 
 <template>
-    <div class="tree">
-        <el-tree :data="property.data" :default-checked-keys="defaultCheckedKeys" :node-key="nodeKey" ref="treeRef"
-            :show-checkbox="showCheckbox" :props="property.defaultProps" @node-click="handleNodeClick"
-            :empty-text="emptyText" />
-    </div>
+  <div class="tree">
+    <el-tree
+      ref="treeRef"
+      :data="property.data"
+      :default-checked-keys="defaultCheckedKeys"
+      :node-key="nodeKey"
+      :show-checkbox="showCheckbox"
+      :props="property.defaultProps"
+      :empty-text="emptyText"
+      @node-click="handleNodeClick"
+    />
+  </div>
 </template>
 
 <style lang="scss" scoped>

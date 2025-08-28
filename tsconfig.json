@@ -13,11 +13,14 @@
     "noImplicitThis":true,//保证this 引用到正确的对象，
     "noPropertyAccessFromIndexSignature":false,//用户设置访问一个对象上的属性，必须可以用index和dot 形式房访问，如果不存在，就能用dot 形式访问
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "strict": true,
-    "jsx": "preserve",
+    "jsx": "preserve", 
+    "jsxImportSource": "vue",
     "sourceMap": true,
     "resolveJsonModule": true,
+    "allowImportingTsExtensions":true,
+    "noEmit": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

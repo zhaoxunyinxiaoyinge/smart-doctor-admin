@@ -78,7 +78,7 @@ body,div#app {
     width: 100%;
     /* display: flex;
     justify-content: flex-start; */
-    font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    font-family: '微软雅黑','Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
   'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
 }
 
@@ -110,5 +110,12 @@ body,div#app {
     overflow: hidden;
   }
 
+  .logo {
 
+  }
 
+  @media  (min-width:375px) and (max-width:470px){
+      :root {
+        font-size:12px;
+      }
+  }

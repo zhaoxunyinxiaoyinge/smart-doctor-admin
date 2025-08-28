@@ -1,6 +1,28 @@
 /// <reference types="vite/client" />
+/// <reference types="element-plus/global.d.ts" />
 declare module '*.vue' {
   import { DefineComponent } from 'vue'
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+// 定义env配置文件的类型提示
+interface ViteTypeOptions {
+  // 这样就不允许有未知的键值了。
+  strictImportMetaEnv: unknown
+}
+
+interface ImportMetaEnv {
+  readonly VITE_APP_TITLE: string
+  readonly VITE_BASE_URL: string
+  readonly VITE_PORT:number
+  readonly VITE_API:string
+
+  // 更多环境变量...
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
+

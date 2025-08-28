@@ -48,131 +48,149 @@ const handleColor=(flag,type)=>{
 </script>
 
 <template>
-    <el-drawer size="25%" v-model="drawerVisble" title="布局主题设置" direction="rtl">
-        <template #default>
-            <div>
-                <div class="list">
-                    <div class="layout margin-bottom-20">
-                        <el-divider>
-                            <svg-icon :names="'snowflake'" style="vertical-align:middle"></svg-icon>
-                            <span>布局切换</span>
-                        </el-divider>
-                        <div class="layout-list">
-                            <div :class="['layout-list-item', 'vertical', store.layoutName == 'vertical' ? 'layout-border' : '']"
-                                @click="handleCurrentLayout('vertical')">
-                                <div class="layout-aside">
-                                </div>
-                                <div class="layout-content">
-                                    <div class="layout-header"></div>
-                                    <div class="layout-wrapper">
-                                        <el-icon v-if="store.layoutName == 'vertical'">
-                                            <SuccessFilled class="checked" />
-                                        </el-icon>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div :class="['layout-list-item', 'classic', store.layoutName == 'classic' ? 'layout-border' : '']"
-                                @click="handleCurrentLayout('classic')">
-                                <div class="layout-aside">
-                                </div>
-                                <div class="layout-content">
-                                    <div class="layout-header"></div>
-                                    <div class="layout-wrapper">
-                                        <el-icon v-if="store.layoutName == 'classic'">
-                                            <SuccessFilled class="checked" />
-                                        </el-icon>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div :class="['layout-list-item', 'transverse', store.layoutName == 'transverse' ? 'layout-border' : '']"
-                                @click="handleCurrentLayout('transverse')">
-                                <div class="layout-aside">
-                                </div>
-                                <div class="layout-content">
-                                    <el-icon v-if="store.layoutName == 'transverse'">
-                                        <SuccessFilled class="checked" />
-                                    </el-icon>
-                                </div>
-                            </div>
-
-                            <div :class="['layout-list-item', 'columns', store.layoutName == 'columns' ? 'layout-border' : '']"
-                                @click="handleCurrentLayout('columns')">
-                                <div class="layout-aside">
-                                </div>
-                                <div class="layout-submenu"></div>
-                                <div class="layout-content">
-                                    <el-icon v-if="store.layoutName == 'columns'">
-                                        <SuccessFilled class="checked" />
-                                    </el-icon>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="all-theme  margin-bottom-20">
-                        <el-divider>
-                            <svg-icon :names="'snowflake'" style="vertical-align:middle"></svg-icon>
-                            <span>全局主题</span>
-                        </el-divider>
-                        <div class="list">
-                            <div class="list-item">
-                                <span>主题颜色</span>
-                                <el-color-picker @change="changeColor" v-model="store.themeColor" show-alpha
-                                    :predefine="colorList" />
-                            </div>
-                            <div class="list-item">
-                                <span>灰色模式</span>
-                                <el-switch v-model="store.grayscale" @change="(flag)=>handleColor(flag,'grayscale')"></el-switch>
-                            </div>
-                            <div class="list-item">
-                                <span>色弱模式</span>
-                                <el-switch  v-model="store.saturate" @change="(flag)=>handleColor(flag,'saturate')"></el-switch>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="ui-set  margin-bottom-20">
-                        <el-divider>
-                            <svg-icon :names="'snowflake'" style="vertical-align:middle"></svg-icon>
-                            <span> 界面设置</span>
-                        </el-divider>
-                        <div class="list">
-                            <div class="list-item">
-                                <span>折叠菜单</span>
-                                <el-switch v-model="config.isCollapse"></el-switch>
-                            </div>
-
-                            <div class="list-item">
-                                <span>面包屑导航</span>
-                                <el-switch v-model="store.isBrearum"></el-switch>
-                            </div>
-                            <div class="list-item">
-                                <span>标签栏</span>
-                                <el-switch v-model="store.tabbar"></el-switch>
-                            </div>
-                            <div class="list-item">
-                                <span>页脚</span>
-                                <el-switch v-model="store.isFooter"></el-switch>
-                            </div>
-                        </div>
-                    </div>
+  <el-drawer
+    v-model="drawerVisble"
+    size="25%"
+    title="布局主题设置"
+    direction="rtl"
+  >
+    <template #default>
+      <div>
+        <div class="list">
+          <div class="layout margin-bottom-20">
+            <el-divider>
+              <svg-icon
+                :names="'snowflake'"
+                style="vertical-align:middle"
+              />
+              <span>布局切换</span>
+            </el-divider>
+            <div class="layout-list">
+              <div
+                :class="['layout-list-item', 'vertical', store.layoutName == 'vertical' ? 'layout-border' : '']"
+                @click="handleCurrentLayout('vertical')"
+              >
+                <div class="layout-aside" />
+                <div class="layout-content">
+                  <div class="layout-header" />
+                  <div class="layout-wrapper">
+                    <el-icon v-if="store.layoutName == 'vertical'">
+                      <SuccessFilled class="checked" />
+                    </el-icon>
+                  </div>
                 </div>
+              </div>
+
+              <div
+                :class="['layout-list-item', 'classic', store.layoutName == 'classic' ? 'layout-border' : '']"
+                @click="handleCurrentLayout('classic')"
+              >
+                <div class="layout-aside" />
+                <div class="layout-content">
+                  <div class="layout-header" />
+                  <div class="layout-wrapper">
+                    <el-icon v-if="store.layoutName == 'classic'">
+                      <SuccessFilled class="checked" />
+                    </el-icon>
+                  </div>
+                </div>
+              </div>
+
+
+              <div
+                :class="['layout-list-item', 'columns', store.layoutName == 'columns' ? 'layout-border' : '']"
+                @click="handleCurrentLayout('columns')"
+              >
+                <div class="layout-aside" />
+                <div class="layout-submenu" />
+                <div class="layout-content">
+                  <el-icon v-if="store.layoutName == 'columns'">
+                    <SuccessFilled class="checked" />
+                  </el-icon>
+                </div>
+              </div>
             </div>
-        </template>
-    </el-drawer>
+          </div>
+
+          <div class="all-theme  margin-bottom-20">
+            <el-divider>
+              <svg-icon
+                :names="'snowflake'"
+                style="vertical-align:middle"
+              />
+              <span>全局主题</span>
+            </el-divider>
+            <div class="list">
+              <div class="list-item">
+                <span>主题颜色</span>
+                <el-color-picker
+                  v-model="store.themeColor"
+                  show-alpha
+                  :predefine="colorList"
+                  @change="changeColor"
+                />
+              </div>
+              <div class="list-item">
+                <span>灰色模式</span>
+                <el-switch
+                  v-model="store.grayscale"
+                  @change="(flag)=>handleColor(flag,'grayscale')"
+                />
+              </div>
+              <div class="list-item">
+                <span>色弱模式</span>
+                <el-switch
+                  v-model="store.saturate"
+                  @change="(flag)=>handleColor(flag,'saturate')"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="ui-set  margin-bottom-20">
+            <el-divider>
+              <svg-icon
+                :names="'snowflake'"
+                style="vertical-align:middle"
+              />
+              <span> 界面设置</span>
+            </el-divider>
+            <div class="list">
+              <div class="list-item">
+                <span>折叠菜单</span>
+                <el-switch v-model="config.isCollapse" />
+              </div>
+
+              <div class="list-item">
+                <span>面包屑导航</span>
+                <el-switch v-model="store.isBrearum" />
+              </div>
+              <div class="list-item">
+                <span>标签栏</span>
+                <el-switch v-model="store.tabbar" />
+              </div>
+              <div class="list-item">
+                <span>页脚</span>
+                <el-switch v-model="store.isFooter" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </el-drawer>
 </template>
 
 
 <style scoped lang="scss">
 .layout-list-item {
     margin-bottom: 10px;
+    margin-right: 20px;
 }
 
 .layout-list {
     display: flex;
-    justify-content: space-around;
+    justify-content:flex-start;
     flex-wrap: wrap;
 }
 

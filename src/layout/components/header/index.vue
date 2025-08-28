@@ -9,61 +9,67 @@ import Driver from "driver.js";
 import step from "@/config/step";
 import "driver.js/dist/driver.min.css";
 import { userstore } from "@/store/expmle"
-import Cookies from 'js-cookie'
+import {userInfo} from "@/store/user"
+import SvgIcon from '@/components/icons/svg-icon.vue';
 
 export default defineComponent({
-    components: {
-        inli8,
-        Dropdown,
-        screenFull,
-        // svgIcon,
-        Skin,
-    },
-    setup() {
-        const isDark = useDark()
-        const toggleDark = useToggle(isDark)
-        let color = ref<string>('#fff');
-        let bg = ref(false);
-        const store = userstore();
-        let drivers: Driver | null;
+  name: "Header",
+  components: {
+    inli8,
+    Dropdown,
+    screenFull,
+    SvgIcon,
+    Skin
+  },
+  setup() {
+    const isDark = useDark()
+    const toggleDark = useToggle(isDark.value)
+    // let color = ref<string>('#fff');
+    let bg = ref(false);
+    const store = userstore();
+    const user=userInfo();
 
-        const chaneSize = (command: string) => {
-            store.setSize(command);
-        }
+    const avatar=ref(user.userinfo.avatar)
+    let drivers: Driver | null;
 
-        const handleHelp = () => {
-            guild();
-        }
+    const chaneSize = (command: string) => {
+      store.setSize(command);
+    }
 
-        const guild = () => {
-            drivers = new Driver();
-            drivers != null && drivers.defineSteps(step);
-            drivers?.start()
-        }
-        let img: string = typeof (Cookies.get('userinfo')) !== 'undefined' && JSON.parse(Cookies.get('userinfo') as string).avatar
-        const avatar = ref<string>(img)
+    const handleHelp = () => {
+      guild();
+    }
 
-        return {
-            color,
-            bg,
-            chaneSize,
-            store,
-            handleHelp,
-            isDark,
-            toggleDark,
-            avatar
+    const guild = () => {
+      drivers = new Driver();
+      drivers != null && drivers.defineSteps(step);
+      drivers?.start()
+    }
 
-        }
+
+    return {
+      // color,
+      bg,
+      chaneSize,
+      store,
+      handleHelp,
+      isDark,
+      toggleDark,
+      user,
+      avatar
 
     }
+
+  }
 })
 </script>
 <template>
   <section class="flex flex-end align-items justifly-center ">
+    <!-- <Weather class="margin-right-10" /> -->
     <!-- 缩放组件 -->
     <screenFull />
     <!-- <! color -->
-    <el-color-picker v-model="color" />
+    <!-- <el-color-picker v-model="color" /> -->
 
     <!-- 国际化 -->
     <inli8 />
@@ -72,10 +78,7 @@ export default defineComponent({
     <Skin />
 
     <!-- 通知 -->
-    <el-dropdown
-      class="margin-right-10"
-      @command="chaneSize"
-    >
+    <el-dropdown class="margin-right-10" @command="chaneSize">
       <span class="el-dropdown-link">
         {{ store.size == "default" ? '默认' : store.size == "large" ? '大' : '小' }}
         <el-icon class="el-icon--right">
@@ -100,35 +103,20 @@ export default defineComponent({
     <!-- 点击帮助 -->
 
 
-    <el-button
-      type="primary"
-      class="margin-right-10"
-      @click.stop="handleHelp"
-    >
+    <!-- <el-button type="primary" class="margin-right-10" @click.stop="handleHelp">
       点击帮助
-    </el-button>
+    </el-button> -->
+    <SvgIcon names="bangzhu" class="margin-right-10" @click.stop="handleHelp"></SvgIcon>
 
-    <el-switch
-      v-model="isDark"
-      size="large"
-      inline-prompt
-      class="ml-2 margin-right-10"
-      active-text="晚"
-      inactive-text="白"
-      @change="toggleDark"
-    />
+    <el-switch v-model="isDark" size="large" inline-prompt class="ml-2 margin-right-10" active-text="晚"
+      inactive-text="白" @change="() => toggleDark" />
 
     <!-- 下拉框 -->
     <Dropdown class="margin-right-10" />
-    <el-avatar
-      shape="square"
-      class="margin-left-10 margin-right-10"
-      :size="40"
-      :src="avatar"
-    />
+    <el-avatar shape="square" class="margin-left-10 margin-right-10" :size="40" :src="user.userinfo.avatar" />
   </section>
 </template>
 
-<style lang="scss"  scoped>
-@import "./../../../assets/scss/common.scss";
+<style lang="scss" scoped>
+@use "./../../../assets/scss/common.scss";
 </style>

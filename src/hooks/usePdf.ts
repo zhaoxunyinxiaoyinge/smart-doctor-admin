@@ -1,7 +1,7 @@
 import * as PdfJs from 'pdfjs-dist/legacy/build/pdf.js';
-import workerSrc from 'pdfjs-dist/build/pdf.worker.entry';
+import  'pdfjs-dist/build/pdf.worker.entry';
 const cMapUrl = '../../../node_modules/pdfjs-dist/cmaps/'
-PdfJs.GlobalWorkerOptions.workerSrc = workerSrc;
+PdfJs.GlobalWorkerOptions.workerSrc = window.workerSrc;
 
   const pages = ref(0);
   const pdfdoc = reactive({

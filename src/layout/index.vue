@@ -1,6 +1,5 @@
 <script  lang="ts" setup>
 import LayoutVecity from "@/layout/layoutVecity/index.vue";
-import LayoutTransverse from "@/layout/layoutTransverse/index.vue";
 import LayoutColums from "@/layout/layoutColums/index.vue";
 import LayoutClassic from "@/layout/layoutClassic/index.vue";
 import Draws from "@/layout/components/draw/index.vue";
@@ -10,7 +9,6 @@ const store = theme();
 const layComponent: any = {
   vertical: LayoutVecity,
   classic: LayoutClassic,
-  transverse: LayoutTransverse,
   columns: LayoutColums
 }
 
@@ -19,6 +17,6 @@ const layComponent: any = {
 <template>
   <div>
     <component :is="layComponent[store.layoutName]" />
-    <Draws></Draws>
+    <Draws />
   </div>
 </template>

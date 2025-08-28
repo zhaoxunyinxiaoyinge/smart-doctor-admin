@@ -4,15 +4,22 @@ import names from "@/store/store.name";
 
 interface userinfo {
     name:string,
-    phone?:number,
+    phone?:string,
     work?:string,
-    avatar?:string
+    avatar?:string,
+    id:number
 }
 
  export  const userInfo=defineStore(names.INFO,{
- state:()=>{
+ state(){
     return {
-        userinfo:<userinfo>{}
+        userinfo:<userinfo>{
+            name:"",
+            phone:"",
+            work:"",
+            avatar:"",
+            id:0
+        }
     }
  },
  actions:{
@@ -20,12 +27,13 @@ interface userinfo {
      * 
      * @param obj {name,phone,work}
      */
-    setUserInfo(obj:{name:string,phone:number,work:string,avatar:string}){
-        const {name,phone,work,avatar}=obj;
+    setUserInfo(obj:{name:string,phone?:string,work?:string,avatar:string,id:number}){
+        const {name,phone,work,avatar,id}=obj;
         this.userinfo.name=name;
         this.userinfo.phone=phone;
         this.userinfo.work=work;
         this.userinfo.avatar=avatar
+        this.userinfo.id=id;
     }
  }
 })

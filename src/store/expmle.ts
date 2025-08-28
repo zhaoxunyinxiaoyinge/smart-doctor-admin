@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 import { getMenu } from "@/store/api/index";
 import { jsonToTree } from "@/utils/common";
 import Layout from "@/layout/index.vue";
-import _, { template } from "lodash";
+import _ from "lodash";
 import { Component } from "vue";
 import { RouteRecordRaw } from "vue-router";
 
@@ -35,15 +35,15 @@ export const userstore = defineStore(names.USER, {
     state() {
         return {
             isCollapse: <boolean>(false),
-            routeList: reactive<Array<RouteList>>([]),
-            token: <string>('') || Cookies.get("token"),
+            routeList: <Array<RouteList>>[],
+            token: Cookies.get("token")||<string>(''),
             lang: <string>(Cookies.get("lang") || 'zh'),
             size: <'' | 'small' | 'large' | 'default'>('default'),
             menuList: <MenuList[]>[],//生成得菜单
-            routers: reactive<(RouteRecordRaw)[]>([]),//生成的路由
+            routers: <(RouteRecordRaw)[]>([]),//生成的路由
             perssions: <string[]>[],
             allMenuList: <MenuList[]>[],
-            currentRoute: ref<string>(Cookies.get('current')||'/welcome')
+            currentRoute:<string>(Cookies.get('current')||'/welcome')
         }
     },
 
@@ -56,6 +56,21 @@ export const userstore = defineStore(names.USER, {
     actions: {
         setCollapseValue(val: boolean) {
             this.isCollapse = val;
+        },
+
+        clearMenuList(){
+            this.$reset();
+            // this.menuList = [];
+            // this.routeList = [];
+            // this.routers = [];
+            // this.perssions = [];
+            // this.allMenuList = [];
+            // this.currentRoute = ('/welcome');
+        },
+
+        setToken(token: string) {
+            this.token = token;
+            Cookies.set("token", token);
         },
 
         clearToken() {
@@ -131,6 +146,7 @@ export const userstore = defineStore(names.USER, {
         },
 
         filterAsyncRoutes(routes: { hidden: boolean, component: string | Component, parentId: number, children?: any, routePath: string, menuName: string, icon: string }[]) {
+          const modules = import.meta.glob('../views/**/[a-z]*.vue');
             const res: RouteRecordRaw[] = [];
             routes.forEach(route => {
                 const tmp: any = {
@@ -143,12 +159,12 @@ export const userstore = defineStore(names.USER, {
 
                 if (tmp.component && tmp.parentId != 0) {
                     const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
-                    tmp.component = this.loadView(componentPath);
+                    tmp.component = this.loadView(componentPath,modules);
                 }
                 
                 if(tmp.component&&tmp.parentId==0&&tmp.component!==Layout){
                     const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
-                    tmp.component = this.loadView(componentPath);
+                    tmp.component = this.loadView(componentPath,modules);
                 }
 
                 tmp.meta.title = tmp.menuName;
@@ -174,8 +190,8 @@ export const userstore = defineStore(names.USER, {
             return res;
         },
 
-        loadView(componentName: string) {
-            return defineAsyncComponent(() => import(/* @vite-ignore */"./.." + componentName + ".vue"));
+        loadView(componentName: string,modules) {     
+            return modules[".."+componentName+".vue"];
         }
     }
 

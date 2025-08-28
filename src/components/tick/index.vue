@@ -8,7 +8,7 @@
       <div class="invoiceHeader-left">
         <ul class="headerLeft">
           <li>
-            <img src="./qrcode.png" alt="">
+            <!-- <img src="./qrcode.png" alt=""> -->
           </li>
           <li>
             <label>机器编号：</label><span></span>
