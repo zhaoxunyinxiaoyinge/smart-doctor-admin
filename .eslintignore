@@ -1,4 +1,0 @@
-node_modules/
-vite-profile.cpuprofile
-# 忽略 pnpm-lock.yaml（由 pnpm 自动生成，无需检查）
-pnpm-lock.yaml

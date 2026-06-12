@@ -3,6 +3,11 @@ import Cookies from "js-cookie";
 import { ElMessage } from 'element-plus';
 import router from "@/router/index";
 import cancleToken from "./cancler";
+
+
+
+
+
 // 创建axios配置实列，会覆盖默认值
 const serve: AxiosInstance = axios.create({
   timeout: 5000,
@@ -37,7 +42,7 @@ serve.interceptors.response.use((response) => {
   }
 
     if (response.data.code == 200) {
-    return Promise.resolve({data:{...response.data}})
+    return Promise.resolve({code:1,data:{...response.data}})
   }
 
   if (response.data.code !== 500 && response.data.code !== 1&&response.data) {

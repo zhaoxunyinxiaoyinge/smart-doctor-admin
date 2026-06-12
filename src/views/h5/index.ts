@@ -1,4 +1,3 @@
 
-import { name, test } from "@/typeings/module";
+import { name } from "@/typeings/module";
 console.log(name);
-console.log(test.age);

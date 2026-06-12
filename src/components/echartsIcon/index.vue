@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import * as echarts from "echarts";
-import { defineProps, withDefaults, onMounted, nextTick, onUnmounted } from "vue";
+import {  onMounted, nextTick, onUnmounted } from "vue";
 
 let dom: HTMLElement | null;
 let domCharts: any;
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
     id: string,
     options: echarts.EChartsCoreOption|undefined,
     styles: string
-}>(), {
-    id: "",
-    options:undefined,
-    styles: ""
-})
+}>();
 
 onMounted(() => {
     nextTick(() => {

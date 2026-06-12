@@ -229,7 +229,10 @@ const handleSize = (size: number) => {
     :inline="true"
     @search="handleSearch"
   />
-  <PageHeader @add="handleInscrement" />
+  <PageHeader
+    v-hasperssion="['menu:role:add']"
+    @add="handleInscrement"
+  />
   <div class=" flex-1">
     <el-table
       v-loading="loading"
@@ -291,7 +294,7 @@ const handleSize = (size: number) => {
           <Tree
             ref="tree"
             :data="menuList"
-            :default-props="{ label: 'title', child: 'children' }"
+            :default-props="{ label: 'title', child: 'children',disabled:(data,node:any)=>{console.log(data,6666); return data.status===0?true:false;}}"
             :default-checked-keys="defaultCheckedKeys"
           />
         </template>

@@ -6,6 +6,8 @@ declare module '*.vue' {
   export default component
 }
 
+declare module "virtual:svg-icons-register";
+
 // 定义env配置文件的类型提示
 interface ViteTypeOptions {
   // 这样就不允许有未知的键值了。

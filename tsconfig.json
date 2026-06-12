@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ESNext",//编译成ESNext的语法
     "useDefineForClassFields": true,
     "allowUnreachableCode": true,//允许多于的代码，不会执行的
     "allowUnusedLabels": false,//不允许无法执行的代码，比如错误的语法代码
@@ -12,13 +12,13 @@
     "noImplicitReturns":true,//确保每一个函数执行完毕的时候会返回一个值
     "noImplicitThis":true,//保证this 引用到正确的对象，
     "noPropertyAccessFromIndexSignature":false,//用户设置访问一个对象上的属性，必须可以用index和dot 形式房访问，如果不存在，就能用dot 形式访问
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "ESNext",//编译成ESNext的模块规范
+    "moduleResolution": "node",//模块解析策略，node 模块解析策略
     "strict": true,
     "jsx": "preserve", 
     "jsxImportSource": "vue",
     "sourceMap": true,
-    "resolveJsonModule": true,
+    "resolveJsonModule": true,//允许导入json模块
     "allowImportingTsExtensions":true,
     "noEmit": true,
     "isolatedModules": true,
@@ -26,14 +26,15 @@
     "skipLibCheck": true,
     "lib": ["ESNext", "DOM","es2015"],
     "types": ["node"],
-    "baseUrl": "./",
     "typeRoots": ["node_modules/@types"],
+    // "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
     "paths": {
       "@/*":["src/*"]
     },
     "allowJs": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "./auto-imports.d.ts", "test/*.ts", "src/typings/foo/*.d.ts", "./global.d.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }],
+  "include": ["src/**/*.ts","src/**/*.vue", "src/**/*.d.ts", "src/**/*.tsx", "./auto-imports.d.ts", "test/*.ts", "src/typeings/foo/*.d.ts", "./global.d.ts","mock/*.ts"],
+  "extends":  "./tsconfig.node.json" ,
   "exclude": ["/node_modules"]
 }

@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import names from "@/store/store.name";
 
 
-interface userinfo {
+export  interface userinfos {
     name:string,
     phone?:string,
     work?:string,
@@ -10,10 +10,11 @@ interface userinfo {
     id:number
 }
 
+
  export  const userInfo=defineStore(names.INFO,{
- state(){
+ state:()=>{
     return {
-        userinfo:<userinfo>{
+        userinfo:<userinfos>{
             name:"",
             phone:"",
             work:"",

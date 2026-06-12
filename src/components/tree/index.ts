@@ -1,4 +1,3 @@
-import { number } from "echarts/core";
 
 interface Tree {
     children?: Tree[],
@@ -9,7 +8,10 @@ interface Tree {
 
 interface DefualtProps {
     label: string,
-    child: string
+    child: string,
+    disabled: string,
+    class: string,
+    isLeaf: string
 }
 
 type fun=()=>({});

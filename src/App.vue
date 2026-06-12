@@ -22,6 +22,7 @@ Cookies.set("lang", lang.value);
       <router-view />
     </div>
   </el-config-provider>
+  
 </template>
 
 <style>

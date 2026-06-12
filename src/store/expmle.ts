@@ -116,7 +116,7 @@ export const userstore = defineStore(names.USER, {
         async getMenuList(id: number) {
             return getMenu({ id }).then(res => {
                 const data = res.data.filter((item: any) => item.isMenu !== 2);
-                const perssionsList = res.data.filter((item: any) => item.isMenu === 2);
+                const perssionsList = res.data.filter((item: any) => item.isMenu === 2&&item.status===1);
                 const buttonData = _.cloneDeep(res.data);
                 const allMenuList = jsonToTree(buttonData, "id");
                 this.allMenuList = allMenuList
@@ -140,7 +140,7 @@ export const userstore = defineStore(names.USER, {
         },
 
         filterAsyncRoutes(routes: { hidden: boolean, component: string | Component, parentId: number, children?: any, routePath: string, menuName: string, icon: string }[]) {
-          const modules = import.meta.glob('../views/**/[a-z]*.vue');
+        //   const modules = import.meta.glob('../views/**/[a-z]*.vue');
             const res: RouteRecordRaw[] = [];
             routes.forEach(route => {
                 const tmp: any = {

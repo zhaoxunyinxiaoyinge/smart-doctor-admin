@@ -2,7 +2,6 @@
 import { ElDialog, ElForm, ElFormItem, ElRadioGroup, ElRadio, ElInput, ElButton, ElMessage } from 'element-plus';
 import { postMenu, putMenu } from "@/views/menu/api/index";
 import _ from "lodash";
-import { withDefaults} from "vue";
 
 let form = reactive<{
     status: number, isMenu: number, parentMenu: string | number, routePath: string, menuName: string, icon: string, names: string, component: string,

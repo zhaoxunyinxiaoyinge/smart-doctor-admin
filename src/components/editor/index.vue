@@ -29,7 +29,6 @@ import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import { SlateElement, IToolbarConfig, IEditorConfig, IDomEditor } from '@wangeditor/editor';
 import { customCheckLinkFns } from "./index"
 import Cookies from 'js-cookie';
-import { withDefaults } from "vue";
 
 const editorRef = shallowRef();
 

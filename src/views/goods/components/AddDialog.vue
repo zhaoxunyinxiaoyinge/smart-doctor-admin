@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import ViewDialog from "./viewDialog.vue"
+import type { prop as Addconfig } from '@/components/forms/index.vue';
 //新增逻辑
 const props=withDefaults(defineProps<{
   dialogVisible:boolean,
   title: string,
-  addConfig: {[key:string]:any}[],
+  addConfig: Addconfig['formField'],
 }>(),{
   dialogVisible:false,
   title:"新增",

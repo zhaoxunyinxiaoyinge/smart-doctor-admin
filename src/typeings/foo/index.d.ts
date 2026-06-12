@@ -20,4 +20,9 @@ declare module "axios" {
         };
         baseURL: string;
     }
+
+  export   interface AxiosResponse  {
+  code:number
 }
+}
+

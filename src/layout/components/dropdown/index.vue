@@ -59,7 +59,6 @@ export default defineComponent({
     </span>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item command="toggle">切换普通会员</el-dropdown-item>
         <el-dropdown-item command="center">个人中心</el-dropdown-item>
         <el-dropdown-item command="exit">退出</el-dropdown-item>
       </el-dropdown-menu>

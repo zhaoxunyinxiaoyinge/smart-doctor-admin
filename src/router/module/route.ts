@@ -10,7 +10,7 @@ const containRoute: Array<any> = [
         component: () => import("@/login/index.vue"),
     },
 
-    { path: '/:pathMatch(.*)*', component: () => import('@/views/notFound/notFound.vue') },
+    { path: '/:pathMatch(.*)*', component: () => defineAsyncComponent(() => import('@/views/notFound/notFound.vue')) },
 
 ];
 

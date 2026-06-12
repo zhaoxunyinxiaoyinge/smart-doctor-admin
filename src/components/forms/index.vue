@@ -129,7 +129,7 @@
               ref="upload"
               :file-list="fileList"
               :plus="false"
-              :show-file-list="true"
+              :show-file-list="false"
               :headers="uploadCofig"
               @success="(val) => handleSuccess(val, item.name)"
             />
@@ -190,14 +190,14 @@ import { Search, Refresh } from "@element-plus/icons-vue";
 import Upload from "@/components/upload/index.vue";
 import { UploadFile, FormInstance } from "element-plus";
 import type { success } from "@/components/upload/index";
-import { withDefaults, ref,onMounted} from "vue";
+import { ref,onMounted, reactive, nextTick} from "vue";
 import Cookies from "js-cookie";
 import Quller from "@/components/vueEditer/index.vue";
 
 //添加表单验证，格式，默认为字段：【规则】
 
-interface prop {
-  inline: boolean,
+ export  interface prop {
+  inline?: boolean,
   initData?:object,
   formField: Array<{ type: string, name: string, placeholder?: string, width?: number, label: string, options?: Array<{ label: string | number, value: number | string }> }>,
   formRule?: typeof formData,

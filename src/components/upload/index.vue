@@ -13,25 +13,30 @@
     :on-exceed="handleExceed"
     :headers="headers"
   >
-    <el-icon>
+    <el-icon v-if="props.fileList.length==0">
       <Plus />
     </el-icon>
-    <template #file="{ file }">
-      <div>
-        <img
-          class="el-upload-list__item-thumbnail"
-          :src="file.url"
-          alt=""
-        >
-      </div>
-    </template>
+    <!-- <template
+      v-if="props.fileList.length>0"
+      #file="{ file }"
+    >
+      <div> -->
+    <img
+      v-if="props.fileList.length>0"
+      width="100px"
+      class="el-upload-list__item-thumbnail"
+      :src="props.fileList[0].url"
+      alt=""
+    >
+    <!-- </div>
+    </template> -->
   </el-upload>
 </template>
 
 <script setup lang="ts">
 import { ElUpload, UploadUserFile } from 'element-plus';
 import type { UploadInstance } from "element-plus"
-import { withDefaults } from "vue";
+import { ref } from "vue";
 import type { success } from "./index";
 import { UploadRawFile } from 'element-plus/lib/components';
 
@@ -54,16 +59,16 @@ const props = withDefaults(defineProps<{
   name?: string,
   multiple?: boolean,
   method?: string
-  headers: any,
-  fileList: UploadUserFile[] | [],
-  plus: boolean
+  headers?: any,
+  fileList?: UploadUserFile[] | [],
+  plus?: boolean
 }>(), {
   tips: 'jpg/png files with a size less than 500KB.',
   url: "/api/common/stream",
   autoUpload: true,
   httpRequest: () => ({}),
   disabled: false,
-  showFileList: true,
+  showFileList: false,
   name: "file",
   multiple: false,
   method: 'post',
@@ -78,7 +83,7 @@ const props = withDefaults(defineProps<{
   自动义上传规则
 */
 
-const handleExceed = (files) => {
+const handleExceed = (files:Array<File>) => {
   upload.value?.clearFiles();
   const file = files[0] as UploadRawFile;
   upload.value?.handleStart(file);
@@ -93,7 +98,7 @@ const clearFile = () => {
   (upload.value as UploadInstance).clearFiles();
 }
 
-const handleStart=(file)=>{
+const handleStart=(file:UploadRawFile)=>{
   (upload.value as UploadInstance).handleStart(file);
 }
 

@@ -11,7 +11,7 @@ const persssion: Directive = {
             const perssonList = store.perssions;
             const userinfo = Cookies.get("userinfo") as string;
             const name = JSON.parse(userinfo).userName;
-            const flag =name=='admin'|| value.some(item => perssonList.includes(item));
+            const flag =name=='admins'|| value.some(item => perssonList.includes(item));
             if (!flag) {
                 el.parentNode?.removeChild(el);
             }

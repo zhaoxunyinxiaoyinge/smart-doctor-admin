@@ -3,8 +3,7 @@ import { Tree } from "@/components/tree/index";
 import { TreeNode } from "element-plus/lib/components/table/src/table/defaults";
 import { ElTree } from "element-plus";
 import { TreeKey } from "element-plus/es/components/tree/src/tree.type";
-import { withDefaults } from "vue";
-import { fun } from "./index"
+import type {DefualtProps,fun} from "./index"
 
 const treeRef = ref<InstanceType<typeof ElTree>>();
 
@@ -41,6 +40,7 @@ const handleNodeClick = (val: TreeNode) => {
 
 
 const property = withDefaults(defineProps<{
+    props?:DefualtProps,
     defaultProps: any,
     data: Tree[] | Array<any>,
     lazy?: boolean,

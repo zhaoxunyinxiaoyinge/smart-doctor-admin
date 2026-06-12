@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { reactive,defineOptions } from "vue";
-defineOptions({
-  name:"DataView"
-})
+import { reactive } from "vue";
 const config = reactive({
   data: [
     {

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 // 视图部分只包含纯正的展示，不区分新增和编辑
-import DefineForm from '@/components/forms/index.vue'
+import DefineForm from '@/components/forms/index.vue';
+import type { prop as Addconfig } from '@/components/forms/index.vue';
+
+
 const props=withDefaults(defineProps<{
   dialogVisible:boolean,
   title: string,
-  addConfig: {[key:string]:any}[],
+  addConfig: Addconfig['formField'],
   initData?:object
 }>(),{
   dialogVisible:false,

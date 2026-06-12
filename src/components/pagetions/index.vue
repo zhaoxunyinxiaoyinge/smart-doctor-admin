@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import { withDefaults } from "vue";
 const props = withDefaults(defineProps<{
     currentPage: number,
     pageSize: number,
-    small: boolean,
+    small?: boolean,
     total: number
 }>(), {
     currentPage: 1,

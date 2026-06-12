@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { withDefaults } from "vue";
 import { useHeader } from "@/hooks/userHeader";
 const loading = ref<boolean>(false)
 

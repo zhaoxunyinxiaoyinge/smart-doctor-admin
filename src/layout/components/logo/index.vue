@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-    import {withDefaults} from "vue";
     const props=withDefaults(defineProps<{height:number}>(),{
         height:60
     });

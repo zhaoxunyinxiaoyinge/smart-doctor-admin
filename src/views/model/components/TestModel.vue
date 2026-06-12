@@ -1,28 +1,18 @@
 <script lang="ts" setup>
+import { ModelRef } from 'vue';
+
 /**
  * @ 这里主要是外部使用v-model时的指定的属性值
  */
-const props = withDefaults(defineProps<{modelValue:string,modelModifiers:()=>any}>(), {
-    modelModifiers:()=>({})
-});
-
-const emit = defineEmits<{
-    (e: "update:modelValue",val:string|undefined|null): void
-}>();
-
-const changeValue = (target:Event) => {
-    let val=(target.target as HTMLInputElement).value; 
-    emit("update:modelValue",val);
-
-}
-
+const model = defineModel();
+const modelValue=computed(()=>model.value?model.value:"");
 </script>
 
 <template>
   <input
+    type="text"
     class="input"
-    :value="props.modelValue"
-    @input="changeValue($event)"
+    v-model="modelValue"
   >
 </template>
 <style scoped>

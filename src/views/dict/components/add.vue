@@ -2,7 +2,6 @@
 import Form from "@/components/forms/index.vue";
 import { postDict, putDict } from "@/views/dict/api/index";
 import { ElMessage } from "element-plus";
-import { defineEmits, withDefaults } from "vue";
 const formConfig = reactive([
     {
         type: 'input',

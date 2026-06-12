@@ -1,22 +1,23 @@
 import { ElMessage, ElMessageBox, ElTable } from "element-plus";
 import {reactive,ref} from "vue";
+  interface TablePropTypes<T=any> {
+    width?:string|undefined|number,
+    label:string|undefined,
+    format?:(row:T)=>string,
+    prop:string,
+    template?:boolean
+  }
 
 const useTable=()=>{
   const list=reactive<Array<any>>([]);
   const dialogFormVisible = ref<boolean>(false);
   const title = ref<string>("新增");
   const multeSelection = ref<InstanceType<typeof ElTable>>();
-  const tableConfig=reactive<TablePropType[]>([]);
+  const tableConfig=reactive<TablePropTypes[]>([]);
   const EditForm=reactive<{[propName:string]:string}>({});
   const EditFormInstance=ref(null);
 
-  interface TablePropType {
-    width?:string|undefined|number,
-    label:string|undefined,
-    format?:(row:{status:number})=>string,
-    prop:string,
-    template?:boolean
-  }
+
 
   //表格查询条件
   const listQuery = reactive<{ page: number, pageSize: number, total: number }>({
@@ -26,7 +27,7 @@ const useTable=()=>{
   })
 
  //初始化表格配置数据
-  const  initTableConfig=(data:Array<TablePropType>)=>{
+  const  initTableConfig=(data:Array<TablePropTypes>)=>{
       tableConfig.push(...data)
   }
 

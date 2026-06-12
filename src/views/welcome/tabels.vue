@@ -387,7 +387,7 @@ const handleSuccess = (val: success) => {
             :limit="1"
             :file-list="fileList"
             :plus="false"
-            :show-file-list="true"
+            :show-file-list="false"
             :headers="uploadCofig"
             @success="handleSuccess"
           />
