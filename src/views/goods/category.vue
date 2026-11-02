@@ -4,8 +4,9 @@ import PageHeader from "@/components/pageHeader/index.vue";
 import Pagetions from "@/components/pagetions/index.vue";
 import { useTable, } from "@/hooks/useTable";
 import { onMounted, reactive } from "vue";
+import { ElMessage } from "element-plus";
 import Edit from "./components/CarouseEdit.vue";
-import { getCategoryData, postCategoryData, putCategoryData,deleteCategoryData} from "@/views/goods/api/index";
+import { getCategoryMobileData, postCategoryMobileData, putCategoryMobileData, deleteCategoryMobileData } from "@/views/goods/api/index";
 
 
 
@@ -13,38 +14,41 @@ const listQuery = reactive({ page: 1, pageSize: 10, total: 0 });
 const form = ref<typeof Form|null>(null);
 
 const list = reactive<any>([]);
-const formField = reactive([{ label: "分类名称", name: "name", type: "input", width: 100 },
-{ label: "是否可用", name: 'status', type: 'select', width: 100, options: [{ label: "是", value: 1 }, { label: '否', value: 0 }] }]);
+// 搜索条件：分类标识 kind（/api/mobile/category 列表目前只支持 kind 筛选）
+const formField = reactive([{ label: "分类标识", name: "kind", type: "input", width: 100 }]);
 const { initTableConfig, tableConfig,handleDelete } = useTable();
 
 const dialogVisible = ref(false);
 const title = ref("新增");
-const editConfig = reactive([{ label: '名称', name: 'name', type: "input", width: 100 }, {
-  width: 100, type: "select", label: "状态", name: "status",
-  options: [{ label: "是", value: 1 }, { label: "否", value: 0 }]
+// 编辑弹窗字段：对应 categories 表（id/name/icon/kind/sort/status）
+const editConfig = reactive([{ label: '名称', name: 'name', type: "input", width: 100 },
+{ label: '分类标识', name: 'kind', type: "input", width: 100 },
+{ label: '排序', name: 'sort', type: "input", width: 100 },
+{ width: 100, type: "select", label: "状态", name: "status",
+  options: [{ label: "启用", value: 1 }, { label: "禁用", value: 0 }]
 }, { width: 100, label: "图标", name: "icon", type: 'upload' }]);
 
 const editData = reactive({});
 
 onMounted(() => {
   tableConfig.length = 0;
-  initTableConfig([{ label: "id", prop: "id" }, { label: "name", prop: "name" },
-  { label: "status", prop: "status", format: (row) => row.status == 1 ? '正在使用' : '未使用' }, { label: "icon", prop: "icon" }, { label: "updateTime", width: 150, prop: "updateTime" }, { label: "createTime", width: 150, prop: "createTime" }
+  initTableConfig([{ label: "id", prop: "id", width: 80 }, { label: "名称", prop: "name" },
+  { label: "分类标识", prop: "kind", width: 120 }, { label: "排序", prop: "sort", width: 80 },
+  { label: "状态", prop: "status", width: 90, format: (row) => row.status == 1 ? '启用' : '禁用' },
+  { label: "图标", prop: "icon", width: 110 }
   ]);
   getList({});
 })
 
 const getList = async (params) => {
   list.length = 0;
-  console.log(list,789)
-  let res = await getCategoryData({ ...params, page: listQuery.page, pageSize: listQuery.pageSize });
+  let res = await getCategoryMobileData({ ...params, page: listQuery.page, pageSize: listQuery.pageSize });
   if (res.code == 1) {
     list.push(...res.data.records);
     listQuery.page = res.data.current;
     listQuery.pageSize = res.data.size;
     listQuery.total = res.data.total
   }
-  console.log(list,789)
 }
 
 const handleResh = () => {
@@ -57,6 +61,8 @@ const handleSearch = (formData) => {
 
 const handleAdd = () => {
   title.value = '新增'
+  // 清掉上一次编辑残留的数据，避免新增时带出旧值
+  Object.keys(editData).forEach(key => delete editData[key]);
   dialogVisible.value = true;
 }
 
@@ -65,10 +71,23 @@ const handleClose = () => {
 }
 
 const handleConfirm = async (data) => {
+  // 必填校验：categories 表 name 不允许为空
+  if (!data.name) {
+    ElMessage.warning('请填写分类名称');
+    return;
+  }
+  const payload: Record<string, any> = {
+    ...data,
+    sort: Number(data.sort) || 0,
+    status: Number(data.status) || 0,
+  };
+
   if (title.value == '新增') {
-    await postCategoryData(data);
+    await postCategoryMobileData(payload);
+    ElMessage.success('新增成功');
   } else {
-    await putCategoryData(data);
+    await putCategoryMobileData(payload);
+    ElMessage.success('编辑成功');
   }
 
   dialogVisible.value = false;
@@ -105,7 +124,7 @@ const handleDeletes =  async(id: number) => {
   if(form.value!=null){
       querySelectData={...form.value.formData,...querySelectData}
   }
-  handleDelete(id,deleteCategoryData,getList,querySelectData);
+  handleDelete(id,deleteCategoryMobileData,getList,querySelectData);
 }
 
 const handleSelectionChange=()=>{
@@ -138,7 +157,7 @@ const handleSelectionChange=()=>{
       />
       <template v-for="(item,index) in tableConfig">
         <el-table-column
-          v-if="item.label == 'icon'"
+          v-if="item.label == '图标'"
           :key="item.label"
           :width="typeof item.width === 'function' ? undefined : item.width"
           :label="String(item.label)"
@@ -163,7 +182,7 @@ const handleSelectionChange=()=>{
           :prop="String(item.prop)"
         />
       </template>
-      <el-table-column label="操作" 
+      <el-table-column label="操作"
       fixed="right"
       width="200px">
         <template #default="scope">
@@ -200,4 +219,3 @@ const handleSelectionChange=()=>{
     @confirm="handleConfirm"
   />
 </template>
-

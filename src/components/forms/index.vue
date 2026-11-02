@@ -13,7 +13,6 @@
       >
         <div
           v-show="show || index <= 1 || !props.inline"
-          style="display: inline-block;"
         >
           <el-form-item
             v-if="item.type == 'input'"
@@ -129,7 +128,7 @@
               ref="upload"
               :file-list="fileList"
               :plus="false"
-              :show-file-list="false"
+              :show-file-list="true"
               :headers="uploadCofig"
               @success="(val) => handleSuccess(val, item.name)"
             />
@@ -148,7 +147,7 @@
     </el-form>
     <div
       v-if="props.inline"
-      class="opeartion-btn"
+      class="operation-btn"
     >
       <el-button
         type="primary"
@@ -190,7 +189,7 @@ import { Search, Refresh } from "@element-plus/icons-vue";
 import Upload from "@/components/upload/index.vue";
 import { UploadFile, FormInstance } from "element-plus";
 import type { success } from "@/components/upload/index";
-import { ref,onMounted, reactive, nextTick} from "vue";
+import { ref,onMounted, reactive, nextTick, Fragment} from "vue";
 import Cookies from "js-cookie";
 import Quller from "@/components/vueEditer/index.vue";
 
@@ -340,7 +339,7 @@ defineExpose({
   flex-wrap: wrap;
 }
 
-.opeartion-btn {
+.operation-btn {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;

@@ -1,14 +1,13 @@
-
 $layoutHeight: 70px;
 $layoutAside: auto;
 $layoutMain: auto;
 $routeHeight: 50px;
-$bgColor: #f0f2f5;
 $routeContentHeight: calc(100vh - 180px);
 html,
 body {
   height: 100%;
-  background-color: $bgColor;
+  /* 页面底色取自全站设计令牌（原硬编码 #f5f7fa） */
+  background-color: var(--app-bg-page);
 }
 
 .header {
@@ -18,8 +17,9 @@ body {
   justify-content: space-between;
   flex-direction: row-reverse;
   box-sizing: border-box;
-  border-bottom: 1px solid #eee;
-  background-color: #fff;
+  border-bottom: 1px solid var(--app-header-border);
+  background-color: var(--app-header-bg);
+  color: var(--app-header-text);
 }
 
 .dark,body {
@@ -29,7 +29,7 @@ body {
 .dark {
   .header {
     background-color: inherit;
-    border-bottom: 1px solid #222
+    border-bottom: 1px solid var(--app-header-border)
   }
   .logo-header {
     border-bottom: 1px solid inherit;
@@ -47,7 +47,7 @@ body {
   justify-content: flex-start;
   padding-left: 20px;
   height: 70px;
-  border-bottom: 1px solid rgba(43, 45, 55, 0.05);
+  border-bottom: 1px solid var(--app-border-soft);
   margin-bottom: 10px;
 }
 
@@ -74,7 +74,7 @@ body {
   box-sizing: border-box;
   align-items: center;
   padding: 0 10px;
-  background-color: rgb(255, 255, 255); 
+  background-color: var(--app-bg-surface);
   margin-bottom: 10px;
 
   .scroll {
@@ -91,12 +91,12 @@ body {
   }
 
   .svg-size {
-    fill: #fff;
+    fill: var(--app-text-muted);
     margin-right: 5px;
   }
 
   .svg-icon {
-    fill: #000;
+    fill: var(--app-text-regular);
 
   }
 
@@ -105,20 +105,31 @@ body {
     height: 20px;
     padding: 6px 10px;
     line-height: 20px;
-    color: #101010;
+    color: var(--app-text-regular);
     font-size: 14px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     margin-right: 10px;
+    border: 1px solid var(--app-border);
+    border-radius: 4px;
+    background-color: var(--app-bg-surface);
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+      color: var(--app-primary-strong);
+      border-color: var(--app-primary-soft);
+      background-color: var(--app-sider-hover-bg);
+    }
 
     &.active {
-      color: #fff;
-      border-bottom: 1px solid var(--el-color-primary);
-      background-color: var(--el-color-primary);
+      color: var(--app-primary-strong);
+      border-color: var(--app-primary-soft);
+      background-color: var(--app-primary-soft);
       font-weight: bold;
       .close {
-      color: #fff;
+      color: var(--app-primary-strong);
 }
     }
   }
@@ -155,7 +166,7 @@ body {
 
 html:not(.dark) {
   .bottom {
-   background-color: #fff;
+   background-color: var(--app-footer-bg);
   }
 }
 
@@ -166,6 +177,7 @@ html:not(.dark) {
   text-align: center;
   font-size: 14px;
   line-height: 50px;
+  color: var(--app-footer-text);
   box-sizing: border-box;
 }
 
@@ -177,10 +189,10 @@ html:not(.dark) {
 
 .el-menu--vertical.el-menu--collapse {
   .el-sub-menu.is-active {
-    background: hsla(180, 1%, 46%, 0.2);
-    color:#fff;
+    background: var(--app-sider-active-bg);
+    color: var(--app-sider-active-text);
     .icons {
-        fill: #fff;
+        fill: var(--app-sider-active-text);
     }
 }
 }
@@ -201,7 +213,7 @@ html:not(.dark) {
 
 .badge {
   .svg-size {
-    fill: #000;
+    fill: var(--app-text-regular);
   }
 }
 
@@ -223,7 +235,9 @@ html:not(.dark) {
   align-items: center;
   padding-left: 10px;
   justify-content: space-between;
-  background-color:#ebebf5
+  background-color: var(--app-header-bg);
+  border-bottom: 1px solid var(--app-header-border);
+  color: var(--app-header-text);
 }
 
 
@@ -254,26 +268,26 @@ html:not(.dark) {
   display: flex;
   height: 60px;
   align-items: center;
-  background-color: #fff;
-  border-bottom: 1px solid #eee;
-  color:#333 ;
+  background-color: var(--app-header-bg);
+  border-bottom: 1px solid var(--app-header-border);
+  color: var(--app-header-text);
   .el-menu-item {
-    background-color: #fff;
-    color:#333
+    background-color: var(--app-header-bg);
+    color: var(--app-header-text)
   }
 }
 
 
 .layout-transvers-header .el-menu {
-  background-color: #fff;
+  background-color: var(--app-header-bg);
   li.el-menu-item {
-    color: #333 !important;;
+    color: var(--app-header-text) !important;
     &.is-active {
-      background-color: #000;
+      background-color: var(--app-primary-soft);
     }
   }
   .el-sub-menu {
-    color: #333 !important;;
+    color: var(--app-header-text) !important;
   }
 
 }
@@ -281,24 +295,28 @@ html:not(.dark) {
 .layout-transvers {
   .el-popper {
     .el-menu-item span, .el-menu-item .el-icon, .el-sub-menu span, .el-sub-menu .el-icon {
-      color:#000 !important
+      color: var(--app-text-primary) !important
     }
   }
 }
 
 .el-menu--horizontal .el-menu .el-menu-item, .el-menu--horizontal .el-menu .el-sub-menu__title {
-  background-color: #fff;
+  background-color: var(--app-bg-surface);
 }
 .el-menu--horizontal {
   .el-menu-item span, .el-menu-item .el-icon, .el-sub-menu span, .el-sub-menu .el-icon {
-    color:#000 !important
+    color: var(--app-sider-text) !important
   }
   .el-sub-menu__title:hover, .el-menu-item:hover, .el-sub-menu__title:hover, .el-menu-item.is-active, .el-sub-menu__title.el-active {
-    background-color: #fff;
+    background-color: var(--app-sider-hover-bg);
+
+    span {
+      color: var(--app-primary-strong) !important;
+    }
   }
 
   .el-menu {
-    background-color: #fff;
+    background-color: var(--app-bg-surface);
   }
 }
 
@@ -326,7 +344,7 @@ html:not(.dark) {
   align-items: center;
   width: 80px;
   font-size: 12px;
-  background-color: #409eff;
+  background-color: var(--app-primary-strong);
   color: #fff;
 
 }
@@ -339,23 +357,23 @@ html:not(.dark) {
 }
 
 .layout-columns-right  .el-menu  {
-  background-color: #fff !important;
-  color:#000;
+  background-color: var(--app-bg-surface) !important;
+  color: var(--app-text-primary);
   .el-menu-item span, .el-menu-item .el-icon, .el-sub-menu span, .el-sub-menu .el-icon,
   span { 
-    color: #222 !important;
+    color: var(--app-sider-text) !important;
   }
   .icons {
-    fill: #222;
+    fill: var(--app-sider-icon);
   }
   .el-sub-menu__title:hover,.el-menu-item:hover,.el-sub-menu__title:hover,.el-menu-item.is-active,.el-sub-menu__title.el-active {
     background: none;
     border-radius: 0;
     span {
-      color:#409eff !important
+      color: var(--app-primary-strong) !important
     }
     .icons {
-      fill: #409eff;
+      fill: var(--app-primary-strong);
     }
   }
 }
@@ -403,17 +421,17 @@ html:not(.dark) {
 
 .layout-column-active {
  position: relative;
- background-color: #fff;
-  color:#222;
+ background-color: var(--app-bg-surface);
+  color: var(--app-text-primary);
   .icons {
-    fill: #222;
+    fill: var(--app-text-primary);
   }
 }
 
 .layout-column-active::after {
     width: 0px;
     height: 30px;
-    border: 1.5px solid #409eff;
+    border: 1.5px solid var(--app-primary);
     position: absolute;
     content: "";
     right: 0px;

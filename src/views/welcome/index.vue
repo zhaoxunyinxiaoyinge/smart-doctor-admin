@@ -1,939 +1,1210 @@
 <template>
   <el-scrollbar :height="content.routeContentHeight">
-    <div class="card">
-      <div class="card-item">
-        <div class="card-title">
-          <span>总销售额</span>
-          <span class="iconfont">&#xe679;</span>
-        </div>
-        <div class="chengj">
-          <span class="icon iconfont">&#xe634;</span>
-          <span class="mount">126,560</span>
-        </div>
-        <div class="desc">
-          日均销售额 ￥12,423
-        </div>
-        <div class="text">
-          <span>周同比 12%</span>
-          <span>日环比 12%</span>
-        </div>
-      </div>
-      <div class="card-item">
-        <div class="card-title">
-          <span>访问量</span>
-          <span class="iconfont">&#xe679;</span>
-        </div>
-        <div class="chengj">
-          <span class="iconfont icon">&#xe674;</span><span class="mount">8,846</span>
-        </div>
-        <div class="desc">
-          日访问量 1,423
-        </div>
-        <div id="catgory" />
-      </div>
-      <div class="card-item">
-        <div class="card-title">
-          <span>支付笔数</span>
-          <span class="iconfont">&#xe679;</span>
-        </div>
-        <div class="chengj">
-          <span class="iconfont icon">&#xe610;</span><span class="mount">6,560</span>
-        </div>
-        <div class="desc">
-          转化率 60%
-        </div>
-        <div
-          id="ke"
-          class="k"
-        />
-      </div>
-      <div class="card-item">
-        <div class="card-title">
-          <span>线上购物转化率</span>
-          <span class="iconfont">&#xe679;</span>
-        </div>
-        <div class="chengj">
-          <span class="iconfont icon">&#xe600;</span><span class="mount">60%</span>
-        </div>
-        <div class="desc">
-          <span>周同比 12%</span><span>日环比 24%</span>
-        </div>
-        <div class="process">
-          <div class="process-item" />
-        </div>
-      </div>
-    </div>
-    <div id="title">
-      <div class="left">
-        <span class="active">销售额</span>
-        <span>访问量</span>
-      </div>
-      <div class="right">
-        <span class="active">今日</span><span>本周</span><span>本月</span><span>全年</span>
-        <el-input  type="date" />
-      </div>
-    </div>
-    <div id="zhu">
-      <div id="tong" />
-      <div class="list">
-        <div class="list-title">
-          <span>门店销售排行榜</span>
-          <span class="more">查看更多</span>
-        </div>
-        <div class="list-item">
-          <span>
-            1
-          </span>
-          <div class="list-item-text">
-            <span>公转路一号店</span>
-            <span>323</span>
+    <div class="dashboard">
+
+      <!-- ============ KPI 指标卡 ============ -->
+      <section class="kpi-grid">
+        <el-card
+          v-for="k in kpiList"
+          :key="k.label"
+          shadow="never"
+          class="kpi-card"
+          :body-style="{ padding: '16px 16px 14px' }"
+        >
+          <div class="kpi-card__glow" :style="{ background: k.tint }" />
+          <div class="kpi-top">
+            <span class="kpi-label">{{ k.label }}</span>
+            <span
+              v-if="k.rate"
+              class="chip"
+              :class="k.trend === 'up' ? 'chip--up' : 'chip--down'"
+            >
+              {{ k.trend === 'up' ? '▲' : '▼' }} {{ k.rate }}%
+            </span>
+            <span v-else class="chip chip--blue">需关注</span>
           </div>
-        </div>
-        <div class="list-item">
-          <span>
-            2
-          </span>
-          <div class="list-item-text">
-            <span>公转路一号店</span>
-            <span>323</span>
+          <div class="kpi-value num">
+            {{ k.value }}<small>{{ k.unit }}</small>
           </div>
-        </div>
-        <div class="list-item">
-          <span>
-            3
-          </span>
-          <div class="list-item-text">
-            <span>公转路一号店</span>
-            <span>323</span>
+          <div class="kpi-foot">
+            <svg width="62" height="20" viewBox="0 0 62 20">
+              <polyline
+                :points="sparkPoints(k.spark)"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>{{ k.desc }}</span>
           </div>
-        </div>
-        <div class="list-item">
-          <span>
-            4
-          </span>
-          <div class="list-item-text">
-            <span>公转路一号店</span>
-            <span>323</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="hot">
-      <div class="hot-item">
-        <div class="hot-search">
-          线上热门搜索
-        </div>
-        <div class="left-search-persion">
-          <div class="search-user">
-            <span class="search-title">搜索用户数</span>
-            <div class="search-text">
-              <span class="mount">22,560</span>
-              <span class="week">本周<i class="percate">40%</i></span>
+        </el-card>
+      </section>
+
+      <!-- ============ 销售趋势 + 渠道分布 ============ -->
+      <section class="row-b">
+        <el-card shadow="never" :body-style="{ padding: '0 14px 14px' }">
+          <template #header>
+            <div class="card-head">
+              <div class="card-head__title">
+                <h3>销售趋势</h3>
+                <span class="sub">{{ realTrend ? '近 7 天 · 管理端实时' : trend.range + ' · 示例数据' }}</span>
+              </div>
+              <div class="legend">
+                <span><i style="background:#3b6cff" />成交额（万元）</span>
+                <span><i style="background:#c9d5f2" />上周同期</span>
+              </div>
+            </div>
+          </template>
+          <div ref="trendRef" class="chart chart--trend" />
+        </el-card>
+
+        <el-card shadow="never" :body-style="{ padding: '6px 18px 16px' }">
+          <template #header>
+            <div class="card-head">
+              <div class="card-head__title">
+                <h3>支付方式分布</h3>
+                <span class="sub">{{ realChannel ? '近 7 天 · 管理端实时' : '订单来源 · 示例数据' }}</span>
+              </div>
+            </div>
+          </template>
+          <div class="donut-box">
+            <div class="donut-wrap">
+              <div ref="channelRef" class="chart chart--donut" />
+              <div class="donut-center num">
+                <b>{{ channelTotal.toLocaleString() }}</b>
+                <small>近 7 天总订单</small>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div v-for="c in channelItems" :key="c.name" class="dl">
+                <span class="sq" :style="{ background: c.color }" />
+                <span class="name">{{ c.name }}</span>
+                <span class="bar">
+                  <i :style="{ width: (c.value / (channelTotal || 1) * 100).toFixed(1) + '%', background: c.color }" />
+                </span>
+                <b class="num">{{ (c.value / (channelTotal || 1) * 100).toFixed(0) }}%</b>
+                <span class="num gray">{{ c.value.toLocaleString() }} 单</span>
+              </div>
+            </div>
+            <div class="donut-tip">
+              <el-icon><TrendCharts /></el-icon>
+              <span>{{ channelTip }}</span>
             </div>
           </div>
-          <div class="search-mount">
-            <span class="search-title">人均搜索次数</span>
-            <div class="search-text">
-              <span class="mount">2.7</span>
-              <span class="week">本周<i class="percate red">40%</i></span>
+        </el-card>
+      </section>
+
+      <!-- ============ 订单状态 / 热销 / 待办 ============ -->
+      <section class="row-c">
+        <el-card shadow="never" :body-style="{ padding: '14px 18px 18px' }">
+          <template #header>
+            <div class="card-head">
+              <div class="card-head__title">
+                <h3>订单状态</h3>
+                <span class="sub">{{ realCount ? '管理端实时' : '近 7 天 · 示例数据' }}</span>
+              </div>
+            </div>
+          </template>
+          <div class="status-list">
+            <div v-for="s in orderStatus" :key="s.name" class="status-row">
+              <div class="status-row__top">
+                <span class="sq" :style="{ background: s.color }" />
+                {{ s.name }}
+                <b class="num">{{ s.count }}</b>
+                <em class="num">{{ (s.count / statusTotal * 100).toFixed(1) }}%</em>
+              </div>
+              <div class="track">
+                <i :style="{ width: (s.count / statusTotal * 100).toFixed(1) + '%', background: s.color }" />
+              </div>
             </div>
           </div>
-        </div>
-        <div class="bar">
-          <div class="line-title">
-            <span>新款连衣裙</span>
-            <span>8,910</span>
+        </el-card>
+
+        <el-card shadow="never" :body-style="{ padding: '14px 18px 18px' }">
+          <template #header>
+            <div class="card-head">
+              <div class="card-head__title">
+                <h3>热销商品 TOP 5</h3>
+                <span class="sub">{{ realHot ? '管理端实时' : '示例数据' }}</span>
+              </div>
+              <el-link type="primary" :underline="false" @click="router.push('/goods/list')">全部商品 ›</el-link>
+            </div>
+          </template>
+          <div class="tops">
+            <div v-for="(g, i) in topGoods" :key="g.name" class="top-item">
+              <span class="rank" :class="rankClass(i)">{{ i + 1 }}</span>
+              <span class="thumb" :style="{ background: g.thumb }" />
+              <div class="ti-t">
+                <p>{{ g.name }}</p>
+                <small>库存 {{ g.stock }} · 客单价 ¥{{ g.price }}</small>
+              </div>
+              <div class="ti-n num">
+                <b>¥{{ g.salesAmount.toLocaleString() }}</b>
+                <small>{{ g.salesCount }} 件</small>
+              </div>
+            </div>
           </div>
-          <div class="process">
-            <div class="kedu" />
+        </el-card>
+
+        <el-card shadow="never" :body-style="{ padding: '14px 18px 18px' }">
+          <template #header>
+            <div class="card-head">
+              <div class="card-head__title">
+                <h3>待办事项</h3>
+                <span class="sub">{{ realTodo ? `${todoTotal} 项未处理` : '44 项未处理 · 示例数据' }}</span>
+              </div>
+            </div>
+          </template>
+          <div class="todo">
+            <div v-for="t in todoList" :key="t.title" class="todo-item">
+              <span class="ti-ic" :class="`ti-ic--${t.level}`">
+                <el-icon><component :is="todoIcon(t.icon)" /></el-icon>
+              </span>
+              <div class="todo-txt">
+                <p>{{ t.title }}</p>
+                <small>{{ t.desc }}</small>
+              </div>
+              <el-tag
+                size="small"
+                effect="plain"
+                :type="tagType(t.level)"
+                round
+              >{{ t.count }}</el-tag>
+            </div>
           </div>
-        </div>
-        <div class="bar">
-          <div class="line-title">
-            <span>新款连衣裙</span>
-            <span>8,910</span>
+        </el-card>
+      </section>
+
+      <!-- ============ 最新订单 ============ -->
+      <el-card shadow="never" :body-style="{ padding: '6px 0 0' }">
+        <template #header>
+          <div class="card-head">
+            <div class="card-head__title">
+              <h3>最新订单</h3>
+              <span class="sub">{{ realOrders ? '管理端实时数据' : '示例数据' }}</span>
+            </div>
+            <div class="card-head__right">
+              <el-tag type="primary" effect="light" round>
+                今日 {{ statsSummary ? statsSummary.todayOrders.toLocaleString() : '1,842' }} 单
+              </el-tag>
+              <el-link type="primary" :underline="false" @click="router.push('/oders/index')">查看全部 ›</el-link>
+            </div>
           </div>
-          <div class="process">
-            <div class="kedu" />
-          </div>
-        </div>
-        <div class="bar">
-          <div class="line-title">
-            <span>新款连衣裙</span>
-            <span>8,910</span>
-          </div>
-          <div class="process">
-            <div class="kedu" />
-          </div>
-        </div>
-        <div class="bar">
-          <div class="line-title">
-            <span>新款连衣裙</span>
-            <span>8,910</span>
-          </div>
-          <div class="process">
-            <div class="kedu" />
-          </div>
-        </div>
-      </div>
-      <div class="hot-item">
-        <div class="sale">
-          <span class="sale-title">销售额类别占比</span>
-          <div class="pie-title">
-            <span>全部渠道</span>
-            <span class="active">线上</span>
-            <span>门店</span>
-          </div>
-        </div>
-        <div class="pie-content">
-          <div
-            id="pies"
-            class="pie-icon"
+        </template>
+
+        <el-table :data="latestOrders" style="width: 100%" size="large">
+          <el-table-column prop="id" label="订单号" min-width="170">
+            <template #default="{ row }">
+              <span class="oid num">{{ row.id }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="商品信息" min-width="260">
+            <template #default="{ row }">
+              <div class="goods-cell">
+                <span class="thumb thumb--sm" :style="{ background: row.thumb }" />
+                <span class="goods-name">{{ row.goods }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="支付方式" width="110">
+            <template #default="{ row }">
+              <span class="ch" :class="channelClass(row.channel)">
+                <i />{{ row.channel }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="buyer" label="买家" min-width="170" />
+          <el-table-column label="实付金额" width="110" sortable>
+            <template #default="{ row }">
+              <span class="amt num">¥{{ row.amount.toFixed(2) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="订单状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="(orderStatusTag as any)[row.status]" effect="light" round>
+                {{ orderStatusText[row.status] }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="time" label="下单时间" width="110" />
+          <el-table-column label="操作" width="130" fixed="right">
+            <template #default="{ row }">
+              <el-button
+                v-if="row.status === 'wait-send'"
+                link type="primary" size="small"
+              >发货</el-button>
+              <el-button
+                v-if="row.status === 'wait-pay'"
+                link type="primary" size="small"
+              >催付</el-button>
+              <el-button
+                v-if="row.status === 'sent'"
+                link type="primary" size="small"
+              >物流</el-button>
+              <el-button
+                v-if="row.status === 'refund'"
+                link type="primary" size="small"
+              >审核</el-button>
+              <el-button link type="info" size="small">详情</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div class="t-foot">
+          <span class="num">显示第 {{ (orderPage - 1) * 5 + 1 }}-{{ Math.min(orderPage * 5, orderTotal) }} 条，共 {{ orderTotal.toLocaleString() }} 条</span>
+          <el-pagination
+            layout="prev, pager, next"
+            :total="orderTotal"
+            :page-size="5"
+            :pager-count="5"
+            :current-page="orderPage"
+            @current-change="(p: number) => loadLatestOrders(p)"
           />
-          <div class="product-list">
-            <div class="product-list-item">
-              <span><mark style="background:rgba(251, 73, 124, 1) ;" />母婴产品</span>
-              <span>38.57%</span>
-            </div>
-            <div class="product-list-item">
-              <span><mark style="background: rgba(255, 199, 96, 1);" />家用电器</span>
-              <span>31.30%</span>
-            </div>
-            <div class="product-list-item">
-              <span><mark style="background:rgba(111, 230, 33, 1) ;" />食用酒水</span>
-              <span>21.21%</span>
-            </div>
-            <div class="product-list-item">
-              <span><mark style="background:rgba(79, 204, 255, 1) ;" />个人健康</span>
-              <span>10.91%</span>
-            </div>
-            <div class="product-list-item">
-              <span><mark style="background: rgba(77, 123, 243, 1);" />服饰箱包</span>
-              <span>0.91%</span>
-            </div>
-            <div class="product-list-item">
-              <span><mark style="background:rgba(29, 73, 153, 1) ;" />其他</span>
-              <span>0.21%</span>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-    <div class="bin">
-      <div class="pie-list">
-        <div class="pie-list-item">
-          <span>门店一</span>
-          <div id="pieOne" />
-        </div>
-        <div class="pie-list-item">
-          <span>门店二</span>
-          <div id="pieTwo" />
-        </div>
-        <div class="pie-list-item">
-          <span>门店三</span>
-          <div id="pieThree" />
-        </div>
-        <div class="pie-list-item">
-          <span>门店四</span>
-          <div id="pieFour" />
-        </div>
-        <div class="pie-list-item">
-          <span>门店五</span>
-          <div id="pieFive" />
-        </div>
-        <div class="pie-list-item">
-          <span>门店六</span>
-          <div id="pieSix" />
-        </div>
-      </div>
-      <div id="shop" />
+      </el-card>
+
     </div>
   </el-scrollbar>
 </template>
+
 <script lang="ts" setup>
-import { onMounted, nextTick } from "vue";
-import content from "@/assets/scss/layout.module.scss";
-import * as echarts from 'echarts';
-type EChartsOption = echarts.EChartsOption;
-let chartDom;
-let myChart;
-let catgroyDom;
-let myCatgory;
-let myShop;
-let shopChart;
-let pieOne;
-let pieTwo;
-let pieThree;
-let pieFive;
-let pieSix;
-let pieFour;
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import * as echarts from 'echarts/core';
+import {
+  TrendCharts,
+  Van,
+  RefreshLeft,
+  Warning,
+  Timer,
+} from '@element-plus/icons-vue';
+import content from '@/assets/scss/layout.module.scss';
+import {
+  kpis,
+  trend,
+  channel,
+  orderStatus as mockOrderStatus,
+  topGoods as mockTopGoods,
+  todos,
+  latestOrders as mockLatestOrders,
+  orderStatusText,
+  orderStatusTag,
+  type OrderStatus,
+  type StatusItem,
+  type TopGoods,
+  type OrderItem,
+  KpiItem,
+} from './dashboardData';
+import {
+  getOrderPage,
+  getOrderItems,
+  getGoodsPage,
+  getStatsSummary,
+  getTrend,
+  getPayChannel,
+  LOW_STOCK_THRESHOLD,
+  type AdminOrderRow,
+  type AdminOrderItemRow,
+  type StatsSummary,
+} from './api/admin';
 
-let oneChart;
-let twoChart;
-let threeChart;
-let fourChart;
-let fiveChart;
-let sixChart;
+const router = useRouter();
 
-let piesDom;
-let piesChart;
+/* ------------------------------------------------------------------ *
+ * 列表数据：默认取模拟数据，接口拉到真实数据后原地替换，失败自动回退
+ * ------------------------------------------------------------------ */
+const kpiList = ref<KpiItem[]>(kpis.map((k) => ({ ...k })));
+const topGoods = ref<TopGoods[]>([...mockTopGoods]);
+const orderStatus = ref<StatusItem[]>([...mockOrderStatus]);
+const latestOrders = ref<OrderItem[]>([...mockLatestOrders]);
+const todoList = ref([...todos]);
 
-let kDom;
-let kChart;
-onMounted(() => {
-  chartDom = document.getElementById('tong')!;
-  myChart = echarts.init(chartDom);
-  catgroyDom = document.getElementById("catgory");
-  myCatgory = echarts.init(catgroyDom);
-  myShop = document.getElementById("shop");
-  shopChart = echarts.init(myShop);
+/** 订单总数（最新订单卡片底部分页用） */
+const orderTotal = ref(1842);
+/** 当前页码 */
+const orderPage = ref(1);
+/** KPI 汇总（最新订单卡片的「今日 N 单」用） */
+const statsSummary = ref<StatsSummary | null>(null);
 
-  pieOne = document.getElementById("pieOne");
-  oneChart = echarts.init(pieOne);
+/** 数据源标记：true = 已接通 adminServe 真实接口 */
+const realKpi = ref(false);
+const realHot = ref(false);
+const realCount = ref(false);
+const realOrders = ref(false);
+const realTodo = ref(false);
+const realTrend = ref(false);
+const realChannel = ref(false);
 
-  pieTwo = document.getElementById("pieTwo");
-  twoChart = echarts.init(pieTwo);
+/** 支付方式分布（接口成功后覆盖 mock 的渠道数据） */
+const channelItems = ref(channel.items.map((c) => ({ ...c })));
+const channelTotal = ref(channel.total);
+const channelTip = ref(`小程序占比环比提升 ${channel.wxRateUp}%`);
 
-  pieThree = document.getElementById("pieThree");
-  threeChart = echarts.init(pieThree);
+/** 待办总数：真实项（待发货/库存预警）取接口值，售后暂为示例值 18 */
+const todoTotal = computed(() => {
+  // count 是 "199 单" / "3 项" 这种带单位的字符串，parseInt 取数字部分
+  const num = (c: unknown) => parseInt(String(c ?? ''), 10) || 0;
+  return num(todoList.value[0]?.count) + num(todoList.value[1]?.count) + num(todoList.value[2]?.count);
+});
 
-  pieFour = document.getElementById("pieFour");
-  fourChart = echarts.init(pieFour);
-
-  pieFive = document.getElementById("pieFive");
-  fiveChart = echarts.init(pieFive);
-
-  pieSix = document.getElementById("pieSix");
-  sixChart = echarts.init(pieSix);
-
-  piesDom = document.getElementById("pies");
-  piesChart = echarts.init(piesDom);
-
-  kDom = document.getElementById("ke");
-  kChart = echarts.init(kDom);
-})
-
-let option: EChartsOption;
-option = {
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'shadow'
-    }
-  },
-  title: {
-    text: "销售额趋势"
-  },
-  grid:{
-    left:"3%",
-    right:0
-  },
-  xAxis: {
-    type: 'category',
-    data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-  },
-  yAxis: {
-    type: 'value',
-  },
-  series: [
-    {
-      data: [10, 50, 100, 150, 10, 50, 100, 150, 20, 50, 100, 150],
-      type: 'bar',
-      showBackground: true,
-      barWidth: 50,
-      backgroundStyle: {
-        color: "rgba(255, 255, 255, 1)"
-      },
-      itemStyle:{
-        color:'rgba(182, 32, 224, 1)'
-      },
-      label:{
-        show:true
-      }
-    }
-  ]
+/** orders 表状态 -> 页面状态标签 */
+const statusMap: Record<string, OrderStatus> = {
+  pending: 'wait-pay',
+  paid: 'wait-send',
+  shipping: 'sent',
+  done: 'done',
+  cancel: 'cancel',
 };
 
-let options: EChartsOption = {
-  grid:{
-    left:0
-  },
-  xAxis: {
-    type: 'category',
-    boundaryGap: false,
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  yAxis: {
-    type: 'value'
-  },
-  series: [
+/** 兜底缩略图（接口没图时用渐变占位） */
+const fallbackThumbs = [
+  'linear-gradient(135deg,#ffd6a5,#ff8a4c)',
+  'linear-gradient(135deg,#b9e7ff,#5aa9e6)',
+  'linear-gradient(135deg,#ffe0e6,#ff8fa3)',
+  'linear-gradient(135deg,#d8f5d0,#7fc76a)',
+  'linear-gradient(135deg,#e3dcff,#8f7bff)',
+];
 
-    {
-      data: [820, 932, 901, 934, 1290, 1330, 1320],
-      type: 'line',
-      areaStyle: {}
-    }
-  ]
-};
+function fallbackThumb(i: number): string {
+  return fallbackThumbs[i % fallbackThumbs.length];
+}
 
+function maskName(name: string): string {
+  return name ? `${name.slice(0, 1)}**` : '—';
+}
 
-let optionShop: EChartsOption = {
-  xAxis: {
-    type: 'category',
-    boundaryGap: false,
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  yAxis: {
-    type: 'value'
-  },
-  series: [
+function maskPhone(phone: string): string {
+  return phone && phone.length >= 7 ? `${phone.slice(0, 3)}****${phone.slice(-4)}` : phone || '—';
+}
 
-    {
-      data: [820, 932, 901, 934, 1290, 1330, 1320],
-      type: 'line',
-      areaStyle: {}
-    }
-  ]
-};
+function timeStr(value: string | number): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  const p = (n: number) => String(n).padStart(2, '0');
+  // 订单可能跨天，带上月日更直观
+  return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 
+/** pay_channel 是支付渠道，不是下单来源，按支付方式展示。
+ *  key 与移动端收银台 PayView 的 CHANNELS 对齐：wechat / alipay / card */
+function channelLabel(payChannel: string): string {
+  const c = (payChannel || '').toLowerCase();
+  if (c.includes('wx') || c.includes('wechat')) return '微信支付';
+  if (c.includes('ali')) return '支付宝';
+  if (c === 'card') return '银行卡';
+  if (c.includes('balance') || c.includes('wallet')) return '余额支付';
+  if (c.includes('app')) return 'APP';
+  if (c.includes('mini')) return '小程序';
+  // 未知渠道原样展示（灰色徽标），出现新支付方式时在上面补一行映射即可
+  return payChannel || '—';
+}
 
+function channelClass(channel: string): string {
+  const c = channel || '';
+  if (c === '小程序' || c.includes('微信')) return 'ch--wx';
+  if (c === 'APP' || c.includes('支付宝')) return 'ch--app';
+  return 'ch--mute';
+}
 
-let optionPie: EChartsOption = {
-  tooltip: {
-    trigger: 'item',
-    
-  },
+/** 环比：今日 vs 昨日，返回百分比数值（昨日为 0 时给 0） */
+function rateOf(today: number, yesterday: number): number {
+  if (!yesterday) return 0;
+  return Math.round((Math.abs(today - yesterday) / yesterday) * 1000) / 10;
+}
 
-  series: [
-    {
-      name: 'Access From',
-      type: 'pie',
-      radius: ['50%', '70%'],
-      avoidLabelOverlap: false,
-      label: {
-        show: true,
+function trendOf(today: number, yesterday: number): 'up' | 'down' {
+  return today >= yesterday ? 'up' : 'down';
+}
+
+/** KPI 四卡：GET /api/mobile/stats/summary */
+async function loadKpis() {
+  try {
+    const s = await getStatsSummary();
+    statsSummary.value = s;
+    kpiList.value = [
+      {
+        ...kpiList.value[0],
+        value: Math.round(s.todayAmount).toLocaleString(),
+        trend: trendOf(s.todayAmount, s.yesterdayAmount),
+        rate: rateOf(s.todayAmount, s.yesterdayAmount),
+        desc: `较昨日 ¥${Math.round(s.yesterdayAmount).toLocaleString()}`,
       },
-      emphasis: {
-        label: {
-          show: false,
-          fontSize: 40,
-          fontWeight: 'bold'
+      {
+        ...kpiList.value[1],
+        value: s.todayOrders.toLocaleString(),
+        trend: trendOf(s.todayOrders, s.yesterdayOrders),
+        rate: rateOf(s.todayOrders, s.yesterdayOrders),
+        desc: `较昨日 ${s.yesterdayOrders} 单`,
+      },
+      {
+        ...kpiList.value[2],
+        value: s.todayNewUsers.toLocaleString(),
+        trend: trendOf(s.todayNewUsers, s.yesterdayNewUsers),
+        rate: rateOf(s.todayNewUsers, s.yesterdayNewUsers),
+        desc: `昨日新增 ${s.yesterdayNewUsers} 人 · 用户总数 ${s.userTotal}`,
+      },
+      {
+        ...kpiList.value[3],
+        value: (s.paidCount + s.shippingCount).toLocaleString(),
+        trend: 'up',
+        rate: 0,
+        desc: `待发货 ${s.paidCount} · 已发货 ${s.shippingCount}`,
+      },
+    ];
+    realKpi.value = true;
+  } catch (e) {
+    console.warn('[dashboard] KPI 汇总接口失败，使用示例数据：', e);
+  }
+}
+
+/** 热销 TOP5：GET /api/mobile/goods，前端按销量排序取前 5 */
+async function loadHotGoods() {
+  try {
+    const res = await getGoodsPage({ page: 1, pageSize: 50 });
+    topGoods.value = [...res.records]
+      .sort((a, b) => (b.sales ?? 0) - (a.sales ?? 0))
+      .slice(0, 5)
+      .map((g, i) => ({
+        name: g.title || '—',
+        stock: g.stock ?? 0,
+        price: g.price ?? 0,
+        // 后端暂无销售额字段，先用 客单价 × 销量 估算
+        salesAmount: Math.round((g.price ?? 0) * (g.sales ?? 0)),
+        salesCount: g.sales ?? 0,
+        thumb: g.cover || fallbackThumb(i),
+      }));
+    realHot.value = true;
+  } catch (e) {
+    console.warn('[dashboard] 商品接口失败，使用示例数据：', e);
+  }
+}
+
+/** 订单状态分布：/api/mobile/order?status=x&pageSize=1，用 total 当各状态数量 */
+async function loadOrderCount() {
+  try {
+    const statuses = [
+      { key: 'pending', name: '待付款', color: '#f5a623' },
+      { key: 'paid', name: '待发货', color: '#3b6cff' },
+      { key: 'shipping', name: '已发货', color: '#7f8ea8' },
+      { key: 'done', name: '已完成', color: '#12a45a' },
+      { key: 'cancel', name: '已取消', color: '#c0c8d4' },
+    ] as const;
+    const counts = await Promise.all(
+      statuses.map((s) => getOrderPage({ status: s.key, page: 1, pageSize: 1 }).then((r) => r.total)),
+    );
+    orderStatus.value = statuses.map((s, i) => ({ name: s.name, count: counts[i], color: s.color }));
+    realCount.value = true;
+  } catch (e) {
+    console.warn('[dashboard] 订单统计接口失败，使用示例数据：', e);
+  }
+}
+
+/** 最新订单：GET /api/mobile/order + 每单明细 GET /api/mobile/order-item */
+async function loadLatestOrders(page = 1) {
+  try {
+    const res = await getOrderPage({ page, pageSize: 5 });
+    orderTotal.value = res.total;
+    orderPage.value = page;
+    const rows = await Promise.all(
+      res.records.map(async (o: AdminOrderRow, i) => {
+        let items: AdminOrderItemRow[] = [];
+        try {
+          items = (await getOrderItems({ orderId: o.id, page: 1, pageSize: 20 })).records;
+        } catch {
+          /* 单个订单明细失败不影响整表 */
         }
-      },
-      labelLine: {
-        show: true
-      },
-      data: [
-        {
-          value: 1048, name: 'Search Engine', itemStyle: {
-            color: "rgba(74, 232, 221, 1)"
-          }
+        const goodsTitle = items[0]?.title || '—';
+        const more = items.length > 1 ? ` 等 ${items.length} 件` : '';
+        return {
+          id: o.orderNo,
+          goods: `${goodsTitle}${more}`,
+          thumb: items[0]?.cover || fallbackThumb(i),
+          channel: channelLabel(o.payChannel),
+          buyer: o.addressName
+            ? `${maskName(o.addressName)}（${maskPhone(String(o.addressPhone ?? ''))}）`
+            : '—',
+          amount: o.payAmount ?? 0,
+          status: statusMap[o.status] ?? 'done',
+          time: timeStr(o.createTime),
+        };
+      }),
+    );
+    latestOrders.value = rows;
+    realOrders.value = true;
+  } catch (e) {
+    console.warn('[dashboard] 最新订单接口失败，使用示例数据：', e);
+  }
+}
+
+/** 拉取真实数据（各请求互相独立，谁成功用谁，失败回退模拟数据） */
+function loadRealData() {
+  loadKpis();
+  loadHotGoods();
+  loadOrderCount();
+  loadLatestOrders();
+  loadTodos();
+  loadTrend();
+  loadPayChannel();
+}
+
+/** 销售趋势：GET /api/mobile/stats/trend（按天聚合，单位转成万元对齐 mock 口径） */
+async function loadTrend() {
+  try {
+    const res = await getTrend(7);
+    const toWan = (v: number) => Math.round((v / 10000) * 100) / 100;
+    renderTrend(res.days, res.current.map(toWan), res.previous.map(toWan));
+    realTrend.value = true;
+  } catch (e) {
+    console.warn('[dashboard] 销售趋势接口失败，使用示例数据：', e);
+  }
+}
+
+/** 支付方式分布：GET /api/mobile/stats/pay-channel */
+async function loadPayChannel() {
+  try {
+    const res = await getPayChannel(7);
+    if (!res.length) throw new Error('近 7 天无订单');
+    renderChannel(res);
+    realChannel.value = true;
+  } catch (e) {
+    console.warn('[dashboard] 支付方式分布接口失败，使用示例数据：', e);
+  }
+}
+
+/**
+ * 待办事项：只接「待发货订单」和「库存不足预警」两项真实数据，
+ * 售后（无售后表）和秒杀（无活动表）保持示例数据。
+ */
+async function loadTodos() {
+  try {
+    const [paidRes, lowStockRes] = await Promise.all([
+      getOrderPage({ status: 'paid', page: 1, pageSize: 1 }),
+      getGoodsPage({ stockLt: LOW_STOCK_THRESHOLD, page: 1, pageSize: 5 }),
+    ]);
+
+    // 待发货订单
+    todoList.value[0] = {
+      ...todoList.value[0],
+      count: `${paidRes.total} 单`,
+      desc: '已支付未发货，请尽快安排',
+    };
+
+    // 库存不足预警：列出库存最低的商品
+    const lowStockGoods = [...lowStockRes.records].sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0));
+    const lowest = lowStockGoods[0];
+    todoList.value[2] = {
+      ...todoList.value[2],
+      count: `${lowStockRes.total} 项`,
+      desc: lowest ? `${lowest.title} 仅剩 ${lowest.stock}` : `库存低于 ${LOW_STOCK_THRESHOLD} 的商品`,
+    };
+
+    realTodo.value = true;
+  } catch (e) {
+    console.warn('[dashboard] 待办接口失败，使用示例数据：', e);
+  }
+}
+
+/* ================= KPI 迷你折线 ================= */
+function sparkPoints(data: number[]): string {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const span = max - min || 1;
+  return data
+    .map((v, i) => `${(i / (data.length - 1)) * 62},${16 - ((v - min) / span) * 12}`)
+    .join(' ');
+}
+
+/* ================= 订单状态汇总 ================= */
+const statusTotal = computed(() =>
+  orderStatus.value.reduce((s, it) => s + it.count, 0)
+);
+
+/* ================= 热销排名样式 ================= */
+function rankClass(i: number) {
+  return i < 3 ? `rank--r${i + 1}` : '';
+}
+
+/* ================= 待办图标 ================= */
+const iconMap: Record<string, any> = {
+  send: Van,
+  refund: RefreshLeft,
+  warn: Warning,
+  promo: Timer,
+};
+function todoIcon(icon: string) {
+  return iconMap[icon] ?? Timer;
+}
+function tagType(level: string) {
+  const map: Record<string, string> = {
+    red: 'danger',
+    orange: 'warning',
+    blue: 'primary',
+    green: 'success',
+  };
+  return (map[level] ?? 'info') as any;
+}
+
+/* ================= ECharts ================= */
+const trendRef = ref<HTMLDivElement>();
+const channelRef = ref<HTMLDivElement>();
+let trendChart: echarts.ECharts | null = null;
+let channelChart: echarts.ECharts | null = null;
+
+/** 构建趋势图配置（初始用 mock，接口成功后用真实数据重画） */
+function trendOption(days: string[], amount: number[], prev: number[]) {
+  return {
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#161d2e',
+      borderWidth: 0,
+      textStyle: { color: '#fff', fontSize: 12 },
+      valueFormatter: (v: any) => `${v} 万元`,
+    },
+    legend: {
+      show: false, // 图例放在卡片头部，保持与设计稿一致
+    },
+    grid: { left: 44, right: 20, top: 24, bottom: 30 },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: days,
+      axisLine: { lineStyle: { color: '#e9edf6' } },
+      axisTick: { show: false },
+      axisLabel: { color: '#8e98ab', fontSize: 11 },
+    },
+    yAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: '#f0f3f9' } },
+      axisLabel: { color: '#8e98ab', fontSize: 11 },
+    },
+    series: [
+      {
+        name: '成交额',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 7,
+        data: amount,
+        lineStyle: { width: 2.6, color: '#3b6cff' },
+        itemStyle: { color: '#3b6cff', borderColor: '#fff', borderWidth: 2 },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(59,108,255,.22)' },
+            { offset: 1, color: 'rgba(59,108,255,0)' },
+          ]),
         },
-        {
-          value: 234, name: 'Direct', itemStyle: {
-            color: "rgba(240, 240, 242, 1)"
-          }
-        },
-
-      ]
-    }
-  ]
-};
-
-let optionPies: EChartsOption = {
-  tooltip: {
-    trigger: 'item',
-    formatter: '{a} <br/>{b} : {c} ({d}%)'
-  },
-  toolbox: {
-    show: false,
-    feature: {
-      mark: { show: true },
-      dataView: { show: true, readOnly: false },
-      restore: { show: true },
-      saveAsImage: { show: true }
-    }
-  },
-  series: [
-    {
-      name: 'Nightingale Chart',
-      type: 'pie',
-      radius: [25, 160],
-      center: ['70%', '50%'],
-      roseType: 'area',
-      label: {
-        show: true
       },
-      itemStyle: {
-        borderRadius: 8
+      {
+        name: '上周同期',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        data: prev,
+        lineStyle: { width: 2, color: '#c9d5f2', type: 'dashed' },
       },
-      data: [
-        { value: 40,name:"母婴产品" },
-        { value: 38,name:"家用电器" },
-        { value: 32,name:"实用酒水" },
-        { value: 30, name:"个人健康"},
-        { value: 28, name:"服饰箱包"},
-        { value: 26,name:"其他" },
-      ]
-    }
-  ]
-};
+    ],
+  };
+}
 
-let optionk: EChartsOption = {
-  grid:{
-    show:false,
-    left:0,
-    right:"20%",
-    top:"0%",
-    bottom:"0"
-  },
-  
-  xAxis: {
-    data: ['2017-10-24', '2017-10-25', '2017-10-26', '2017-10-27'],
-  },
-  yAxis: {
-    show:false
-  },
-  series: [
-    {
-      type: 'candlestick',
-      barWidth: "3",
-      data: [
-        [20, 34, 10, 38],
-        [40, 35, 30, 50],
-        [31, 38, 33, 44],
-        [38, 15, 5, 42]
-      ]
-    }
-  ]
-};
+function renderTrend(days: string[], amount: number[], prev: number[]) {
+  if (!trendRef.value) return;
+  if (!trendChart) trendChart = echarts.init(trendRef.value);
+  trendChart.setOption(trendOption(days, amount, prev));
+}
 
+function initTrendChart() {
+  renderTrend(trend.days, trend.amount, trend.lastWeek);
+}
 
+function initChannelChart() {
+  renderChannel(channel.items.map((c) => ({ name: c.name, value: c.value })));
+}
 
+/** 支付方式对应的环形图配色（名称与 channelLabel 输出对齐） */
+function payChannelColor(name: string): string {
+  if (name === '微信支付') return '#07c160';
+  if (name === '支付宝') return '#3b6cff';
+  if (name === '银行卡') return '#0f766e';
+  if (name === '余额支付') return '#f5a623';
+  return '#8e98ab';
+}
 
-nextTick(() => {
-  myChart && option && myChart.setOption(option);
-  myCatgory && options && myCatgory.setOption(options);
-  myShop && options && shopChart.setOption(optionShop);
+function renderChannel(items: Array<{ name: string; value: number }>) {
+  const list = items
+    .map((it) => ({ name: it.name || '未支付', value: it.value, color: payChannelColor(it.name || '未支付') }))
+    .sort((a, b) => b.value - a.value);
+  channelTotal.value = list.reduce((s, x) => s + x.value, 0);
+  channelItems.value = list;
+  const top = list[0];
+  channelTip.value = top ? `${top.name}占比 ${Math.round((top.value / (channelTotal.value || 1)) * 100)}%` : '暂无支付数据';
 
-  pieOne && optionPie && oneChart.setOption(optionPie);
+  if (!channelRef.value) return;
+  if (!channelChart) channelChart = echarts.init(channelRef.value);
+  channelChart.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}：{c} 单（{d}%）',
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['58%', '78%'],
+        center: ['50%', '50%'],
+        label: { show: false },
+        labelLine: { show: false },
+        emphasis: { scale: false },
+        itemStyle: { borderRadius: 4 },
+        data: list.map((x) => ({ name: x.name, value: x.value, itemStyle: { color: x.color } })),
+      },
+    ],
+  });
+}
 
-  pieTwo && optionPie && twoChart.setOption(optionPie);
+function handleResize() {
+  trendChart?.resize();
+  channelChart?.resize();
+}
 
-  pieThree && optionPie && threeChart.setOption(optionPie);
+onMounted(async () => {
+  await nextTick();
+  initTrendChart();
+  initChannelChart();
+  loadRealData();
+  window.addEventListener('resize', handleResize);
+});
 
-  pieFour && optionPie && fourChart.setOption(optionPie);
-
-  pieFive && optionPie && fiveChart.setOption(optionPie);
-
-  pieSix && optionPie && sixChart.setOption(optionPie);
-
-  piesDom && optionPies && piesChart.setOption(optionPies);
-
-  kDom && optionk && kChart.setOption(optionk);
-})
-
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+  trendChart?.dispose();
+  channelChart?.dispose();
+  trendChart = null;
+  channelChart = null;
+});
 </script>
 
-<style scoped  lang="scss">
-// @use './../../assets/scss/layout'; 使用新的scss语法导入scss
-#container {
-  height: var(--height)+'px';
-}
+<style lang="scss" scoped>
+.dashboard {
+  --dash-bg: #f4f6fb;
+  --dash-ink: #161d2e;
+  --dash-ink2: #586378;
+  --dash-ink3: #8e98ab;
+  --dash-line: #e9edf6;
+  --dash-brand: #3b6cff;
+  --dash-up: #e4393c;   /* 涨：红（国内习惯） */
+  --dash-down: #12a45a; /* 跌：绿 */
 
-.card {
   display: flex;
-  justify-content: flex-start;
-  margin-bottom: 30px;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px 28px;
+  background: var(--dash-bg);
+  min-width: 960px;
+  font-size: 13px;
+  color: var(--dash-ink);
 
-  .card-item {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    flex: 1;
-    height: 200px;
-    background-color: #fff;
-    margin-right: 30px;
-    padding: 25px 25px 25px 30px;
+  .num { font-variant-numeric: tabular-nums; }
+  .up { color: var(--dash-up); }
+
+  /* ---------- 通用卡片头 ---------- */
+  :deep(.el-card) {
+    border-radius: 14px;
+    border-color: var(--dash-line);
+    box-shadow: 0 1px 2px rgba(22, 35, 64, 0.04),
+      0 10px 30px -16px rgba(22, 35, 64, 0.18);
   }
-}
+  :deep(.el-card__header) { padding: 14px 18px; border-bottom: none; }
 
-.process {
-  margin-top: 34px;
-  height: 7px;
-  background-color: rgba(246, 246, 248, 1);
-  width: 100%;
-}
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 
-.process-item {
-  height: 100%;
-  width: 70%;
-  background-color: rgba(74, 232, 221, 1);
-}
+    &__title {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
 
-.card-title {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: rgba(116, 121, 140, 1);
-  margin-bottom: 18px;
-}
-
-#catgory {
-  flex: 1;
-  width: 100%;
-}
-
-#title {
-  display: flex;
-  padding: 0 30px;
-  justify-content: space-between;
-  align-items: center;
-  height: 70px;
-  background-color: #fff;
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: rgba(155, 162, 171, 1);
-
-
-  .left {
-    color: rgba(155, 162, 171, 1);
-    font-size: 14px;
-
-    span {
-      margin-right: 40px;
+      h3 { margin: 0; font-size: 14px; font-weight: 600; }
+      .sub { font-size: 11px; color: var(--dash-ink3); }
     }
-
-    .active {
-      color: rgba(0, 84, 254, 1);
-      padding-bottom: 3px;
-      border-bottom: 2px solid rgba(0, 84, 254, 1);
+    &__right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   }
 
-  .right {
+  .legend {
+    margin-left: auto;
     display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--dash-ink2);
 
-    span {
+    i {
       display: inline-block;
-      background-color: rgba(242, 242, 242, 1);
-      padding: 5px;
-      color: rgba(116, 121, 140, 1);
-      margin-left: 8px;
-      white-space: nowrap;
-    }
-
-    .active {
-      background-color: rgba(0, 84, 254, 1);
-      color: #fff;
-    }
-
-    .el-input {
-      margin-left: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      margin-right: 5px;
     }
   }
 
-}
-
-mark {
-  display: inline-block;
-  margin-right: 10px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-#zhu {
-  box-sizing: border-box;
-  height: 340px;
-  padding: 24px 30px 29px;
-  background-color: #fff;
-  display: flex;
-
-  #tong {
-    flex: 1;
-  }
-
-  .list {
-    width: 230px;
-    margin-left: 44px;
-  }
-
-  .list-title {
-    color: rgba(32, 37, 58, 1);
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 25px;
-  }
-
-  .list-item {
-    display: flex;
-    margin-bottom: 10px;
-    align-items: center;
-  }
-
-  .list-item-text {
-    display: flex;
-    justify-content: space-between;
-    box-sizing: border-box;
-    padding: 0 15px;
-    width: 207px;
-    background-color: rgba(248, 249, 251, 1);
-    margin-left: 15px;
-    border-radius: 5px;
-    height: 38px;
-    line-height: 38px;
-    color: rgba(116, 121, 140, 1);
-    font-size: 12px;
-  }
-
-  .more {
-    font-size: 12px;
-    color: rgba(4, 134, 254, 1);
-  }
-}
-
-#ke {
-  width: 100%;
-  height: 31px;
-  margin-top: 25px;
-}
-
-.hot {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 30px;
-}
-
-.hot-item {
-  box-sizing: border-box;
-  padding: 24px 30px 0 30px;
-  height: 380px;
-  background-color: #fff;
-  width: 47%;
-
-  .hot-search {
-    color: rgba(32, 37, 58, 1);
-    font-size: 14px;
-    margin-bottom: 20px;
-    text-align: left;
-  }
-
-  .left-search-persion {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .search-user,
-  .search-mount {
-    display: flex;
-    flex-direction: column;
-    width: 230px;
-    height: 75px;
-    background-color: rgba(248, 249, 251, 1);
-    box-sizing: border-box;
-    padding: 14px 20px;
-  }
-
-  .search-title {
-    color: rgba(145, 145, 175, 1);
-    font-size: 14px;
-    margin-bottom: 2px;
-    text-align: left;
-  }
-
-  .search-text {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .mount {
-    color: rgba(33, 33, 69, 1);
-    font-size: 18px;
-  }
-
-  .week {
-    color: rgba(145, 145, 175, 1);
-    font-size: 12px;
-  }
-
-  .percate {
-    color: rgba(15, 178, 105, 1);
-    font-size: 14px;
-    font-style: normal;
-  }
-
-  .red {
-    color: rgba(224, 85, 103, 1);
-  }
-
-  .sale {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 44px;
-  }
-
-  .sale-title {
-    color: rgba(32, 37, 58, 1);
-    font-size: 14px;
-  }
-
-  .pie-icon {
-    flex: 1
-  }
-
-  .pie-title {
-    display: flex;
-
-    span {
-      margin-left: 8px;
-      color: rgba(116, 121, 140, 1);
-      padding: 5px 10px;
-      background-color: rgba(242, 242, 242, 1);
-      font-size: 12px;
-    }
-
-    .active {
-      background-color: rgba(0, 84, 254, 1);
-      color: #fff;
-    }
-  }
-
-  .pie-content {
-    display: flex;
-  }
-
-  .product-list {
-    width: 207px;
-  }
-
-  .product-list-item {
-    height: 35px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 15px;
-    background-color: rgba(248, 249, 251, 1);
-    color: rgba(116, 121, 140, 1);
-    font-size: 12px;
-    margin-bottom: 8px;
-  }
-
-
-}
-
-.bar {
-  height: 33px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-bottom: 17px;
-
-  .line-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
-    color: rgba(116, 121, 140, 1);
-  }
-
-  .process {
-    margin-top: 0;
+  .sq {
+    display: inline-block;
+    width: 7px;
     height: 7px;
-    background-color: rgba(246, 246, 248, 1);
+    border-radius: 2px;
   }
 
-  .kedu {
-    width: 70%;
-    background-color: rgba(182, 32, 224, 1);
-    height: 100%;
+  /* ---------- KPI ---------- */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
   }
-}
 
-.bin {
-  display: flex;
-  flex-direction: column;
-  margin-top: 30px;
-  height: 465px;
-  background-color: #fff;
-}
+  .kpi-card {
+    position: relative;
+    overflow: hidden;
 
-.icon {
-  width: 32px;
-  height: 32px;
-  margin-right: 15px;
-}
+    &__glow {
+      position: absolute;
+      right: -30px;
+      top: -30px;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+  }
 
-.desc {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: rgba(155, 162, 171, 1);
-  margin-top: 10px;
-}
+  .kpi-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--dash-ink2);
+    font-size: 12px;
+  }
 
-.text {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: rgba(116, 121, 140, 1);
-  margin-top: 24px;
-}
+  .chip {
+    margin-left: auto;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
 
-.mount {
-  font-size: 32px;
-  color: rgba(40, 45, 48, 1);
-  font-weight: 400;
-}
+    &--up { color: var(--dash-up); background: #fdeceb; }
+    &--down { color: var(--dash-down); background: #e9f8ef; }
+    &--blue { color: var(--dash-brand); background: #edf2ff; font-weight: 500; }
+  }
 
-.chengj {
-  display: flex;
-  align-items: center;
-  line-height: 32px;
-}
+  .kpi-value {
+    margin: 10px 0 0;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
 
-#shop {
-  flex: 1;
-  width: 100%;
-  height: 100%;
-}
+    small {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dash-ink2);
+      margin-left: 2px;
+    }
+  }
 
-.pie-list {
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
+  .kpi-foot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--dash-ink3);
 
-  .pie-list-item {
-    box-sizing: border-box;
+    svg { color: #f0a09e; flex: none; }
+  }
+
+  /* ---------- 趋势 + 渠道 ---------- */
+  .row-b {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+  }
+
+  .chart--trend { width: 100%; height: 300px; }
+  .chart--donut { width: 100%; height: 200px; }
+
+  .donut-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 162px;
-    width: 183px;
-    padding-top: 26px;
+  }
 
-    span {
-      font-size: 14px;
-      color: rgba(122, 126, 135, 1);
-      margin-bottom: 15px;
-    }
+  .donut-wrap {
+    position: relative;
+    width: 100%;
+  }
 
-    #pieOne,
-    #pieTwo,
-    #pieThree,
-    #pieFour,
-    #pieFive,
-    #pieSix {
-      height: 145px;
-      width: 181px;
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    line-height: 1.35;
+
+    b { font-size: 20px; font-weight: 700; }
+    small { font-size: 10.5px; color: var(--dash-ink3); }
+  }
+
+  .donut-legend {
+    width: 100%;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dl {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12px;
+
+    .name { color: var(--dash-ink2); }
+    .bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 4px;
+      background: #f2f5fa;
+      overflow: hidden;
+
+      i { display: block; height: 100%; border-radius: 4px; }
     }
+    b { font-weight: 600; width: 44px; text-align: right; }
+    .gray { width: 56px; text-align: right; color: var(--dash-ink3); font-size: 11px; }
+  }
+
+  .donut-tip {
+    width: 100%;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f8fafd;
+    border: 1px solid #eff3fa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--dash-ink2);
+
+    .el-icon { color: var(--dash-brand); }
+    b { font-weight: 600; }
+  }
+
+  /* ---------- 订单状态 ---------- */
+  .row-c {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    gap: 16px;
+  }
+
+  .status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .status-row__top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    margin-bottom: 6px;
+
+    b { margin-left: auto; font-weight: 600; }
+    em { font-style: normal; color: var(--dash-ink3); font-size: 11px; width: 46px; text-align: right; }
+  }
+
+  .track {
+    height: 7px;
+    border-radius: 5px;
+    background: #f2f5fa;
+    overflow: hidden;
+
+    i { display: block; height: 100%; border-radius: 5px; }
+  }
+
+  /* ---------- 热销 TOP5 ---------- */
+  .tops {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .top-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .rank {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f2f5fa;
+    color: var(--dash-ink3);
+    flex: none;
+
+    &--r1 { background: linear-gradient(135deg, #ff8a3d, #ff5b2e); color: #fff; }
+    &--r2 { background: linear-gradient(135deg, #9db4ff, #6b8bff); color: #fff; }
+    &--r3 { background: linear-gradient(135deg, #ffd06b, #f5a623); color: #fff; }
+  }
+
+  .thumb {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    flex: none;
+
+    &--sm { width: 30px; height: 30px; border-radius: 7px; }
+  }
+
+  .ti-t {
+    flex: 1;
+    min-width: 0;
+
+    p {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    small { font-size: 10px; color: var(--dash-ink3); }
+  }
+
+  .ti-n {
+    text-align: right;
+    line-height: 1.3;
+
+    b { font-size: 12px; font-weight: 600; display: block; }
+    small { font-size: 10px; color: var(--dash-ink3); }
+  }
+
+  /* ---------- 待办 ---------- */
+  .todo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: #f8fafd;
+    border: 1px solid #f0f4fa;
+  }
+
+  .ti-ic {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+
+    &--blue { background: #eaf1ff; color: #3068e0; }
+    &--red { background: #fdeeec; color: #d5342f; }
+    &--orange { background: #fff5e8; color: #e08a1e; }
+    &--green { background: #e9f8ef; color: #0d9450; }
+  }
+
+  .todo-txt {
+    flex: 1;
+    min-width: 0;
+
+    p { margin: 0; font-size: 12px; font-weight: 500; }
+    small { font-size: 10px; color: var(--dash-ink3); }
+  }
+
+  /* ---------- 最新订单表格 ---------- */
+  .oid {
+    color: var(--dash-ink);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .goods-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    .goods-name {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--dash-ink);
+    }
+  }
+
+  .ch {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+
+    i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    &--app { background: #eef2ff; color: #3b6cff; }
+    &--wx { background: #e8f9ee; color: #07974d; }
+    &--mute { background: #f2f5fa; color: #8e98ab; }
+  }
+
+  .amt {
+    color: var(--dash-ink);
+    font-weight: 600;
+  }
+
+  .t-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    font-size: 11px;
+    color: var(--dash-ink3);
+  }
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width: 1500px) {
+    .row-c { grid-template-columns: 1fr 1fr; }
+    .row-c .el-card:last-child { grid-column: span 2; }
+  }
+  @media (max-width: 1200px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .row-b { grid-template-columns: 1fr; }
+    .row-c { grid-template-columns: 1fr; }
+    .row-c .el-card:last-child { grid-column: auto; }
   }
 }
 </style>

@@ -1,0 +1,345 @@
+/* ==================================================================
+ * 全站主题样式统一入口（颜色 / 主题唯一归拢地）
+ *
+ * 结构：
+ *   1. Element Plus 样式库（必须最先 @use）
+ *   2. 设计令牌（:root CSS 变量，原 src/assets/scss/var.scss）
+ *   3. Element Plus 组件主题覆盖（原 src/assets/element/index.scss）
+ *
+ * 注意：Element Plus 的语义色配置（@forward）在 src/assets/css/var.scss，
+ * 由 vite.config.ts 的 additionalData 全局注入，不要删那个文件。
+ * ================================================================ */
+@use "element-plus/theme-chalk/src/index.scss";
+
+/* ------------------------------------------------------------------
+ * 设计令牌（Design Tokens）
+ * 全站配色唯一来源：侧边栏、顶部栏、菜单与页面中性色都从这里取值。
+ * 主色系为商务藏青蓝（Royal Blue），深浅两档分别用于「填充」与「文字图标」，
+ * 沉稳大气，保证白底上的文字对比度符合 WCAG AA。
+ * ---------------------------------------------------------------- */
+:root {
+  /* 品牌色 */
+  --app-primary: #2563eb;
+  --app-primary-strong: #1d4ed8;
+  --app-primary-deep: #1e3a8a;
+  --app-primary-soft: #dbeafe;
+  --app-primary-softer: #eff6ff;
+
+  /* 中性色 */
+  --app-bg-page: #f5f7fa;
+  --app-bg-surface: #ffffff;
+  --app-bg-sider: #300404;
+  --app-border: #e8edf2;
+  --app-border-soft: #f1f5f9;
+  --app-text-primary: #1e293b;
+  --app-text-regular: #475569;
+  --app-text-muted: #94a3b8;
+
+  /* 侧边栏（深红底 + 白字主题） */
+  --app-sider-text: #ffffff;
+  --app-sider-icon: rgba(255, 255, 255, 0.72);
+  --app-sider-hover-bg: #481212;
+  --app-sider-active-bg: #571919;
+  --app-sider-active-text: #ffffff;
+
+  /* 顶部栏（极淡 + 半透明，叠加在页面底色上近乎白） */
+  --app-header-bg: rgba(255, 255, 255, 0.4);
+  --app-header-border: #eaf4f4;
+  --app-header-text: #3f5459;
+  --app-header-hover-bg: #eef7f7;
+  --app-header-accent: #0f766e;
+
+  /* 页脚 */
+  --app-footer-bg: #ffffff;
+  --app-footer-text: #94a3b8;
+
+  /* 兼容原有变量名 */
+  --el-menu-bg-color: #300404;
+  --bg-color: #ffffff;
+  --color-white: #ffffff;
+}
+
+/* 深色模式：保持与 Element Plus dark 主题一致的层次 */
+.dark {
+  --app-bg-page: #0f172a;
+  --app-bg-surface: #1e293b;
+  --app-bg-sider: #1e293b;
+  --app-border: #334155;
+  --app-border-soft: #1e293b;
+  --app-text-primary: #e2e8f0;
+  --app-text-regular: #cbd5e1;
+  --app-text-muted: #64748b;
+
+  --app-sider-text: #cbd5e1;
+  --app-sider-icon: #94a3b8;
+  --app-sider-hover-bg: rgba(37, 99, 235, 0.12);
+  --app-sider-active-bg: rgba(37, 99, 235, 0.2);
+  --app-sider-active-text: #93c5fd;
+
+  --app-header-bg: #1e293b;
+  --app-header-border: #334155;
+  --app-header-text: #cbd5e1;
+  --app-header-hover-bg: rgba(148, 163, 184, 0.14);
+
+  --app-footer-bg: #1e293b;
+  --app-footer-text: #64748b;
+}
+
+/* ==================================================================
+ * 以下为 Element Plus 组件主题覆盖
+ * ================================================================== */
+
+$breadcrumb-height: 50px;
+$router-list-height: 50px;
+$breadcrumb-bg: auto;
+$router-list-bg: auto;
+
+/* ==================================================================
+ * 侧边栏（.el-aside / .el-menu）
+ * 白底 + 右侧细分隔线；选中态用浅薄荷底 + 深青加粗文字表达，
+ * 避免大面积铺主色导致视觉噪音。
+ * ================================================================ */
+.dark {
+  .el-aside {
+    background-color: inherit;
+  }
+
+  .el-menu {
+    background-color: inherit;
+  }
+}
+
+.el-aside {
+  background-color: var(--app-bg-sider);
+  /* 侧边栏为深色底，分隔线用半透明白，避免浅灰线在深红底上突兀 */
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.el-menu {
+  background-color: var(--app-bg-sider);
+  border-right: none;
+  padding: 8px 0;
+  /* 宽松化：行高 46px、层级缩进 18px，整体呼吸感更足 */
+  --el-menu-item-height: 46px;
+  --el-menu-sub-item-height: 44px;
+  --el-menu-base-level-padding: 18px;
+  --el-menu-level-padding: 16px;
+  --el-menu-bg-color: var(--app-bg-sider);
+  --el-menu-hover-bg-color: var(--app-sider-hover-bg);
+  --el-menu-text-color: var(--app-sider-text);
+  --el-menu-active-color: var(--app-sider-active-text);
+}
+
+/* 菜单项：方正小圆角 + 均匀留白，去掉圆润的胶囊感 */
+.el-menu-item,
+.el-sub-menu__title {
+  height: 46px;
+  line-height: 46px;
+  margin: 3px 10px;
+  border-radius: 3px;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.el-menu-item span,
+.el-sub-menu__title span {
+  line-height: inherit;
+}
+
+.el-menu-item .el-icon,
+.el-sub-menu__title .el-icon {
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.el-menu-item,
+.el-sub-menu {
+  span,
+  .el-icon {
+    color: var(--app-sider-text) !important;
+  }
+}
+
+/* 悬停：极浅薄荷底，文字转深青 */
+.el-sub-menu__title:hover,
+.el-menu-item:hover {
+  background-color: var(--app-sider-hover-bg) !important;
+
+  span,
+  .el-icon {
+    color: var(--app-sider-active-text) !important;
+  }
+
+  .icons {
+    fill: var(--app-sider-active-text);
+  }
+}
+
+/* 选中：深色块 + 左侧竖向标记条，端正严肃的常见表达 */
+.el-menu-item.is-active,
+.el-sub-menu__title.el-active {
+  background-color: var(--app-sider-active-bg) !important;
+  box-shadow: inset 3px 0 0 0 var(--app-sider-active-text);
+
+  span,
+  .el-icon {
+    color: var(--app-sider-active-text) !important;
+    font-weight: 500;
+  }
+}
+
+.el-menu-item.is-active {
+  .el-icon {
+    color: var(--app-sider-active-text) !important;
+  }
+
+  .icons {
+    fill: var(--app-sider-active-text);
+  }
+}
+
+/* 折叠态下的选中项 */
+.el-menu--vertical.el-menu--collapse {
+  .el-sub-menu.is-active {
+    background: var(--app-sider-active-bg);
+
+    span,
+    .el-icon {
+      color: var(--app-sider-active-text) !important;
+    }
+
+    .icons {
+      fill: var(--app-sider-active-text);
+    }
+  }
+}
+
+/* 菜单图标：默认稍暗的白，悬停/选中由上面的规则接管 */
+.icons {
+  fill: var(--app-sider-icon);
+  margin-right: 12px;
+  transition: fill 0.2s ease;
+}
+
+.icons + span {
+  margin-left: 10px;
+}
+
+/* ==================================================================
+ * 顶部栏（.header）内部元素
+ * 背景与描边在 layout.module.scss 定义，这里只负责内容配色
+ * ================================================================ */
+.header {
+  .svg-size {
+    color: var(--app-header-text);
+    transition: color 0.2s ease;
+  }
+
+  .svg-size:hover {
+    color: var(--app-header-accent);
+  }
+
+  .el-dropdown-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--app-header-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .el-dropdown-link:hover,
+  .el-dropdown-link:focus {
+    color: var(--app-header-accent);
+  }
+
+  .el-switch {
+    --el-switch-on-color: var(--app-header-accent);
+    --el-switch-off-color: #cbd5e1;
+  }
+
+  .el-avatar {
+    border: 1px solid var(--app-border);
+  }
+}
+
+/* ==================================================================
+ * 面包屑条
+ * ================================================================ */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  height: $breadcrumb-height;
+  background: $breadcrumb-bg;
+  padding-left: 20px;
+  color: var(--app-text-regular);
+
+  .el-breadcrumb {
+    font-size: 14px;
+  }
+
+  .el-breadcrumb__inner,
+  .el-breadcrumb__inner a {
+    /* 面包屑在淡青顶栏内，文字用偏青的灰，避免与冷灰背景撞色 */
+    color: #7d9698;
+    font-weight: 400 !important;
+  }
+
+  .el-breadcrumb__item:last-child .el-breadcrumb__inner {
+    color: var(--app-header-text);
+    font-weight: 500 !important;
+  }
+
+  #hamburger-collapse {
+    color: var(--app-header-text);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  #hamburger-collapse:hover {
+    color: var(--app-header-accent);
+  }
+}
+
+.route-list {
+  height: $router-list-height;
+  background-color: $router-list-bg;
+}
+
+.el-main.main {
+  padding-top: 0px;
+}
+
+.route-list {
+  display: flex;
+  justify-content: flex-start;
+  height: 50px;
+  align-items: center;
+}
+
+.header .el-dialog__header {
+  text-align: left;
+}
+
+.box-card {
+  width: 50%;
+}
+
+.el-main {
+  padding: 0px;
+}
+
+.page-header {
+  padding: 10px 0 10px 0;
+  background-color: var(--app-bg-surface);
+}
+
+.dark {
+  .page-header {
+    background-color: inherit;
+  }
+}
+
+.animate__fadeOut {
+  display: none;
+}

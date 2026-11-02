@@ -21,16 +21,38 @@ router.beforeEach((to: any, from: any, next: any) => {
         } else {
             // 这里需要根据token 获取用户请求
             if (store.menuList.length == 0) {
-                const users = Cookies.get("userinfo");
-                const info=users != undefined && JSON.parse(users);
+                // userinfo 存在本地 cookie，可能残留或被改坏，解析失败时按未登录处理，避免守卫直接抛错卡死
+                let info: any = null;
+                try {
+                    const users = Cookies.get("userinfo");
+                    info = users ? JSON.parse(users) : null;
+                } catch (e) {
+                    console.warn("userinfo cookie 解析失败，按未登录处理", e);
+                    info = null;
+                }
+                if (!info || !info.id) {
+                    Cookies.set("token", "");
+                    next({ path: '/login', replace: true });
+                    return;
+                }
                 user.setUserInfo({name:info.userName,phone:info.phone,work:info.work,avatar:info.avatar,id:info.id});
-                const id = users != undefined && JSON.parse(users).id;
-                store.getMenuList(id).then(() => {
+
+                store.getMenuList(info.id).then(() => {
+
                     store.routers.forEach(item => {
                         router.addRoute(item);
-                    })  
+                    })
+
+                    console.log(router.getRoutes(),6666)
 
                     next({ path:to.path, replace: true })
+                }).catch((err: any) => {
+                    // 兜底：菜单接口失败或超时（axios timeout 5s）时不处理的话，
+                    // next() 永远不会被调用，首页 loading 动画就会一直转下去。
+                    // 这里清掉失效 token 并跳到登录页，保证守卫一定放行。
+                    console.error("获取菜单失败，跳转登录页：", err);
+                    Cookies.set("token", "");
+                    next({ path: '/login', replace: true });
                 });
 
             } else {

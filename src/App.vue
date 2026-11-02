@@ -15,6 +15,7 @@ Cookies.set("lang", lang.value);
 <template>
   <el-config-provider
     :size="size"
+    :z-index="3000"
     :button="{ autoInsertSpace: true }"
     :locale="lang == 'en' ? { ...dictMap.en, ...en } : { ...zhCn, ...dictMap.ch }"
   >

@@ -89,7 +89,7 @@ const handleClick = (row: any, column: any) => {
 
 const handleAdd = () => {
     dialogVisible.value = true;
-    Object.keys(formData).length > 0 && Object.keys(formData).forEach(item => {
+    if (Object.keys(formData).length > 0) Object.keys(formData).forEach(item => {
         formData[item] = '';
     })
 }
@@ -149,6 +149,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <div class="page-column">
   <From
     :form-field="formConfig"
     :inline="true"
@@ -208,4 +209,5 @@ onMounted(() => {
     :page-size="pageSize"
     :total="total"
   />
+  </div>
 </template>

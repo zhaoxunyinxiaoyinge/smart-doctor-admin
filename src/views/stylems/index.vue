@@ -45,7 +45,8 @@ const fileBase = (file: any) => {
       </template>
       <div class="img-box">
         <el-image :src="user.userinfo.avatar" style="width: 260px;margin-right: 50px;" />
-        <VueCopper :file="file" :url="user.userinfo.avatar" />
+        <!-- 这里功能不完善，暂时关闭 -->
+        <!-- <VueCopper :file="file" :url="user.userinfo.avatar" /> -->
       </div>
       <div>
         <el-upload name="file" class="upload-demo" action="#" :show-file-list="false" :http-request="myUpload"
@@ -59,7 +60,6 @@ const fileBase = (file: any) => {
             </div>
           </template>
         </el-upload>
-        <el-button type="primary">确定裁剪图片</el-button>
       </div>
       <div><span>姓名:</span><span>{{ user.userinfo.name }}</span></div>
       <div><span>职务:</span><span>{{ user.userinfo.work }}</span></div>

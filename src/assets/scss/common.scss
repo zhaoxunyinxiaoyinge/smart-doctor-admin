@@ -28,6 +28,16 @@
    overflow: hidden;
 }
 
+/* 表格页通用骨架：让页面占满 route-content 的固定高度，
+   使 .flex-1 的 flex:1 真正生效——el-table height="100%" 首次测量即为准确值，
+   消除初次加载时表格二次布局导致的"上挤"跳动 */
+.page-column {
+   display: flex;
+   flex-direction: column;
+   height: 100%;
+   box-sizing: border-box;
+}
+
 .justifly-center {
    justify-content: center;
 }
@@ -52,11 +62,7 @@
 }
 
 
-.test{
-   background-color: aquamarine;
- }
-
- .white {
+ .text-black {
    color:#000;
  }
 

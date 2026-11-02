@@ -6,7 +6,7 @@ import {
   PropType,
 } from "vue";
 import SvgIcon from '@/components/icons/svg-icon.vue';
-import path from "path";
+import { resolvePath } from "@/utils/resolvePath";
 
 interface List {
   path: string,
@@ -62,7 +62,7 @@ const SitemBar = defineComponent({
     };
 
     const resovlePath = (val: string) => {
-      return path.resolve(props.basePath, val)
+      return resolvePath(props.basePath, val)
     }
 
     const slot = {

@@ -3,9 +3,9 @@ import {reactive,ref} from "vue";
   interface TablePropTypes<T=any> {
     width?:string|undefined|number,
     label:string|undefined,
-    format?:(row:T)=>string,
+    format?:(row:T,col?:any,cellValue?:any)=>any,
     prop:string,
-    template?:boolean
+    template?:boolean|string
   }
 
 const useTable=()=>{
@@ -66,14 +66,23 @@ const useTable=()=>{
           cancelButtonText: '取消',
           type: 'warning',
       }
-  ).then(() => { return deleteFunction(id) }).then(() => {
+  ).then(() => { return deleteFunction(id) }).then((res) => {
+      // 后端 code!=1（如数据不存在）不算删除成功，别再误报"已完成删除"
+      if (res && res.code != 1) {
+          ElMessage.error(res.msg || '删除失败');
+          return;
+      }
       getData(data)
-      ElMessage({  
+      ElMessage({
           type: 'success',
           message: '已完成删除',
       })
   }).catch(err => {
-      console.log(err);
+      // ElMessageBox 点"取消"走 reject('cancel')，静默即可；真错误要提示出来
+      if (err !== 'cancel' && err !== 'close') {
+          console.log(err);
+          ElMessage.error('删除请求失败，请检查网络或重新登录');
+      }
   })
 }
 

@@ -7,7 +7,7 @@ const theme=defineStore(names.THEME,{
         return {
             layout:ref<Component>(),
             layoutName:ref<"vertical"|"classic"|"transverse"|"columns">('vertical'),
-            themeColor:ref<string>("#409eff"),
+            themeColor:ref<string>("#2563eb"),
             grayscale:false,
             saturate:false,
             gray:ref<string>(''),

@@ -27,7 +27,7 @@
     "lib": ["ESNext", "DOM","es2015"],
     "types": ["node"],
     "typeRoots": ["node_modules/@types"],
-    // "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "paths": {
       "@/*":["src/*"]

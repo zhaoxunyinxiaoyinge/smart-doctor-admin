@@ -44,7 +44,7 @@ const [handleImport] = useHeader({ name: props.name, url: props.url });
     >
       <el-icon>
         <Plus />
-      </el-icon>新增
+      </el-icon>{{ $t("common.add") }}
     </el-button>
     <div class="margin-right-20">
       <el-button
@@ -54,7 +54,7 @@ const [handleImport] = useHeader({ name: props.name, url: props.url });
       >
         <el-icon>
           <Printer />
-        </el-icon>打印
+        </el-icon>{{ $t("common.print") }}
       </el-button>
       <el-button
         v-if="props.export"
@@ -64,7 +64,7 @@ const [handleImport] = useHeader({ name: props.name, url: props.url });
       >
         <el-icon>
           <Files />
-        </el-icon>导出
+        </el-icon>{{ $t("common.export") }}
       </el-button>
     </div>
   </div>

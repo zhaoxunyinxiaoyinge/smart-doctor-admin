@@ -4,36 +4,45 @@ import PageHeader from "@/components/pageHeader/index.vue";
 import Pagetions from "@/components/pagetions/index.vue";
 import { useTable } from "@/hooks/useTable";
 import { onMounted, reactive } from "vue";
+import { ElMessage } from "element-plus";
 import Edit from "./components/CarouseEdit.vue";
-import { getData, postData, putData,deleteData } from "@/views/goods/api/index";
+import { getBannerData, postBannerData, putBannerData, deleteBannerData } from "@/views/goods/api/index";
 
 const listQuery = reactive({ page: 1, pageSize: 10, total: 0 });
 const form = ref<typeof Form>();
 
 const list = reactive<Array<{[key:string]:any}>>([]);
-const formField = reactive([{ label: "babaner名称", name: "name", type: "input", width: 100 },
-{ label: "是否可用", name: 'status', type: 'select', width: 100, options: [{ label: "是", value: 1 }, { label: '否', value: 0 }] }]);
+// 搜索条件：标题 / 状态（对应 /api/mobile/banner 的 title、status 查询参数）
+const formField = reactive([{ label: "标题", name: "title", type: "input", width: 100 },
+{ label: "状态", name: 'status', type: 'select', width: 100, options: [{ label: "启用", value: 1 }, { label: '禁用', value: 0 }] }]);
 const { initTableConfig, tableConfig,handleDelete } = useTable();
 
 const dialogVisible = ref(false);
 const title = ref("新增");
-const editConfig = reactive([{ label: '名称', name: 'name', type: "input", width: 100 }, {
-  width: 100, type: "select", label: "状态", name: "status",
-  options: [{ label: "是", value: 1 }, { label: "否", value: 0 }]
-}, { width: 100, label: "图标", name: "imgUrl", type: 'upload' }]);
+// 编辑弹窗字段：对应 banners 表（id/image/goods_id/title/sub_title/sort/status）
+const editConfig = reactive([{ label: '标题', name: 'title', type: "input", width: 100 },
+{ label: '副标题', name: 'subTitle', type: "input", width: 100 },
+{ label: '商品ID', name: 'goodsId', type: "input", width: 100 },
+{ label: '排序', name: 'sort', type: "input", width: 100 },
+{ width: 100, type: "select", label: "状态", name: "status",
+  options: [{ label: "启用", value: 1 }, { label: "禁用", value: 0 }]
+}, { width: 100, label: "图片", name: 'image', type: 'upload' }]);
 
 const editData = reactive({});
 
 onMounted(async () => {
-  initTableConfig([{ label: "id", prop: "id" }, { label: "name", prop: "name" },
-  { label: "status", prop: "status", format: (row) => row.status == 1 ? '正在使用' : '未使用' }, { label: "icon", prop: "imgUrl" }, { label: "updateTime", width: 150, prop: "updateTime" }, { label: "createTime", width: 150, prop: "createTime" }
+  initTableConfig([{ label: "id", prop: "id", width: 80 }, { label: "标题", prop: "title" },
+  { label: "副标题", prop: "subTitle" }, { label: "商品ID", prop: "goodsId", width: 90 },
+  { label: "排序", prop: "sort", width: 80 },
+  { label: "状态", prop: "status", width: 90, format: (row) => row.status == 1 ? '启用' : '禁用' },
+  { label: "图片", prop: "image", width: 110 }
   ]);
   await getList({});
 })
 
 const getList = async (params) => {
   list.length = 0;
-  getData({ ...params, page: listQuery.page, pageSize: listQuery.pageSize }).then(res => {
+  getBannerData({ ...params, page: listQuery.page, pageSize: listQuery.pageSize }).then(res => {
     if (res.code == 1) {
       list.push(...res.data.records);
       listQuery.page = res.data.current;
@@ -55,6 +64,8 @@ const handleSearch = (formData) => {
 
 const handleAdd = () => {
   title.value = '新增'
+  // 清掉上一次编辑残留的数据，避免新增时带出旧值
+  Object.keys(editData).forEach(key => delete editData[key]);
   dialogVisible.value = true;
 }
 
@@ -63,10 +74,32 @@ const handleClose = () => {
 }
 
 const handleConfirm = async (data) => {
+  // 必填校验：banners 表 title / image 不允许为空
+  if (!data.title) {
+    ElMessage.warning('请填写标题');
+    return;
+  }
+  if (!data.image) {
+    ElMessage.warning('请上传图片');
+    return;
+  }
+  // 后端 banners 表列名是 snake_case，提交前转换
+  const payload: Record<string, any> = {
+    ...data,
+    goods_id: Number(data.goodsId) || 0,
+    sub_title: data.subTitle ?? '',
+    sort: Number(data.sort) || 0,
+    status: Number(data.status) || 0,
+  };
+  delete payload.goodsId;
+  delete payload.subTitle;
+
   if (title.value == '新增') {
-    await postData(data);
+    await postBannerData(payload);
+    ElMessage.success('新增成功');
   } else {
-    await putData(data);
+    await putBannerData(payload);
+    ElMessage.success('编辑成功');
   }
 
   dialogVisible.value = false;
@@ -103,7 +136,7 @@ const handleDeletes = (id) => {
   if(form.value!=null){
       querySelectData={...form.value.formData,...querySelectData}
   }
-  handleDelete(id,deleteData,getList,querySelectData);
+  handleDelete(id,deleteBannerData,getList,querySelectData);
 }
 
 const handleSelectionChange=()=>{
@@ -136,7 +169,7 @@ const handleSelectionChange=()=>{
       />
       <template v-for="(item,index) in tableConfig">
         <el-table-column
-          v-if="item.label == 'icon'"
+          v-if="item.label == '图片'"
           :key="item.label"
           :width="item.width"
           :label="item.label"
@@ -145,8 +178,8 @@ const handleSelectionChange=()=>{
           <template #default="scope">
             <span v-show-image>
               <el-image
-                :src="scope.row['imgUrl']"
-                style="width:50px"
+                :src="scope.row.image"
+                style="width:80px"
               />
             </span>
           </template>

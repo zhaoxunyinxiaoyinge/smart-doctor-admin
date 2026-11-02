@@ -7,7 +7,7 @@ import {
 } from "vue";
 import { userstore } from "@/store/expmle";
 import SvgIcon from '@/components/icons/svg-icon.vue';
-import path from "path";
+import { resolvePath } from "@/utils/resolvePath";
 import { isOutLink } from "@/utils/common"
 
 interface List {
@@ -69,7 +69,7 @@ const SitemBar = defineComponent({
 
       // 当显示的路由子菜单只有一个时的情况
       if (onlyChild.length == 1) {
-        onlyOneChild.path = path.resolve(props.basePath, onlyOneChild.path)
+        onlyOneChild.path = resolvePath(props.basePath, onlyOneChild.path)
         return true;
       }
 
@@ -84,7 +84,7 @@ const SitemBar = defineComponent({
     };
 
     const resovlePath = (val: string) => {
-      return path.resolve(props.basePath, val)
+      return resolvePath(props.basePath, val)
     }
 
     const slot = {

@@ -1,7 +1,13 @@
 <script lang="ts" setup>
 import { showImage as vShowImage } from "@/utils/index";
 import { ElTable, ElMessageBox, ElMessage, ElNotification, ElInput, UploadUserFile } from "element-plus"
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, nextTick } from "vue";
+
+// legacy 模式下 script 里不能直接用 $t，统一走 i18n.global.t（模板里仍可用 $t）
+import { i18n } from "@/lang/index";
+
+// 包一层箭头函数，避免解构丢失 this，同时保证 computed 内的响应式追踪
+const t = (key: string, ...args: any[]) => (i18n as any).global.t(key, ...args);
 
 import DefineForm from "@/components/forms/index.vue";
 import Upload from "@/components/upload/index.vue";
@@ -39,7 +45,8 @@ interface formField {
 let list = reactive<Array<dataList>>([]);
 const dialogFormVisible = ref<boolean>(false);
 let form = reactive<Partial<dataList>>({})
-let title = ref("新增");
+// 弹窗模式：add=新增 edit=编辑（不再存中文文案，文案由 i18n 渲染）
+let mode = ref<"add" | "edit">("add");
 let fileList = reactive<UploadUserFile[]>([]);
 let defineProps = reactive({ label: "roleName", children: "children" });
 let treeData = reactive<any>([]);
@@ -49,26 +56,32 @@ onMounted(() => {
     getRoleLists();
 })
 
+// label 存 i18n key，渲染时再翻译，切换语言时 computed 会跟着重算
 const defineFormField = reactive<Array<formField>>([
     {
         type: 'input',
-        label: "用户名",
+        label: "user.userName",
         name: "userName",
         width: 120
     },
     {
         type: 'input',
-        label: "身份证号",
+        label: "user.idNum",
         name: "idNum",
         width: 120
     },
     {
         type: 'input',
-        label: "手机号",
+        label: "user.phone",
         name: "phone",
         width: 120
     }
 ])
+
+// 传给 DefineForm 的字段：把 key 翻译成当前语言的文案
+const formFieldI18n = computed(() =>
+    defineFormField.map((f) => ({ ...f, label: t(f.label) }))
+)
 
 const listQuery = reactive<{ page: number, pageSize: number, total: number }>({
     page: 1,
@@ -81,35 +94,37 @@ const tree = ref<typeof Tree | null>(null);
 const multeSelection = ref<InstanceType<typeof ElTable>>();
 const formId = ref<typeof DefineForm | null>(null);
 
+// label 存 i18n key，模板里用 $t(item.label) 渲染
 const tabelConfig = reactive([{
-    label: "用户名",
+    label: "user.userName",
     prop: 'userName',
 },
 {
-    label: '职业',
+    label: 'user.work',
     prop: 'work'
 },
 {
-    label: '手机号码',
+    label: 'user.phone',
     prop: 'phone'
 },
 {
-    label: '身份证号码',
+    label: 'user.idNum',
     prop: 'idNum'
 },
 {
-    label: '创建时间',
+    label: 'user.createTime',
     prop: 'createTime'
 },
 {
-    label: '更新时间',
+    label: 'user.updateTime',
     prop: 'updateTime'
 },
 {
-    label: '操作',
+    label: 'user.action',
     width: 250,
     template: 'template'
-}]);
+},
+]);
 
 const uploadCofig = reactive({
     authorization: Cookies.get("token")
@@ -157,10 +172,8 @@ const handleSearch = () => {
 
 const handleEdit = (val: dataList) => {
     fileList.length = 0;
-    title.value = "编辑";
-    if (val.id) {
-        getRoleUsers(val.id);
-    }
+    fileList.splice(0,1);
+    mode.value = "edit";
     form.id = val.id;
     form.userName = val.userName;
     form.phone = val.phone;
@@ -175,15 +188,20 @@ const handleEdit = (val: dataList) => {
     form.idNum = val.idNum;
     form.work = val.work;
     dialogFormVisible.value = true;
+    // 弹窗打开、Tree 渲染完成后才能回显勾选（否则 tree ref 还是 null）
+    const roleUserId = val.id;
+    if (roleUserId) {
+        nextTick(() => getRoleUsers(roleUserId));
+    }
 }
 
 const handleDelete = (id: number) => {
     ElMessageBox.confirm(
-        '此操作将会删除该条数据?',
-        '警告',
+        t('user.deleteConfirm'),
+        t('user.warning'),
         {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+            confirmButtonText: t('user.confirm'),
+            cancelButtonText: t('user.cancel'),
             type: 'warning',
         }
     ).then(() => { return deleteUser(id) }).then(() => {
@@ -191,7 +209,7 @@ const handleDelete = (id: number) => {
         getData(data)
         ElMessage({
             type: 'success',
-            message: 'Delete completed',
+            message: t('user.deleteSuccess'),
         })
     }).catch(err => {
         console.log(err);
@@ -204,7 +222,7 @@ const handleAdd = () => {
     if (form.id) {
         delete form.id;
     }
-    title.value = "新增";
+    mode.value = "add";
     form.userName = undefined;
     form.phone = "";
     form.idNum = undefined;
@@ -212,6 +230,7 @@ const handleAdd = () => {
     form.avatar = '';
     form.work = "";
     fileList.splice(0, 1);
+    fileList.length=0;
     if (tree.value) {
         tree.value?.clearChecked();
     }
@@ -219,36 +238,23 @@ const handleAdd = () => {
 }
 
 const handleCommit = () => {
-    let ids = tree.value?.getCheckedNodeKeys();
-    if (title.value == '新增') {
-        postUser({ ...form, ids }).then((res: any) => {
-            if (res.code == 1) {
-                ElNotification({
-                    title: 'Success',
-                    message: 'This is a success message',
-                    type: 'success',
-                })
-                let data = formId.value?.formData;
-                getData(data);
-            }
-        }).finally(() => {
-            dialogFormVisible.value = false;
-        })
-    } else {
-        putUser({ ...form, ids }).then((res: any) => {
-            if (res.code == 1) {
-                ElNotification({
-                    title: 'Success',
-                    message: 'This is a success message',
-                    type: 'success',
-                })
-                let data = formId.value?.formData;
-                getData(data);
-            }
-        }).finally(() => {
-            dialogFormVisible.value = false;
-        })
-    }
+    // 后端字段名是 roleIds，勾选的叶子 + 半选父节点一起提交
+    const roleIds = (tree.value?.getCheckedNodeKeys() ?? []).map(Number);
+    const isAdd = mode.value === 'add';
+    const req = isAdd ? postUser({ ...form, roleIds }) : putUser({ ...form, roleIds });
+    req.then((res: any) => {
+        if (res.code == 1) {
+            ElNotification({
+                title: t('user.success'),
+                message: isAdd ? t('user.addSuccess') : t('user.editSuccess'),
+                type: 'success',
+            })
+            let data = formId.value?.formData;
+            getData(data);
+        }
+    }).finally(() => {
+        dialogFormVisible.value = false;
+    })
 }
 
 const handleRefsh = () => {
@@ -271,10 +277,11 @@ const handleSize = (size: number) => {
 }
 
 const handleSuccess = (val: success) => {
+    fileList.splice(0,1);
     if (val.code == 1) {
         form.avatar = val.data;
     }
-    fileList.length = 0;
+    fileList.push({name:"img",url:val.data})
 }
 
 </script>
@@ -282,7 +289,7 @@ const handleSuccess = (val: success) => {
 <template>
   <define-form
     ref="formId"
-    :form-field="defineFormField"
+    :form-field="formFieldI18n"
     :inline="true"
     @search="handleSearch"
     @refsh="handleRefsh"
@@ -317,7 +324,7 @@ const handleSuccess = (val: success) => {
           v-if="!item.template"
           :key="item.label"
           :width="item.width"
-          :label="item.label"
+          :label="$t(item.label)"
           :prop="item.prop"
         >
           <template #default="scope">
@@ -335,20 +342,20 @@ const handleSuccess = (val: success) => {
         <el-table-column
           v-else
           :key="item.prop"
-          :label="item.label"
+          :label="$t(item.label)"
         >
           <template #default="scope">
             <el-button
               type="primary"
               @click="handleEdit(scope.row)"
             >
-              编辑
+              {{ $t("user.edit") }}
             </el-button>
             <el-button
               type="danger"
               @click="handleDelete(scope.row.id)"
             >
-              删除
+              {{ $t("user.del") }}
             </el-button>
           </template>
         </el-table-column>
@@ -357,11 +364,11 @@ const handleSuccess = (val: success) => {
     <el-dialog
       v-model="dialogFormVisible"
       custom-class="headers"
-      :title="title"
+      :title="mode === 'add' ? $t('user.add') : $t('user.edit')"
     >
       <el-form :model="form">
         <el-form-item
-          label="用户名"
+          :label="$t('user.userName')"
           :label-width="130"
         >
           <el-input
@@ -370,8 +377,8 @@ const handleSuccess = (val: success) => {
           />
         </el-form-item>
         <el-form-item
-          v-if="title == '新增'"
-          label="用户密码"
+          v-if="mode === 'add'"
+          :label="$t('user.password')"
           :label-width="130"
         >
           <el-input
@@ -380,42 +387,42 @@ const handleSuccess = (val: success) => {
           />
         </el-form-item>
         <el-form-item
-          label="用户头像"
+          :label="$t('user.avatar')"
           :label-width="130"
         >
           <Upload
             :limit="1"
             :file-list="fileList"
             :plus="false"
-            :show-file-list="false"
+            :show-file-list="true"
             :headers="uploadCofig"
             @success="handleSuccess"
           />
         </el-form-item>
 
         <el-form-item
-          label="电话号码"
+          :label="$t('user.phone')"
           :label-width="130"
         >
           <el-input v-model="form.phone" />
         </el-form-item>
 
         <el-form-item
-          label="职业"
+          :label="$t('user.work')"
           :label-width="130"
         >
           <el-input v-model="form.work" />
         </el-form-item>
 
         <el-form-item
-          label="身份证号码"
+          :label="$t('user.idNum')"
           :label-width="130"
         >
           <el-input v-model="form.idNum" />
         </el-form-item>
 
         <el-form-item
-          label="角色"
+          :label="$t('user.role')"
           :label-width="130"
         >
           <Tree
@@ -427,11 +434,11 @@ const handleSuccess = (val: success) => {
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
+          <el-button @click="dialogFormVisible = false">{{ $t("user.cancel") }}</el-button>
           <el-button
             type="primary"
             @click="handleCommit"
-          >提交</el-button>
+          >{{ $t("user.submit") }}</el-button>
         </span>
       </template>
     </el-dialog>

@@ -1,0 +1,6 @@
+node_modules
+dist
+dist-verify
+dist-broken-20261031
+.git
+.vite-cache-admin

@@ -5,11 +5,13 @@ import type { prop as Addconfig } from '@/components/forms/index.vue';
 
 
 const props=withDefaults(defineProps<{
+  inline?:boolean,
   dialogVisible:boolean,
   title: string,
   addConfig: Addconfig['formField'],
   initData?:object
 }>(),{
+  inline:false,
   dialogVisible:false,
   title:"新增",
   addConfig:()=>[],
@@ -38,15 +40,17 @@ const handleConfirm=()=>{
   <el-dialog
     :model-value="props.dialogVisible"
     :title="props.title"
-    width="50%"
+     width='60%'
+     @close="handleClose"
   >
     <DefineForm
       v-if="props.dialogVisible"
       ref="form"
-      :inline="false"
+      :inline="props.inline"
       :init-data="props.initData"
       :form-field="props.addConfig"
     /> 
+    <slot></slot>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>

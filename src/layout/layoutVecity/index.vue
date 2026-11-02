@@ -1,20 +1,33 @@
 <template>
   <div class="content">
-    <el-aside class="aside">
+    <!-- 宽度跟随折叠状态：展开 220px（留白更宽松），折叠后与菜单条对齐 64px -->
+    <el-aside class="aside" :width="store.isCollapse ? '64px' : '220px'">
       <el-scrollbar height="100vh">
         <section
           class="flex justifly-center align-items "
-          style="text-align: center;padding: 0;margin:0;height: 69px; border-bottom: 1px solid #eee;"
+          style="text-align: center;padding: 0;margin:0;height: 69px; border-bottom: 1px solid rgba(255,255,255,0.12);"
         >
-          <el-image
-            style="width:40px"
-            :fit="'contain'"
-            src="/lion.png"
-          />
+          <span class="logo-badge">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+              <path
+                d="M6 8h12l-1.2 11.2a1.6 1.6 0 0 1-1.6 1.4H8.8a1.6 1.6 0 0 1-1.6-1.4L6 8Z"
+                fill="#fff"
+                opacity=".95"
+              />
+              <path
+                d="M9 10V7a3 3 0 0 1 6 0v3"
+                stroke="#fff"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                fill="none"
+              />
+            </svg>
+          </span>
           <span
             v-if="!store.isCollapse"
-            class="white"
-          >医疗智慧系统</span>
+            class="text-black"
+            style="color:#ffffff;font-weight:600;font-size:16px;letter-spacing:0.5px;margin-left:10px;"
+          >智慧电商系统</span>
         </section>
         <side-bar />
       </el-scrollbar>
@@ -23,7 +36,7 @@
       <div class="header">
         <Header />
         <!-- 路由导航，和展开栏 ,面包屑-->
-        <section class="breaum">
+        <section class="breadcrumb">
           <el-icon
             id="hamburger-collapse"
             :size="24"
@@ -102,7 +115,7 @@ const contenClass = computed(() => {
 watch(route, function () {
   let len = breaList.length;
   breaList.splice(0, len,);
-  route.matched && route.matched.forEach(element => {
+  if (route.matched) route.matched.forEach(element => {
     if (element.meta.hidden && !breaList.includes(element.path)) {
       breaList.push(element)
     }
@@ -124,4 +137,18 @@ watch(route, function () {
 
 <style scoped lang="scss">
 @use "/src/assets/scss/layout.module.scss";
+
+/* 侧边栏顶部商务徽标：藏青渐变圆角方块 + 白色购物袋 */
+.logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 徽标配色跟随侧边栏深红主题（原为蓝色渐变） */
+  background: linear-gradient(135deg, #dc2626, #7f1d1d);
+  box-shadow: 0 4px 12px -4px rgba(220, 38, 38, 0.4);
+  flex: none;
+}
 </style>

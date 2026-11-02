@@ -4,7 +4,9 @@ import axios from "axios";
 
 let map = new Map<string, Canceler>();
 const getUrl = (config: AxiosRequestConfig) => {
-    return [config.method, qs.stringify(config.data), qs.stringify(config.params)].join("&");
+    // key 必须带 url：不同接口参数相同时（如 user 和 goods 都传 page=1&pageSize=500）
+    // 不带 url 会互相取消；带上后仅「同接口+同参数」才视为重复请求
+    return [config.url, config.method, qs.stringify(config.data), qs.stringify(config.params)].join("&");
 }
 class CreateCancle {
     /**
@@ -29,7 +31,7 @@ class CreateCancle {
         const url: string = getUrl(config);
         if (map.has(url)) {
             const cancel = map.get(url);
-            cancel && cancel();
+            cancel?.();
             map.delete(url);
         }
     }

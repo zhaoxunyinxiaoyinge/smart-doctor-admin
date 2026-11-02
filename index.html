@@ -5,12 +5,21 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/lion.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>智慧医院系统</title>
+  <title>智慧电商管理系统</title>
 </head>
 
 <body style="font-size: 14px;">
   <div id="app">
-    <img width="100%" height="100%" src="/loading.gif" />
+    <!--
+      首屏 loading 图：原 loading.gif 3.49 MB（1364x344 / 112 帧），GIF 无法 gzip 压缩，
+      是首屏最大的一块资源。这里改成优先加载压缩后的动画 WebP（0.70 MB，画质肉眼无差异），
+      不支持 WebP 的老浏览器（IE11 / Safari < 14）自动回退到原 GIF。
+      验证无误后可把 loading.gif 从 public/ 删除。
+    -->
+    <picture>
+      <source srcset="/loading.webp" type="image/webp" />
+      <img width="100%" height="100%" src="/loading.gif" />
+    </picture>
   </div>
   <script type="module" src="/src/main.ts"></script>
   <script>

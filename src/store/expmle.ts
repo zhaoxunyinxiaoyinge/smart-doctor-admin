@@ -140,26 +140,25 @@ export const userstore = defineStore(names.USER, {
         },
 
         filterAsyncRoutes(routes: { hidden: boolean, component: string | Component, parentId: number, children?: any, routePath: string, menuName: string, icon: string }[]) {
-        //   const modules = import.meta.glob('../views/**/[a-z]*.vue');
+          const modules = import.meta.glob([
+                '/src/views/**/*.vue',
+                '!/src/views/**/components/**',   // 局部组件目录
+                '!/src/views/**/*.spec.vue',
+                ]);
             const res: RouteRecordRaw[] = [];
             routes.forEach(route => {
                 const tmp: any = {
                     ...route,
                 };
 
-                if (tmp.parentId == 0&&(tmp.component=='layout'||tmp.component=='')) {
+                if (tmp.component === null || tmp.component === undefined || tmp.component === '' || tmp.component === 'layout') {
                     tmp.component = Layout;
                 }
 
-                 // 添加路由懒加载
-                if (tmp.component && tmp.parentId != 0) {
-                    const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
-                   tmp.component =import(this.loadviewPath(componentPath));
-                }
-                // 添加路由懒加载
-                if(tmp.component&&tmp.parentId==0&&tmp.component!==Layout){
-                    const componentPath = typeof tmp.component == 'string' ? _.cloneDeep(tmp.component) : "";
-                    tmp.component =import(this.loadviewPath(componentPath));
+                const wrapLayout = tmp.parentId == 0 && typeof tmp.component === 'string' && !tmp.isOutLink;
+
+                if (typeof tmp.component === 'string') {
+                    tmp.component =this.loadviewPath(_.cloneDeep(tmp.component),modules);
                 }
 
                 tmp.meta.title = tmp.menuName;
@@ -180,17 +179,19 @@ export const userstore = defineStore(names.USER, {
                 if (tmp.children && tmp.children.length > 0) {
                     tmp.children = this.filterAsyncRoutes(_.cloneDeep(tmp.children));
                 }
+
+                if (wrapLayout) {
+                    tmp.children = [{ ...tmp, path: '', name: undefined }];
+                    tmp.component = Layout;
+                }
                 res.push(tmp);
             });
             return res;
         },
 
-        // loadView(componentName: string,modules) {     
-        //     return modules[".."+componentName+".vue"];
-        // },
-
-        loadviewPath(componentName:string){
-            return `/src${componentName}.vue`;
+        loadviewPath(componentName:string,modules){
+            const componentPath=`/src${componentName}.vue`;
+            return modules[componentPath]??(() => defineAsyncComponent(() => import('@/views/notFound/notFound.vue'))); 
         }
 
     }

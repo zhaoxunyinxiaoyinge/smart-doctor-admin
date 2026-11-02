@@ -561,7 +561,7 @@ const handleResize = () => {
           <div class="sub-title">
             目标评估
           </div>
-          <div class="sencond-text">
+          <div class="second-text">
             有望达到预期
           </div>
           <div
@@ -696,7 +696,7 @@ const handleResize = () => {
         font-size: 12px;
     }
 
-    .sencond-text {
+    .second-text {
         font-size: 20px;
         color: rgba(40, 45, 48, 1);
         margin-bottom: 20px;

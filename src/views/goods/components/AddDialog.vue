@@ -3,10 +3,12 @@ import ViewDialog from "./viewDialog.vue"
 import type { prop as Addconfig } from '@/components/forms/index.vue';
 //新增逻辑
 const props=withDefaults(defineProps<{
+  inline?:boolean,
   dialogVisible:boolean,
   title: string,
   addConfig: Addconfig['formField'],
 }>(),{
+  inline:false,
   dialogVisible:false,
   title:"新增",
   addConfig:()=>[]
@@ -34,8 +36,11 @@ const handleAddConfirm=(formData)=>{
   <ViewDialog
     :dialog-visible="props.dialogVisible"
     :add-config="props.addConfig"
-    :title="'新增'"
+    :title="props.title"
+    :inline="props.inline"
     @update:dialogVisible="handleClose"
     @confirm="handleAddConfirm"
-  />
+  >
+  <slot></slot>
+  </ViewDialog>
 </template>

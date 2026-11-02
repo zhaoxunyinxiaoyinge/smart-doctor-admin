@@ -1,0 +1,32 @@
+/* ------------------------------------------------------------------
+ * Element Plus 主题变量覆盖（仅供 vite additionalData 全局注入）
+ * 商务配色约定：
+ *   primary 宝蓝（商务藏青系），用于填充与交互强调
+ *   success / warning / danger 采用降饱和的柔和语义色
+ *   info 回落中性石板灰，避免与主色抢占视觉焦点
+ *
+ * 注意：本文件只允许包含 @forward 配置，不能写任何 CSS 规则——
+ * 它会被注入到每一个 SCSS 编译单元，写了规则会重复输出 N 次。
+ * ---------------------------------------------------------------- */
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #2563eb,
+    ),
+    'success': (
+      'base': #10b981,
+    ),
+    'warning': (
+      'base': #f59e0b,
+    ),
+    'danger': (
+      'base': #f87171,
+    ),
+    'error': (
+      'base': #f87171,
+    ),
+    'info': (
+      'base': #64748b,
+    )
+  ),
+);

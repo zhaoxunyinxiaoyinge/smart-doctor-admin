@@ -32,8 +32,11 @@ const handleClose=()=>{
   <ViewDialog
     :dialog-visible="props.dialogVisible"
     :add-config="props.addConfig"
+    :inline="false"
     :title="'编辑'"
     :init-data="props.formData"
     @update:dialogVisible="handleClose"
-  />
+  >
+  <slot></slot>
+  </ViewDialog>
 </template>

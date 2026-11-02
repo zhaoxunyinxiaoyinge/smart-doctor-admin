@@ -10,7 +10,7 @@ import RouteMain from "@/layout/components/main/index.vue";
 
 import { theme } from "@/store/theme";
 import Cookies from "js-cookie";
-import path from "path";
+import { resolvePath } from "@/utils/resolvePath";
 
 type List = {
     path: string,
@@ -50,7 +50,7 @@ const mainList = computed(() => {
                 path: item.children[0].path,
                 meta: item.children[0].meta,
                 children: item.children[0].children,
-                levelT: path.resolve(item.path, item.children[0].path),
+                levelT: resolvePath(item.path, item.children[0].path),
                 basePath: item.path
             }
         } else {
@@ -76,15 +76,15 @@ const contenClass = computed(() => {
 
 const activeMainMenuList = computed(() => {
     let route: any[] = [];
-    mainList.value.length > 0 && mainList.value.forEach(items => {
+    if (mainList.value.length > 0) mainList.value.forEach(items => {
         if (items && activeManMenu.value === (items.levelT) && items.path != '/') {
             activeManMenu.value = items.levelT;
-            items.children && route.push(...items.children);
+            if (items.children) route.push(...items.children);
         } else if (activeManMenu.value == '/' && items && items.path == '/') {
-            items.children && items.children.forEach((sItem) => {
+            if (items.children) items.children.forEach((sItem) => {
                 sItem.basePath = items.levelT as string
             })
-            items.children && route.push(...items.children);
+            if (items.children) route.push(...items.children);
         }
     })
     return route;
@@ -93,7 +93,7 @@ const activeMainMenuList = computed(() => {
 const handleMenu = (val: List) => {
     activeManMenu.value = val.levelT as string;
        if (val.children && val.children.length == 0) { 
-           val.levelT && router.push(val.levelT);
+           if (val.levelT) router.push(val.levelT);
     }else if(val.children==undefined){
       console.log()
         router.push(val.path)
@@ -104,7 +104,7 @@ watchEffect(() => {
   console.log(mainList)
     let len = breaList.length;
     breaList.splice(0, len,)
-    route.matched && route.matched.forEach(element => {
+    if (route.matched) route.matched.forEach(element => {
         if (element.meta.hidden && !breaList.includes(element.path)) {
             breaList.push(element)
         }

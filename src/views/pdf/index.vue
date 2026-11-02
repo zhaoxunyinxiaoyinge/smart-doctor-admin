@@ -3,9 +3,11 @@ import { onMounted} from "vue";
 import {previewPdf} from "@/hooks/usePdf";
 
 const {loadFile}=previewPdf();
+const pdfAddress="http://localhost:8083/public/test.pdf";
+
 onMounted(async() => {
   const canvas=document.getElementById("canvas");
-   await loadFile('http://localhost:8083/public/test.pdf',canvas as HTMLCanvasElement);
+   await loadFile(pdfAddress,canvas as HTMLCanvasElement);
 })
 </script>
 

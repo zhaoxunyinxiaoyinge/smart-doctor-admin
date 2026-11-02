@@ -19,7 +19,7 @@ const breaList = inject<Array<List>>('breakList');
 </script>
 
 <template>
-  <section class="breaum">
+  <section class="breadcrumb">
     <el-breadcrumb
       v-if="themes.isBrearum"     
       id="hamburger-container"
