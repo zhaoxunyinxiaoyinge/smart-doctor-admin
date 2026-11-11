@@ -216,8 +216,6 @@ const handleDelete = (id: number) => {
     })
 }
 
-
-
 const handleAdd = () => {
     if (form.id) {
         delete form.id;
@@ -229,7 +227,7 @@ const handleAdd = () => {
     form.passWord = "";
     form.avatar = '';
     form.work = "";
-    fileList.splice(0, 1);
+    fileList.splice(0,1);
     fileList.length=0;
     if (tree.value) {
         tree.value?.clearChecked();
@@ -294,6 +292,7 @@ const handleSuccess = (val: success) => {
     @search="handleSearch"
     @refsh="handleRefsh"
   />
+  
   <PageHeader
     :url="'/api/user/import'"
     :name="'user'"
@@ -362,6 +361,7 @@ const handleSuccess = (val: success) => {
       </template>
     </el-table>
     <el-dialog
+    v-if="dialogFormVisible"
       v-model="dialogFormVisible"
       custom-class="headers"
       :title="mode === 'add' ? $t('user.add') : $t('user.edit')"

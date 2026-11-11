@@ -14,7 +14,7 @@ const serve: AxiosInstance = axios.create({
 });
 
 serve.defaults.headers.post['Content-Type'] = 'application/json';
-serve.defaults.baseURL ="/";
+serve.defaults.baseURL ='/';
 
 
 serve.interceptors.request.use((config: any) => {

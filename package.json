@@ -17,6 +17,7 @@
     "go": "vite --debug transform"
   },
   "dependencies": {
+    "@ai-sdk/vue": "^4.0.169",
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^17.8.1",
     "@element-plus/icons-vue": "^2.3.1",
@@ -36,6 +37,7 @@
     "@vueuse/core": "^8.9.4",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.12",
+    "ai": "^7.0.169",
     "animate.css": "^4.1.1",
     "axios": "^0.26.1",
     "clipboard": "^2.0.11",

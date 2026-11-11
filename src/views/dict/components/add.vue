@@ -2,6 +2,7 @@
 import Form from "@/components/forms/index.vue";
 import { postDict, putDict } from "@/views/dict/api/index";
 import { ElMessage } from "element-plus";
+import { update } from "lodash";
 const formConfig = reactive([
     {
         type: 'input',
@@ -33,7 +34,8 @@ const handleClose = () => {
 const handleCommit = () => {
     if (props.isEdit) {
         const data = formId.value?.formData;
-        putDict({ ...data }).then((res: any) => {
+        const {updateTime,createTime,...datas}=data;
+        putDict({ ...datas }).then((res: any) => {
             if (res.code == 1) {
                 ElMessage.success("编辑成功");
                 eimt("update")

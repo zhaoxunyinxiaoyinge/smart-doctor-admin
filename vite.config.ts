@@ -95,12 +95,12 @@ export default defineConfig(({ command,mode}) => {
         port:parseInt(loadEnv(mode,"./").VITE_PORT) || 3000,
         proxy: {
           "^/api": {
-            target:loadEnv(mode,"./").VITE_API_URL || "http://localhost:7001",
+            target:loadEnv(mode,"./").VITE_API_URL+"/api" || "http://localhost:7001",
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, '')
           },
           "^/sapi2": {
-            target:"http://localhost:7001",
+            target:loadEnv(mode,"./").VITE_API_URL,
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/sapi2/, '')
           }

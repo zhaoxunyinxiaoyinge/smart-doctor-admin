@@ -1,908 +1,853 @@
 <script setup lang="ts">
-import { ElMessage, ElMessageBox } from 'element-plus'
-import type { UploadFile, UploadInstance } from 'element-plus'
-import {
-  ArrowDown,
-  Close,
-  CopyDocument,
-  Delete,
-  PictureFilled,
-  Promotion,
-  RefreshRight,
-  Service,
-} from '@element-plus/icons-vue'
-
-/* ------------------------------------------------------------------
- * MCP 对话页：标准聊天框布局
- * - 左侧为助手（系统）消息，右侧为用户消息
- * - 支持图片上传（本地预览 → 随消息一并提交）
- * - 保留原有流式接口契约：POST /sapi2/chat，SSE 增量返回 { content }
- * ---------------------------------------------------------------- */
-
-type Role = 'user' | 'assistant'
-type Status = 'loading' | 'done' | 'error'
-
-interface ChatImage {
-  id: string
-  name: string
-  size: number
-  type: string
-  dataUrl: string
-}
-
-interface Message {
-  id: number
-  role: Role
-  content: string
-  images: ChatImage[]
-  status: Status
-  time: string
-  /** 助手消息指向它所回应的用户消息 id，用于失败重试 */
-  replyTo?: number
-}
-
-/** 后端流式对话地址（沿用原接口，未改动契约） */
-const CHAT_ENDPOINT = '/sapi2/chat'
-/** SSE 结束标记 */
-const DONE_FLAG = '[DONE]'
-
-const MAX_PENDING = 4
-const MAX_FILE_SIZE = 5 * 1024 * 1024
-const COMPRESS_THRESHOLD = 1 * 1024 * 1024
-const ACCEPTED_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
-
-const suggestions = [
-  '你好，请介绍一下你能做什么',
-  '帮我梳理一次 MCP 工具调用的完整链路',
-  '接口偶发超时，一般从哪里开始排查',
-]
-
-const msg = ref('')
-const messages = ref<Message[]>([])
-const pendingImages = ref<ChatImage[]>([])
-const sending = ref(false)
-const shouldStick = ref(true)
-
-const uploadRef = ref<UploadInstance>()
-const scrollRef = ref<HTMLElement | null>(null)
-
-let seed = 0
-let controller: AbortController | null = null
-let rafId = 0
-
-const nextId = () => ++seed
-
-const stamp = () =>
-  new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-
-const canSend = computed(
-  () => !sending.value && (msg.value.trim().length > 0 || pendingImages.value.length > 0),
-)
-
-const statusText = computed(() => (sending.value ? '正在生成' : '在线'))
-
-/* ------------------------------ 滚动 ------------------------------ */
-
-const scrollToBottom = () => {
-  const el = scrollRef.value
-  if (el) el.scrollTop = el.scrollHeight
-}
-
-const scheduleScroll = () => {
-  if (!shouldStick.value || rafId) return
-  rafId = requestAnimationFrame(() => {
-    rafId = 0
-    scrollToBottom()
-  })
-}
-
-const onBodyScroll = () => {
-  const el = scrollRef.value
-  if (!el) return
-  shouldStick.value = el.scrollHeight - el.scrollTop - el.clientHeight < 80
-}
-
-const stickToBottom = () => {
-  shouldStick.value = true
-  const el = scrollRef.value
-  if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-}
-
-/* ------------------------------ 图片处理 ------------------------------ */
-
-const isImageFile = (file: File) =>
-  ACCEPTED_MIME.includes(file.type) || /\.(png|jpe?g|webp|gif)$/i.test(file.name)
-
-const readAsDataURL = (file: File) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(new Error('读取图片失败'))
-    reader.readAsDataURL(file)
-  })
-
-/**
- * 大图压缩：超过阈值时按最长边 1600px 等比缩放并转 JPEG，
- * 避免 base64 体积过大把请求撑爆。GIF 保留原图以免丢失动画。
- */
-const maybeCompress = (file: File, dataUrl: string) => {
-  if (file.type === 'image/gif' || file.size <= COMPRESS_THRESHOLD) return Promise.resolve(dataUrl)
-
-  return new Promise<string>((resolve) => {
-    const image = new Image()
-    image.onload = () => {
-      try {
-        const scale = Math.min(1, 1600 / Math.max(image.width, image.height))
-        if (scale >= 1) {
-          resolve(dataUrl)
-          return
-        }
-        const canvas = document.createElement('canvas')
-        canvas.width = Math.round(image.width * scale)
-        canvas.height = Math.round(image.height * scale)
-        const ctx = canvas.getContext('2d')
-        if (!ctx) {
-          resolve(dataUrl)
-          return
-        }
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
-        resolve(canvas.toDataURL('image/jpeg', 0.85))
-      } catch {
-        resolve(dataUrl)
-      }
-    }
-    image.onerror = () => resolve(dataUrl)
-    image.src = dataUrl
-  })
-}
-
-const handleFileChange = async (uploadFile: UploadFile) => {
-  // el-upload 以「累积列表」方式回调，处理完即清空内部列表，保证同一文件可重复选择
-  nextTick(() => uploadRef.value?.clearFiles())
-
-  const raw = uploadFile.raw
-  if (!raw) return
-
-  if (!isImageFile(raw)) {
-    ElMessage.warning(`「${raw.name}」不是受支持的图片格式`)
-    return
-  }
-  if (raw.size > MAX_FILE_SIZE) {
-    ElMessage.warning(`「${raw.name}」超过 ${MAX_FILE_SIZE / 1024 / 1024}MB 限制`)
-    return
-  }
-  if (pendingImages.value.length >= MAX_PENDING) {
-    ElMessage.warning(`最多上传 ${MAX_PENDING} 张图片`)
-    return
-  }
-
-  try {
-    const original = await readAsDataURL(raw)
-    const dataUrl = await maybeCompress(raw, original)
-    pendingImages.value.push({
-      id: `${raw.name}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      name: raw.name,
-      size: raw.size,
-      type: dataUrl.startsWith('data:image/jpeg') ? 'image/jpeg' : raw.type,
-      dataUrl,
-    })
-  } catch {
-    ElMessage.error(`「${raw.name}」读取失败，请重试`)
-  }
-}
-
-const removeImage = (id: string) => {
-  pendingImages.value = pendingImages.value.filter((item) => item.id !== id)
-}
-
-const formatSize = (bytes: number) =>
-  bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)}MB` : `${Math.ceil(bytes / 1024)}KB`
-
-/* ------------------------------ 流式对话 ------------------------------ */
-
-/** 解析单个 SSE 事件块，取出 delta 文本 */
-const parseSseBlock = (block: string) => {
-  let out = ''
-  for (const line of block.split('\n')) {
-    const trimmed = line.trim()
-    if (!trimmed.startsWith('data:')) continue
-    const payload = trimmed.slice(5).trim()
-    if (!payload || payload === DONE_FLAG) continue
-    if (!payload.startsWith('{')) {
-      // 兼容服务端直接下发纯文本分片的情况
-      out += payload
-      continue
-    }
-    try {
-      const data = JSON.parse(payload) as { content?: unknown }
-      if (data && typeof data.content === 'string' && data.content !== DONE_FLAG) out += data.content
-    } catch {
-      // 分片不完整，丢弃即可，下一轮会补齐
-    }
-  }
-  return out
-}
-
-const patchAssistant = (id: number, patch: (target: Message) => void) => {
-  const target = messages.value.find((item) => item.id === id)
-  if (target) patch(target)
-}
-
-/* ------------------------ Markdown 渲染 ------------------------ */
-// 大模型返回的是 Markdown，按纯文本渲染会出现 **加粗**、- 列表 等符号原样显示的问题。
-// 先整体 HTML 转义防注入，再做受限的 Markdown 转换，只输出本组件自定义的标签与 class。
-const escapeHtml = (text: string) =>
-  text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-
-/** 行内转换；行内代码先摘出占位，避免代码里的 * 号被误转换 */
-const renderInlineMd = (text: string) => {
-  const codes: string[] = []
-  let out = text.replace(/`([^`]+)`/g, (_match, code: string) => {
-    codes.push(code)
-    return `\u0000${codes.length - 1}\u0000`
-  })
-  out = out
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/(^|[^*\w])\*([^*\n]+)\*/g, '$1<em>$2</em>')
-    .replace(/~~([^~]+)~~/g, '<del>$1</del>')
-    .replace(
-      /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
-      '<a class="md-link" href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
-    )
-  // oxlint-disable-next-line no-control-regex —— \u0000 是刻意的占位符标记，用于找回被保护的代码段
-  return out.replace(/\u0000(\d+)\u0000/g, (_match, index: string) =>
-    `<code class="md-inline-code">${codes[Number(index)]}</code>`,
-  )
-}
-
-/** 块级解析；入参必须是「已经转义过」的行 */
-const parseMdBlocks = (lines: string[]) => {
-  const html: string[] = []
-  let i = 0
-
-  const isUlItem = (line: string) => /^\s*[-*+]\s+/.test(line)
-  const isOlItem = (line: string) => /^\s*\d+[.)]\s+/.test(line)
-  const isTableRow = (line: string) => /^\s*\|.*\|\s*$/.test(line)
-  const isTableDivider = (line: string) =>
-    /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(line)
-  const splitRow = (line: string) =>
-    line.trim().replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim())
-
-  while (i < lines.length) {
-    const line = lines[i]
-    if (!line.trim()) {
-      i++
-      continue
-    }
-
-    // 围栏代码块（流式输出时可能尚未闭合，剩余内容按代码处理）
-    if (/^\s*```/.test(line)) {
-      const lang = line.replace(/^\s*```/, '').trim()
-      i++
-      const buf: string[] = []
-      while (i < lines.length && !/^\s*```/.test(lines[i])) {
-        buf.push(lines[i])
-        i++
-      }
-      if (i < lines.length) i++ // 跳过结束的 ```
-      html.push(
-        `<pre class="md-pre"><code${lang ? ` data-lang="${escapeHtml(lang)}"` : ''}>${buf.join('\n')}</code></pre>`,
-      )
-      continue
-    }
-
-    // 标题（# 的层级映射为 h3 起步，避免气泡内标题过大）
-    const heading = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/)
-    if (heading) {
-      const level = Math.min(heading[1].length + 2, 6)
-      html.push(`<h${level} class="md-heading">${renderInlineMd(heading[2])}</h${level}>`)
-      i++
-      continue
-    }
-
-    // 分隔线
-    if (/^\s*([-*_])\1{2,}\s*$/.test(line)) {
-      html.push('<hr class="md-hr" />')
-      i++
-      continue
-    }
-
-    // 引用（转义后 > 变成 &gt;）
-    if (/^\s*&gt;\s?/.test(line)) {
-      const buf: string[] = []
-      while (i < lines.length && /^\s*&gt;\s?/.test(lines[i])) {
-        buf.push(lines[i].replace(/^\s*&gt;\s?/, ''))
-        i++
-      }
-      html.push(`<blockquote class="md-quote">${parseMdBlocks(buf)}</blockquote>`)
-      continue
-    }
-
-    // 表格
-    if (isTableRow(line) && i + 1 < lines.length && isTableDivider(lines[i + 1])) {
-      const header = splitRow(line)
-      i += 2
-      const rows: string[][] = []
-      while (i < lines.length && isTableRow(lines[i])) {
-        rows.push(splitRow(lines[i]))
-        i++
-      }
-      html.push(
-        '<div class="md-table-wrap"><table class="md-table"><thead><tr>' +
-          header.map((cell) => `<th>${renderInlineMd(cell)}</th>`).join('') +
-          '</tr></thead><tbody>' +
-          rows
-            .map(
-              (row) =>
-                '<tr>' +
-                header.map((_cell, index) => `<td>${renderInlineMd(row[index] ?? '')}</td>`).join('') +
-                '</tr>',
-            )
-            .join('') +
-          '</tbody></table></div>',
-      )
-      continue
-    }
-
-    // 列表
-    if (isUlItem(line) || isOlItem(line)) {
-      const ordered = isOlItem(line) && !isUlItem(line)
-      const items: string[] = []
-      while (i < lines.length && (ordered ? isOlItem(lines[i]) : isUlItem(lines[i]))) {
-        items.push(lines[i].replace(/^\s*(?:[-*+]|\d+[.)])\s+/, ''))
-        i++
-      }
-      const tag = ordered ? 'ol' : 'ul'
-      html.push(
-        `<${tag} class="md-list">${items.map((item) => `<li>${renderInlineMd(item)}</li>`).join('')}</${tag}>`,
-      )
-      continue
-    }
-
-    // 段落：连续非空行合并，单行换行用 <br /> 保留
-    const buf: string[] = []
-    while (
-      i < lines.length &&
-      lines[i].trim() &&
-      !/^\s*(#{1,6}\s|```|&gt;)/.test(lines[i]) &&
-      !isUlItem(lines[i]) &&
-      !isOlItem(lines[i]) &&
-      !isTableRow(lines[i])
-    ) {
-      buf.push(lines[i].trim())
-      i++
-    }
-    if (buf.length) {
-      html.push(`<p class="md-p">${renderInlineMd(buf.join('<br />'))}</p>`)
-    }
-  }
-  return html.join('')
-}
-
-const renderMarkdown = (source: string) => parseMdBlocks(escapeHtml(source).split('\n'))
-
-/** 发起一次流式请求，userMsg 为本次要回应的用户消息 */
-const runStream = async (userMsg: Message) => {
-  sending.value = true
-  shouldStick.value = true
-
-  const assistantId = nextId()
-  messages.value.push({
-    id: assistantId,
-    role: 'assistant',
-    content: '',
-    images: [],
-    status: 'loading',
-    time: stamp(),
-    replyTo: userMsg.id,
-  })
-  await nextTick()
-  scrollToBottom()
-
-  controller = new AbortController()
-  const payload: { input: string; images?: Array<Pick<ChatImage, 'name' | 'type' | 'dataUrl'>> } = {
-    input: userMsg.content,
-  }
-  if (userMsg.images.length) {
-    payload.images = userMsg.images.map(({ name, type, dataUrl }) => ({ name, type, dataUrl }))
-  }
-
-  try {
-    const response = await fetch(CHAT_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    })
-    // if (!response.ok) throw new Error(`服务返回 ${response.status}`)
-
-    const reader = response.body?.getReader()
-    if (!reader) throw new Error('当前浏览器不支持流式响应')
-
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    for (;;) {
-      const { done, value } = await reader.read()
-      if (done) break
-      buffer += decoder.decode(value, { stream: true })
-      const blocks = buffer.split('\n\n')
-      buffer = blocks.pop() ?? ''
-      let piece = ''
-      for (const block of blocks) piece += parseSseBlock(block)
-      if (piece) {
-        patchAssistant(assistantId, (item) => {
-          item.content += piece
-        })
-        scheduleScroll()
-      }
-    }
-
-    buffer += decoder.decode()
-    const rest = buffer.trim()
-    if (rest) {
-      const piece = parseSseBlock(rest)
-      if (piece) {
-        patchAssistant(assistantId, (item) => {
-          item.content += piece
-        })
-      }
-    }
-
-    patchAssistant(assistantId, (item) => {
-      item.status = 'done'
-      if (!item.content) item.content = '（本次未返回内容）'
-    })
-  } catch (error) {
-    const aborted = error instanceof DOMException && error.name === 'AbortError'
-    patchAssistant(assistantId, (item) => {
-      if (aborted) {
-        item.status = 'done'
-        if (!item.content) item.content = '（已停止生成）'
-      } else {
-        item.status = 'error'
-        const detail = error instanceof Error ? error.message : '未知错误'
-        item.content = item.content || `请求失败：${detail}`
-      }
-    })
-  } finally {
-    controller = null
-    sending.value = false
-    await nextTick()
-    scrollToBottom()
-  }
-}
-
-const send = async () => {
-  if (!canSend.value) return
-  const content = msg.value.trim()
-  const images = pendingImages.value.slice()
-
-  const userMsg: Message = {
-    id: nextId(),
-    role: 'user',
-    content,
-    images,
-    status: 'done',
-    time: stamp(),
-  }
-  messages.value.push(userMsg)
-  msg.value = ''
-  pendingImages.value = []
-
-  await runStream(userMsg)
-}
-
-const stop = () => {
-  controller?.abort()
-}
-
-const retry = async (target: Message) => {
-  const userMsg = messages.value.find((item) => item.id === target.replyTo)
-  if (!userMsg || sending.value) return
-  const index = messages.value.findIndex((item) => item.id === target.id)
-  if (index > -1) messages.value.splice(index, 1)
-  await runStream(userMsg)
-}
-
-const onKeydown = (evt: Event | KeyboardEvent) => {
-  const event = evt as KeyboardEvent
-  if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return
-  event.preventDefault()
-  send()
-}
-
-const useSuggestion = (text: string) => {
-  msg.value = text
-  send()
-}
-
-const copyText = async (text: string) => {
-  if (!text) return
-  try {
-    await navigator.clipboard.writeText(text)
-    ElMessage.success('已复制到剪贴板')
-  } catch {
-    ElMessage.warning('复制失败，请手动选中复制')
-  }
-}
-
-const clearAll = () => {
-  if (!messages.value.length) return
-  ElMessageBox.confirm('清空后当前对话记录将无法恢复，确定继续吗？', '清空对话', {
-    type: 'warning',
-    confirmButtonText: '清空',
-    cancelButtonText: '取消',
-  })
-    .then(() => {
-      messages.value = []
-      ElMessage.success('对话已清空')
-    })
-    .catch(() => {
-      /* 用户取消 */
-    })
-}
-
-onBeforeUnmount(() => {
-  controller?.abort()
-  if (rafId) cancelAnimationFrame(rafId)
+import { useChat } from '@ai-sdk/vue'
+import { ref } from 'vue'
+import { DefaultChatTransport } from 'ai'
+
+const input = ref('')
+const { messages, sendMessage, status, stop, error, regenerate } = useChat({
+  transport: new DefaultChatTransport({
+    api: 'sapi2/chat',
+  }),
 })
+
+function onSubmit() {
+  sendMessage({ text: input.value })
+  input.value = ''
+}
+
+// 纯静态展示配置：不是响应式状态，也没有新增方法
+const models = [
+  { id: 'deepseek', name: 'DeepSeek V3.2', desc: '中文 · 性价比高（默认）', active: true },
+  { id: 'auto', name: '自动选择', desc: '由服务端决定模型', active: false },
+  { id: 'gpt', name: 'GPT-5', desc: '通用对话 · 推理强', active: false },
+  { id: 'claude', name: 'Claude Sonnet 4.5', desc: '长文本 · 代码理解', active: false },
+  { id: 'gemini', name: 'Gemini 2.5 Pro', desc: '多模态 · 超长上下文', active: false },
+  { id: 'qwen', name: '通义千问 Max', desc: '中文 · 工具调用', active: false },
+  { id: 'kimi', name: 'Kimi K2', desc: '长文档 · 中文阅读', active: false },
+  { id: 'glm', name: 'GLM-4.6', desc: '国产 · 稳定', active: false },
+]
 </script>
 
 <template>
-  <div class="mcp-chat">
-    <header class="chat-header">
-      <div class="chat-ident">
-        <div class="brand-avatar">
-          <img
-            src="/lion.png"
-            alt="MCP"
-          />
+  <section class="chat-page">
+    <!-- 左侧：模型 / 会话信息 -->
+    <aside class="side">
+      <div class="side-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4" />
+            <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
+          </svg>
         </div>
-        <div class="chat-title">
-          <h3>MCP 智能助手</h3>
-          <p>智慧电商系统 · 基于 MCP 协议的对话服务</p>
+        <div class="brand-text">
+          <h1>AI 助手</h1>
+          <p>MCP 智能对话</p>
         </div>
       </div>
-      <div class="chat-actions">
-        <span
-          class="status-pill"
-          :class="{ 'is-busy': sending }"
-        >
-          <i class="dot" />
-          {{ statusText }}
-        </span>
-        <el-button
-          text
-          :disabled="!messages.length"
-          @click="clearAll"
-        >
-          <el-icon><Delete /></el-icon>
-          <span>清空对话</span>
-        </el-button>
-      </div>
-    </header>
 
-    <div class="chat-body-wrap">
-      <div
-        ref="scrollRef"
-        class="chat-body"
-        @scroll.passive="onBodyScroll"
-      >
-        <div
-          v-if="!messages.length"
-          class="chat-empty"
-        >
-          <div class="empty-logo">
-            <el-icon :size="34"><Service /></el-icon>
+      <div class="side-block">
+        <p class="side-label">常用模型</p>
+        <ul class="model-list">
+          <li
+            v-for="model in models"
+            :key="model.id"
+            class="model-item"
+            :class="{ 'is-active': model.active }"
+          >
+            <span class="model-dot" />
+            <span class="model-text">
+              <strong>{{ model.name }}</strong>
+              <small>{{ model.desc }}</small>
+            </span>
+            <svg v-if="model.active" class="model-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m5 13 4 4L19 7" />
+            </svg>
+          </li>
+        </ul>
+      </div>
+
+      <div class="side-block side-meta">
+        <p class="side-label">当前会话</p>
+        <div class="meta-row">
+          <span>消息数</span>
+          <b>{{ messages.length }}</b>
+        </div>
+        <div class="meta-row">
+          <span>状态</span>
+          <b v-if="status === 'submitted'" class="is-thinking">思考中</b>
+          <b v-else-if="status === 'streaming'" class="is-thinking">输出中</b>
+          <b v-else>已就绪</b>
+        </div>
+      </div>
+
+      <div class="side-foot">
+        <span class="foot-dot" />
+        接口 sapi2/chat
+      </div>
+    </aside>
+
+    <!-- 右侧：对话主区 -->
+    <main class="main">
+      <header class="chat-head">
+        <div class="head-title">
+          <h2>新对话</h2>
+          <p>用一句话描述你的问题</p>
+        </div>
+        <div class="head-actions">
+          <span v-if="status === 'submitted'" class="status-pill is-thinking">
+            <i class="dot" /><i class="dot" /><i class="dot" />
+            <span>思考中</span>
+          </span>
+          <span v-else-if="status === 'streaming'" class="status-pill is-streaming">
+            <i class="pulse" />
+            <span>输出中</span>
+          </span>
+          <span v-else class="status-pill">
+            <i class="ready" />
+            <span>已就绪</span>
+          </span>
+
+          <el-button v-if="status === 'streaming'" class="stop-btn" text @click="stop">停止</el-button>
+        </div>
+      </header>
+
+      <div class="chat-body">
+        <div v-if="!messages.length" class="empty">
+          <div class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.8-.9L3 21l1.9-5a8.4 8.4 0 0 1-.9-3.8 8.4 8.4 0 0 1 8.4-8.4 8.4 8.4 0 0 1 8.6 7.7Z" />
+            </svg>
           </div>
-          <h4>开始一段新对话</h4>
-          <p>输入问题，或上传图片让助手一起看</p>
-          <div class="suggest-list">
-            <button
-              v-for="item in suggestions"
-              :key="item"
-              class="suggest-item"
-              type="button"
-              @click="useSuggestion(item)"
-            >
-              {{ item }}
-            </button>
-          </div>
+          <p class="empty-title">今天想聊点什么？</p>
+          <p class="empty-desc">输入你的问题，我会尽量给出清晰的回答</p>
         </div>
 
         <div
-          v-for="item in messages"
-          :key="item.id"
-          class="msg-row"
-          :class="item.role"
+          v-for="m in messages"
+          :key="m.id"
+          class="row"
+          :class="m.role === 'user' ? 'is-user' : 'is-ai'"
         >
-          <div class="avatar">
-            <img
-              v-if="item.role === 'assistant'"
-              src="/lion.png"
-              alt="助手"
+          <div class="avatar">{{ m.role === 'user' ? '我' : 'AI' }}</div>
+          <div class="bubble">
+            <template v-for="(part, i) in m.parts" :key="i">
+              
+              <span v-if="part.type === 'text'" class="text">{{ part.text }}</span>
+              
+              <div v-else-if="part.type === 'tool-searchProducts'"
+                class="tool-chip">
+                  正在查询商品：{{ part.input?.keyword }}
+            </div>
+
+            </template>
+            <span
+              v-if="status === 'streaming' && m.role !== 'user' && m.id === messages[messages.length - 1].id"
+              class="caret"
             />
-            <span v-else>我</span>
           </div>
+        </div>
 
-          <div class="msg-main">
-            <div
-              class="bubble"
-              :class="{ 'is-error': item.status === 'error' }"
-            >
-              <div
-                v-if="item.images.length"
-                class="bubble-images"
-                :class="{ 'is-single': item.images.length === 1 }"
-              >
-                <el-image
-                  v-for="(img, index) in item.images"
-                  :key="img.id"
-                  class="bubble-image"
-                  :src="img.dataUrl"
-                  :preview-src-list="item.images.map((one) => one.dataUrl)"
-                  :initial-index="index"
-                  fit="cover"
-                  preview-teleported
-                />
-              </div>
-
-              <span
-                v-if="item.status === 'loading' && !item.content"
-                class="typing"
-              >
-                <i />
-                <i />
-                <i />
-              </span>
-              <div
-                v-else-if="item.content"
-                class="bubble-text"
-                :class="{ 'md-body': item.role === 'assistant' }"
-              >
-                <span v-if="item.role === 'user'">{{ item.content }}</span>
-                <!-- 助手消息按 Markdown 渲染；内容已整体转义，无注入风险 -->
-                <div
-                  v-else
-                  v-html="renderMarkdown(item.content)"
-                />
-              </div>
-            </div>
-
-            <div class="msg-meta">
-              <span class="time">{{ item.time }}</span>
-              <el-button
-                v-if="item.role === 'assistant' && item.status === 'done' && item.content"
-                text
-                size="small"
-                @click="copyText(item.content)"
-              >
-                <el-icon><CopyDocument /></el-icon>
-                <span>复制</span>
-              </el-button>
-              <el-button
-                v-if="item.status === 'error'"
-                text
-                size="small"
-                class="retry-btn"
-                :disabled="sending"
-                @click="retry(item)"
-              >
-                <el-icon><RefreshRight /></el-icon>
-                <span>重新生成</span>
-              </el-button>
-            </div>
+        <div v-if="status === 'submitted'" class="row is-ai">
+          <div class="avatar">AI</div>
+          <div class="bubble typing">
+            <i /><i /><i />
           </div>
+        </div>
+
+
+        <div v-if="error" class="error-box">
+          <div class="error-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v4.5M12 16h.01" />
+            </svg>
+          </div>
+          <div class="error-text">
+            <p class="error-title">请求失败了</p>
+            <p class="error-msg">{{ error.message }}</p>
+          </div>
+          <el-button class="retry-btn" @click="regenerate()">重试</el-button>
         </div>
       </div>
 
-      <transition name="fade-up">
-        <button
-          v-if="!shouldStick && messages.length"
-          class="to-bottom"
-          type="button"
-          @click="stickToBottom"
-        >
-          <el-icon><ArrowDown /></el-icon>
-        </button>
-      </transition>
-    </div>
-
-    <footer class="chat-footer">
-      <div
-        v-if="pendingImages.length"
-        class="pending-list"
-      >
-        <div
-          v-for="img in pendingImages"
-          :key="img.id"
-          class="pending-item"
-          :title="`${img.name} · ${formatSize(img.size)}`"
-        >
-          <img
-            :src="img.dataUrl"
-            :alt="img.name"
-          />
-          <button
-            class="pending-remove"
-            type="button"
-            @click="removeImage(img.id)"
-          >
-            <el-icon><Close /></el-icon>
-          </button>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <el-upload
-          ref="uploadRef"
-          class="upload-trigger"
-          :auto-upload="false"
-          :show-file-list="false"
-          :multiple="true"
-          accept="image/png,image/jpeg,image/webp,image/gif"
-          :on-change="handleFileChange"
-        >
-          <button
-            class="tool-btn"
-            type="button"
-            :disabled="pendingImages.length >= MAX_PENDING"
-          >
-            <el-icon><PictureFilled /></el-icon>
-            <span>图片</span>
-          </button>
-        </el-upload>
-
-        <el-input
-          v-model="msg"
-          class="chat-input"
-          type="textarea"
-          :autosize="{ minRows: 1, maxRows: 5 }"
-          resize="none"
-          placeholder="输入内容，Enter 发送，Shift + Enter 换行"
-          @keydown="onKeydown"
+      <form class="composer" @submit.prevent="onSubmit">
+        <input
+          v-model="input"
+          class="composer-input"
+          :disabled="status !== 'ready'"
+          placeholder="给 AI 发送消息…"
+          autocomplete="off"
         />
-
-        <el-button
-          v-if="!sending"
-          type="primary"
-          class="send-btn"
-          :disabled="!canSend"
-          @click="send"
-        >
-          <el-icon><Promotion /></el-icon>
-          <span>发送</span>
-        </el-button>
-        <el-button
-          v-else
-          class="send-btn stop-btn"
-          @click="stop"
-        >
-          <span class="stop-square" />
-          <span>停止</span>
-        </el-button>
-      </div>
-
-      <div class="input-tip">
-        支持 PNG / JPG / WEBP / GIF，最多 {{ MAX_PENDING }} 张，单张不超过 5MB；大图会自动压缩
-      </div>
-    </footer>
-  </div>
+        <button class="send" type="submit" :disabled="status !== 'ready' || !input.trim()" aria-label="发送">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h13M12 5l7 7-7 7" />
+          </svg>
+        </button>
+      </form>
+      <p class="composer-tip">Enter 发送 · 内容由 AI 生成，请自行判断准确性</p>
+    </main>
+  </section>
 </template>
 
 <style scoped lang="scss">
-.mcp-chat {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  text-align: left; /* 防止外层容器继承的居中影响消息排版 */
-  background-color: var(--app-bg-page);
-  border: 1px solid var(--app-border);
-  border-radius: 10px;
-}
+.chat-page {
+  --bubble-ai-bg: var(--app-bg-surface, #fff);
+  --bubble-ai-border: var(--app-border, #e8edf2);
+  --line-soft: var(--app-border-soft, #f1f5f9);
+  --side-width: 248px;
 
-/* ------------------------------ 顶部 ------------------------------ */
-.chat-header {
-  flex-shrink: 0;
+  box-sizing: border-box;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 18px;
-  background-color: var(--app-bg-surface);
-  border-bottom: 1px solid var(--app-border);
-}
-
-.chat-ident {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  height: calc(100vh - 20px);
+  height: calc(100dvh - 20px);
+  min-height: 560px;
   min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  background: var(--app-bg-surface, #fff);
+  border: 1px solid var(--app-border, #e8edf2);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px -28px rgba(30, 58, 138, 0.35);
 }
 
-.brand-avatar {
+/* ---------- 左侧栏 ---------- */
+.side {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background-color: var(--app-primary-softer);
-  border: 1px solid var(--app-primary-soft);
+  flex: none;
+  flex-direction: column;
+  width: var(--side-width);
+  padding: 16px 12px 12px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, var(--app-primary-softer, #eff6ff) 0%, var(--app-bg-page, #f5f7fa) 42%, var(--app-bg-page, #f5f7fa) 100%);
+  border-right: 1px solid var(--app-border, #e8edf2);
+  box-shadow: 1px 0 0 rgba(15, 23, 42, 0.02), 6px 0 18px -18px rgba(15, 23, 42, 0.5);
 
-  img {
-    width: 26px;
-    height: 26px;
-    object-fit: contain;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 999px;
   }
 }
 
-.chat-title {
+.side-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 16px;
+}
+
+.brand-logo {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #fff;
+  border-radius: 10px;
+  background: linear-gradient(140deg, var(--app-primary, #2563eb), var(--app-primary-deep, #1e3a8a));
+  box-shadow: 0 6px 14px -7px rgba(37, 99, 235, 0.7);
+
+  svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+.brand-text {
   min-width: 0;
 
-  h3 {
+  h1 {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
-    color: var(--app-text-primary);
-    letter-spacing: 0.3px;
+    line-height: 1.3;
+    color: var(--app-text-primary, #1e293b);
+  }
+
+  p {
+    margin: 1px 0 0;
+    font-size: 11px;
+    color: var(--app-text-muted, #94a3b8);
+  }
+}
+
+.side-block {
+  margin-bottom: 18px;
+}
+
+.side-label {
+  margin: 0 0 8px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--app-text-muted, #94a3b8);
+  text-transform: uppercase;
+}
+
+.model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.model-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: default;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  &.is-active {
+    background: var(--app-bg-surface, #fff);
+    border-color: var(--app-primary-soft, #dbeafe);
+    box-shadow: 0 6px 16px -14px rgba(37, 99, 235, 0.9);
+
+    .model-dot {
+      background: var(--app-primary, #2563eb);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    }
+
+    strong {
+      color: var(--app-primary-strong, #1d4ed8);
+    }
+  }
+}
+
+.model-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: #cbd5e1;
+  border-radius: 50%;
+}
+
+.model-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--app-text-primary, #1e293b);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--app-text-muted, #94a3b8);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.model-check {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--app-primary, #2563eb);
+}
+
+.side-meta {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+
+  .side-label {
+    padding: 0;
+  }
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 12px;
+  color: var(--app-text-regular, #475569);
+
+  b {
+    font-weight: 600;
+    color: var(--app-text-primary, #1e293b);
+
+    &.is-thinking {
+      color: var(--app-primary-strong, #1d4ed8);
+    }
+  }
+}
+
+.side-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding: 8px 6px 2px;
+  font-size: 11px;
+  color: var(--app-text-muted, #94a3b8);
+}
+
+.foot-dot {
+  width: 5px;
+  height: 5px;
+  background: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+/* ---------- 右侧主区 ---------- */
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.head-title {
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--app-text-primary, #1e293b);
   }
 
   p {
     margin: 2px 0 0;
     font-size: 12px;
-    color: var(--app-text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: var(--app-text-muted, #94a3b8);
   }
 }
 
-.chat-actions {
+.head-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  gap: 8px;
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
+  padding: 4px 10px;
   font-size: 12px;
-  color: var(--app-primary-strong);
-  background-color: var(--app-primary-softer);
-  border: 1px solid var(--app-primary-soft);
+  line-height: 1.4;
+  color: var(--app-text-regular, #475569);
+  background: var(--app-bg-page, #f5f7fa);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  white-space: nowrap;
 
-  .dot {
+  .ready {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: var(--app-primary);
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.16);
   }
 
-  &.is-busy {
-    color: var(--app-text-regular);
-    background-color: var(--app-border-soft);
-    border-color: var(--app-border);
+  &.is-thinking,
+  &.is-streaming {
+    color: var(--app-primary-strong, #1d4ed8);
+    background: var(--app-primary-soft, #dbeafe);
+    border-color: transparent;
+  }
 
-    .dot {
-      background-color: var(--el-color-warning);
-      animation: pulse 1.2s infinite ease-in-out;
+  .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: bounce 1.1s infinite ease-in-out;
+  }
+
+  .dot:nth-child(2) {
+    animation-delay: 0.16s;
+  }
+
+  .dot:nth-child(3) {
+    animation-delay: 0.32s;
+  }
+
+  .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.2s infinite ease-in-out;
+  }
+}
+
+.stop-btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: var(--app-text-regular, #475569);
+  border: 1px solid var(--app-border, #e8edf2);
+  border-radius: 999px;
+}
+
+.chat-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding: 24px 28px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background:
+    radial-gradient(720px 240px at 100% 0%, rgba(37, 99, 235, 0.05), transparent 70%),
+    var(--app-bg-page, #f5f7fa);
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.45);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  // 消息少时贴底显示，避免底部留出大片空白
+  > :first-child {
+    margin-top: auto;
+  }
+}
+
+.empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 32px 12px;
+  text-align: center;
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 8px;
+  color: var(--app-primary, #2563eb);
+  background: var(--app-primary-soft, #dbeafe);
+  border-radius: 17px;
+
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-primary, #1e293b);
+}
+
+.empty-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--app-text-muted, #94a3b8);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 100%;
+  min-width: 0;
+
+  &.is-user {
+    flex-direction: row-reverse;
+
+    .avatar {
+      color: var(--app-primary-strong, #1d4ed8);
+      background: var(--app-primary-soft, #dbeafe);
+      border-color: transparent;
     }
+
+    .bubble {
+      color: #fff;
+      background: linear-gradient(140deg, var(--app-primary, #2563eb), var(--app-primary-strong, #1d4ed8));
+      border-color: transparent;
+      border-radius: 16px 16px 5px 16px;
+      box-shadow: 0 12px 26px -16px rgba(37, 99, 235, 0.9);
+    }
+  }
+
+  &.is-ai .bubble {
+    border-radius: 16px 16px 16px 5px;
+    box-shadow: 0 10px 24px -20px rgba(15, 23, 42, 0.7);
+  }
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(140deg, #64748b, #475569);
+  border: 1px solid transparent;
+  border-radius: 11px;
+}
+
+.bubble {
+  max-width: min(74%, 680px);
+  padding: 11px 15px;
+  font-size: 14px;
+  line-height: 1.75;
+  text-align: left;
+  color: var(--app-text-primary, #1e293b);
+  background: var(--bubble-ai-bg);
+  border: 1px solid var(--bubble-ai-border);
+  border-radius: 16px;
+  word-break: break-word;
+
+  .text {
+    white-space: pre-wrap;
+  }
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: currentColor;
+  border-radius: 1px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 15px 17px;
+
+  i {
+    width: 6px;
+    height: 6px;
+    background: var(--app-text-muted, #94a3b8);
+    border-radius: 50%;
+    animation: bounce 1.1s infinite ease-in-out;
+  }
+
+  i:nth-child(2) {
+    animation-delay: 0.16s;
+  }
+
+  i:nth-child(3) {
+    animation-delay: 0.32s;
+  }
+}
+
+/* ---------- 错误 ---------- */
+.error-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+}
+
+.error-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 9px;
+
+  svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+.error-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.error-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.error-msg {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #dc2626;
+  word-break: break-word;
+}
+
+.retry-btn {
+  flex: none;
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
+  color: #b91c1c;
+  background: #fff;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  &:hover {
+    color: #fff;
+    background: #dc2626;
+    border-color: #dc2626;
+  }
+}
+
+/* ---------- 输入区 ---------- */
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 22px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.composer-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 44px;
+  padding: 0 18px;
+  font-size: 14px;
+  color: var(--app-text-primary, #1e293b);
+  background: var(--app-bg-page, #f5f7fa);
+  border: 1px solid var(--app-border, #e8edf2);
+  border-radius: 999px;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+
+  &::placeholder {
+    color: var(--app-text-muted, #94a3b8);
+  }
+
+  &:focus {
+    background: var(--app-bg-surface, #fff);
+    border-color: var(--app-primary, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.send {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(140deg, var(--app-primary, #2563eb), var(--app-primary-strong, #1d4ed8));
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 8px 18px -10px rgba(37, 99, 235, 0.9);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+
+  svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px -10px rgba(37, 99, 235, 0.95);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    box-shadow: none;
+  }
+}
+
+.composer-tip {
+  margin: 0;
+  padding: 4px 22px 8px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--app-text-muted, #94a3b8);
+}
+
+@keyframes bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
   }
 }
 
@@ -910,569 +855,52 @@ onBeforeUnmount(() => {
   0%,
   100% {
     opacity: 1;
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
   }
+
   50% {
-    opacity: 0.3;
+    opacity: 0.6;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0);
   }
 }
 
-/* ------------------------------ 消息区 ------------------------------ */
-.chat-body-wrap {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-}
-
-.chat-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 20px 18px 8px;
-}
-
-.chat-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  height: 100%;
-  min-height: 260px;
-  text-align: center;
-
-  .empty-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    border-radius: 18px;
-    color: var(--app-primary-strong);
-    background-color: var(--app-primary-softer);
-    border: 1px solid var(--app-primary-soft);
-  }
-
-  h4 {
-    margin: 6px 0 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--app-text-primary);
-  }
-
-  p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--app-text-muted);
-  }
-}
-
-.suggest-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  max-width: 620px;
-  margin-top: 8px;
-}
-
-.suggest-item {
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  line-height: 1.4;
-  cursor: pointer;
-  color: var(--app-text-regular);
-  background-color: var(--app-bg-surface);
-  border: 1px solid var(--app-border);
-  transition: all 0.18s ease;
-
-  &:hover {
-    color: var(--app-primary-strong);
-    background-color: var(--app-primary-softer);
-    border-color: var(--app-primary);
-  }
-}
-
-.msg-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 18px;
-
-  &.user {
-    flex-direction: row-reverse;
-
-    .msg-main {
-      align-items: flex-end;
-    }
-
-    .avatar {
-      background-color: var(--app-primary-strong);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .bubble {
-      background-color: var(--app-primary-strong);
-      color: #fff;
-      border-color: transparent;
-      border-top-right-radius: 2px;
-    }
-
-    .msg-meta {
-      justify-content: flex-end;
-    }
-  }
-
-  &.assistant {
-    .avatar {
-      background-color: var(--app-bg-surface);
-      border: 1px solid var(--app-border);
-    }
-
-    .avatar img {
-      width: 22px;
-      height: 22px;
-      object-fit: contain;
-    }
-
-    .bubble {
-      background-color: var(--app-bg-surface);
-      color: var(--app-text-primary);
-      border-color: var(--app-border);
-      border-top-left-radius: 2px;
-    }
-  }
-}
-
-.avatar {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.msg-main {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  max-width: 76%;
-  min-width: 0;
-}
-
-.bubble {
-  max-width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  font-size: 14px;
-  line-height: 1.75;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-
-  &.is-error {
-    border-color: var(--el-color-danger);
-    background-color: var(--el-color-danger-light-9);
-    color: var(--el-color-danger);
-  }
-}
-
-.bubble-text {
-  white-space: pre-wrap;
-  word-break: break-word;
-  text-align: left;
-}
-
-/* Markdown 正文（v-html 内容不带 scoped 标记，必须用 :deep 穿透） */
-.bubble-text.md-body {
-  white-space: normal;
-  min-width: 0;
-
-  :deep(.md-p) {
-    margin: 0 0 8px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  :deep(.md-heading) {
-    font-weight: 600;
-    line-height: 1.5;
-    margin: 12px 0 6px;
-
-    &:first-child {
-      margin-top: 0;
-    }
-  }
-
-  :deep(h3.md-heading) {
-    font-size: 15px;
-  }
-
-  :deep(h4.md-heading) {
-    font-size: 14px;
-  }
-
-  :deep(h5.md-heading),
-  :deep(h6.md-heading) {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--app-text-regular);
-  }
-
-  :deep(.md-list) {
-    margin: 0 0 8px;
-    padding-left: 20px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    li {
-      margin: 4px 0;
-    }
-  }
-
-  :deep(.md-pre) {
-    margin: 8px 0;
-    padding: 10px 12px;
-    border-radius: 8px;
-    overflow-x: auto;
-    font-size: 12.5px;
-    line-height: 1.6;
-    font-family: Consolas, Monaco, 'Courier New', monospace;
-    background-color: #0f172a;
-    color: #e2e8f0;
-  }
-
-  :deep(.md-inline-code) {
-    padding: 1px 5px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-family: Consolas, Monaco, 'Courier New', monospace;
-    background-color: var(--app-border-soft);
-    color: var(--app-primary-strong);
-  }
-
-  :deep(.md-quote) {
-    margin: 8px 0;
-    padding: 6px 12px;
-    border-left: 3px solid var(--app-primary);
-    border-radius: 0 6px 6px 0;
-    background-color: var(--app-primary-softer);
-    color: var(--app-text-regular);
-  }
-
-  :deep(.md-hr) {
-    border: none;
-    border-top: 1px solid var(--app-border);
-    margin: 12px 0;
-  }
-
-  :deep(.md-link) {
-    color: var(--app-primary-strong);
-    text-decoration: underline;
-  }
-
-  :deep(.md-table-wrap) {
-    margin: 8px 0;
-    overflow-x: auto;
-  }
-
-  :deep(.md-table) {
-    border-collapse: collapse;
-    font-size: 13px;
-
-    th,
-    td {
-      padding: 6px 10px;
-      border: 1px solid var(--app-border);
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      background-color: var(--app-border-soft);
-      font-weight: 600;
-    }
-  }
-
-  :deep(strong) {
-    font-weight: 600;
-  }
-}
-
-.bubble-images {
-  display: grid;
-  grid-template-columns: repeat(2, 110px);
-  gap: 6px;
-
-  &.is-single {
-    grid-template-columns: minmax(0, 180px);
-  }
-
-  & + .bubble-text {
-    margin-top: 8px;
-  }
-}
-
-.bubble-image {
-  width: 100%;
-  height: 110px;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: zoom-in;
-  background-color: var(--app-border-soft);
-}
-
-.bubble-images.is-single .bubble-image {
-  height: 150px;
-}
-
-.msg-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--app-text-muted);
-
-  :deep(.el-button) {
-    height: 22px;
-    padding: 0 4px;
-    font-size: 12px;
-    color: var(--app-text-muted);
-  }
-
-  :deep(.el-button:hover) {
-    color: var(--app-primary-strong);
-  }
-
-  :deep(.retry-btn) {
-    color: var(--el-color-danger);
-  }
-}
-
-/* 打字指示器 */
-.typing {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 20px;
-
-  i {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--app-primary);
-    animation: typing 1.2s infinite ease-in-out;
-
-    &:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    &:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-  }
-}
-
-@keyframes typing {
+@keyframes blink {
   0%,
-  80%,
   100% {
-    opacity: 0.25;
-    transform: translateY(0);
-  }
-  40% {
     opacity: 1;
-    transform: translateY(-3px);
+  }
+
+  50% {
+    opacity: 0;
   }
 }
 
-.to-bottom {
-  position: absolute;
-  right: 18px;
-  bottom: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--app-primary-strong);
-  background-color: var(--app-bg-surface);
-  border: 1px solid var(--app-border);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
-}
+/* ---------- 响应式 ---------- */
+@media (max-width: 900px) {
+  .chat-page {
+    height: calc(100vh - 80px);
+  }
 
-.fade-up-enter-active,
-.fade-up-leave-active {
-  transition: all 0.2s ease;
-}
+  .chat-body {
+    padding: 18px;
+  }
 
-.fade-up-enter-from,
-.fade-up-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-/* ------------------------------ 输入区 ------------------------------ */
-.chat-footer {
-  flex-shrink: 0;
-  padding: 10px 18px 12px;
-  background-color: var(--app-bg-surface);
-  border-top: 1px solid var(--app-border);
-}
-
-.pending-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.pending-item {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--app-border);
-
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .bubble {
+    max-width: 82%;
   }
 }
 
-.pending-remove {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  color: #fff;
-  background-color: rgba(15, 23, 42, 0.6);
-  font-size: 10px;
-
-  &:hover {
-    background-color: var(--el-color-danger);
-  }
-}
-
-.input-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.upload-trigger {
-  flex-shrink: 0;
-
-  :deep(.el-upload) {
-    display: block;
-  }
-}
-
-.tool-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 34px;
-  padding: 0 12px;
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: 13px;
-  color: var(--app-text-regular);
-  background-color: var(--app-bg-surface);
-  border: 1px solid var(--app-border);
-  transition: all 0.18s ease;
-
-  &:hover:not(:disabled) {
-    color: var(--app-primary-strong);
-    background-color: var(--app-primary-softer);
-    border-color: var(--app-primary);
+@media (max-width: 720px) {
+  .side {
+    display: none;
   }
 
-  &:disabled {
-    cursor: not-allowed;
-    color: var(--app-text-muted);
-    background-color: var(--app-border-soft);
-  }
-}
-
-.chat-input {
-  flex: 1 1 auto;
-
-  :deep(.el-textarea__inner) {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--app-border);
-    box-shadow: none;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--app-text-primary);
-    background-color: var(--app-bg-surface);
-    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  .composer {
+    padding: 12px 14px 0;
   }
 
-  :deep(.el-textarea__inner:hover) {
-    border-color: var(--app-primary);
+  .composer-tip {
+    padding: 6px 14px 10px;
   }
-
-  :deep(.el-textarea__inner:focus) {
-    border-color: var(--app-primary);
-    box-shadow: 0 0 0 3px var(--app-primary-softer);
-  }
-}
-
-.send-btn {
-  flex-shrink: 0;
-  height: 36px;
-  padding: 0 18px;
-
-  &.stop-btn {
-    color: var(--el-color-danger);
-    background-color: var(--el-color-danger-light-9);
-    border-color: var(--el-color-danger-light-7);
-
-    &:hover {
-      color: #fff;
-      background-color: var(--el-color-danger);
-      border-color: var(--el-color-danger);
-    }
-  }
-}
-
-.stop-square {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-right: 4px;
-  border-radius: 2px;
-  background-color: currentColor;
-}
-
-.input-tip {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--app-text-muted);
 }
 </style>
