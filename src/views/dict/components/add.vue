@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import Form from "@/components/forms/index.vue";
-import { postDict, putDict } from "@/views/dict/api/index";
+import { postDict } from "@/views/dict/api/index";
 import { ElMessage } from "element-plus";
-import { update } from "lodash";
 const formConfig = reactive([
     {
         type: 'input',
@@ -32,36 +31,24 @@ const handleClose = () => {
 }
 
 const handleCommit = () => {
-    if (props.isEdit) {
-        const data = formId.value?.formData;
-        const {updateTime,createTime,...datas}=data;
-        putDict({ ...datas }).then((res: any) => {
-            if (res.code == 1) {
-                ElMessage.success("编辑成功");
-                eimt("update")
-            }
-        }).finally(() => {
-            eimt("close");
-        })
-    } else {
-        const data = formId.value?.formData;
-        postDict({ ...data }).then((res: any) => {
-            if (res.code == 1) {
-                ElMessage.success("新增成功");
-                eimt("update")
-            }
-        }).finally(() => {
-            if (formId.value) {
-                Object.keys(formId.value.formData).forEach(item => {
-                    if (formId.value) {
-                        formId.value.formData[item] = "";
-                    }
+    const data = formId.value?.formData;
+    postDict({ ...data }).then((res: any) => {
+        if (res.code == 1) {
+            ElMessage.success("新增成功");
+            eimt("update")
+        }
+    }).finally(() => {
+        if (formId.value) {
+            Object.keys(formId.value.formData).forEach(item => {
+                if (formId.value) {
+                    formId.value.formData[item] = "";
+                }
 
-                })
-            }
-            eimt("close");
-        })
-    }
+            })
+        }
+    eimt("close");
+    })
+    
 
 }
 
@@ -74,26 +61,10 @@ const props = withDefaults(defineProps<{
     isEdit: false,
     formData: {}
 })
-
-watch(() => props.dialogVisible, () => {
-    if (props.dialogVisible && props.isEdit) {
-        nextTick(() => {
-            Object.keys(props.formData).forEach(name => {
-                if (formId.value) {
-                    formId.value.formData[name] = props.formData[name];
-                }
-
-            })
-        })
-
-    }
-
-})
-
 </script>
 <template>
-    <el-dialog :model-value="dialogVisible" :title="props.isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
-        <Form ref="formId" :form-field="formConfig"></Form>
+    <el-dialog :model-value="dialogVisible"  :title="props.isEdit ? '编辑' : '新增'" width="50%" :before-close="handleClose">
+        <Form ref="formId" :form-field="formConfig" :usertype="true"></Form>
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="handleClose">取消</el-button>

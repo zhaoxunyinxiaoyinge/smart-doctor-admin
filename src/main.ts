@@ -1,6 +1,4 @@
-window.addEventListener('unhandledrejection', event => {
-  console.error('Unhandled promise rejection:', event.reason);
-});
+
 import { createApp, type Component } from 'vue'
 import App from '@/App.vue'
 // 说明：Element Plus 组件在 .vue 文件里由 vite.config.ts 的

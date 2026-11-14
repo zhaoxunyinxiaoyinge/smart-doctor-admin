@@ -6,7 +6,8 @@ import PageHeader from "@/components/pageHeader/index.vue";
 import { getDictList, getDetial, DeleteDict } from "@/views/dict/api/index";
 import { useRouter } from "vue-router";
 import Add from "@/views/dict/components/add.vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import Edit from "@/views/dict/components/edit.vue"
+import {useTable} from "@/hooks/useTable";
 
 const router = useRouter();
 
@@ -55,30 +56,14 @@ const formConfig = reactive([
         width: 100
     }
 ]);
-const page = ref(1);
-const pageSize = ref(20);
-const total = ref(0);
-const tableData = reactive<any>([]);
-const dialogVisible = ref(false);
-const isEdit = ref(false);
-const formData = reactive<any>({});
 
-const getData = (params: object) => {
-    tableData.length = 0;
-    getDictList({ ...params, page: page.value, pageSize: pageSize.value }).then((res: any) => {
-        if (res.code == 1) {
-            tableData.push(...res.data.records);
-            total.value = res.data.total;
-            page.value = res.data.current;
-            pageSize.value = res.data.size;
-        }
-    })
-}
+const {list,dialogFormVisible,initTableConfig,listQuery,
+    isEdit,formData,handleClose,getData,handleAdd,handleDelete,handleEdit}=useTable()
 
 const handleSearch = (val: any) => {
-    tableData.length = 0;
-    page.value = 1;
-    getData({ ...val })
+    list.length = 0;
+    listQuery.page=1;
+    getData(getDictList,val)
 }
 
 const handleClick = (row: any, column: any) => {
@@ -87,57 +72,13 @@ const handleClick = (row: any, column: any) => {
     }
 }
 
-const handleAdd = () => {
-    dialogVisible.value = true;
-    if (Object.keys(formData).length > 0) Object.keys(formData).forEach(item => {
-        formData[item] = '';
-    })
-}
-
-const handleEdit = (val: number) => {
-    getDetial({ id: val }).then((res: any) => {
-        if (res.code == 1) {
-            Object.keys(res.data).forEach((name: any) => {
-                if (name != 'id' || name != "createTime" || name != "updateTime") {
-                    formData[name] = res.data[name];
-                }
-            })
-            dialogVisible.value = true;
-            isEdit.value = true
-
-        }
-    })
-}
-
-const handleDelete = (id: number) => {
-    ElMessageBox.confirm(
-        "确定要删除该条数据",
-        "删除",
-        {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-        }
-    ).then(() => {
-        return DeleteDict(id);
-    }).then(() => {
-        getData({})
-        ElMessage.success("删除成功")
-    })
-}
-
-const handleClose = () => {
-    dialogVisible.value = false;
-
-}
-
 const handleUpdate = () => {
-    getData({});
+    getData(getDictList);
 }
 
 
 onMounted(() => {
-    getData({});
+    getData(getDictList);
 })
 
 </script>
@@ -160,7 +101,7 @@ onMounted(() => {
   />
   <div class="flex-1">
     <el-table
-      :data="tableData"
+      :data="list"
       height="100%"
       @cell-click="handleClick"
     >
@@ -181,13 +122,13 @@ onMounted(() => {
           <template #default="scope">
             <el-button
               type="primary"
-              @click="handleEdit(scope.row.id)"
+              @click="handleEdit(scope.row.id,getDetial)"
             >
               编辑
             </el-button>
             <el-button
               type="danger"
-              @click="handleDelete(scope.row.id)"
+              @click="handleDelete(scope.row.id,DeleteDict)"
             >
               删除
             </el-button>
@@ -197,17 +138,23 @@ onMounted(() => {
     </el-table>
     <Add
       :form-data="formData"
-      :dialog-visible="dialogVisible"
+      :dialog-visible="dialogFormVisible&&!isEdit"
       :is-edit="isEdit"
       @close="handleClose"
-      @update="handleUpdate"
+      @update="()=>handleUpdate()"
     />
+    <Edit  
+      :form-data="formData"
+      :dialog-visible="dialogFormVisible&&isEdit"
+      :is-edit="isEdit"
+      @close="handleClose"
+      @update="()=>handleUpdate()"></Edit>
   </div>
   <Pagetion
     :small="true"
-    :current-page="page"
-    :page-size="pageSize"
-    :total="total"
+    :current-page="listQuery.page"
+    :page-size="listQuery.pageSize"
+    :total="listQuery.total"
   />
   </div>
 </template>

@@ -47,19 +47,6 @@
       <!-- 右：登录区 -->
       <div class="login">
         <h2 class="login-title">欢迎登录</h2>
-
-        <div class="tab">
-          <span
-            :class="!isPhoneLogin ? 'active' : ''"
-            @click="toggleLogin(false, canvas as HTMLCanvasElement)"
-          >账号密码登录</span>
-          <span
-            :class="isPhoneLogin ? 'active' : ''"
-            @click="toggleLogin(true, canvas as HTMLCanvasElement)"
-          >手机号登录</span>
-        </div>
-
-        <!-- 账号密码登录 -->
         <el-form
           v-if="!isPhoneLogin"
           ref="formEl"
@@ -90,6 +77,29 @@
               show-password
             />
           </el-form-item>
+          
+          <el-form-item
+            class="form-item"
+            prop="captcha"
+          >
+            <el-row :gutter="15">
+              <el-col :span="9">
+              <el-input
+                v-model="formData.answaner"
+                placeholder="请输入正确的答案"
+                type="text"
+                size="default"
+      
+              /></el-col>
+              <el-col :span="7">
+                <img v-if="!isGetLoadingCahtcha" class="catcha" :src="captcha?.image"/>
+                <div style="display: flex;align-items: center;height: 32px;" v-else>获取中...</div>
+              </el-col>
+              <el-col :span="3">
+                <el-button :disabled="isGetLoadingCahtcha" type="primary" size="large" @click="getCatcha">获取验证码</el-button>
+              </el-col>
+          </el-row>
+          </el-form-item>
 
           <div class="form-extra">
             <span class="forgot">忘记密码？</span>
@@ -100,61 +110,12 @@
               class="btn"
               type="primary"
               size="default"
-              @click="login(formEl)"
+              @click="login(formEl,captcha)"
             >
               登 录
             </el-button>
           </el-form-item>
         </el-form>
-
-        <!-- 手机号登录 -->
-        <el-form
-          v-else
-          ref="formEl"
-          class="form"
-          :model="formData"
-          :rules="rules"
-        >
-          <el-form-item
-            class="form-item"
-            prop="phone"
-          >
-            <el-input
-              v-model="formData.phone"
-              placeholder="请输入您的手机号"
-              size="default"
-            />
-          </el-form-item>
-
-          <el-form-item
-            class="form-item"
-            prop="code"
-          >
-            <el-input
-              v-model="formData.code"
-              placeholder="请输入验证码"
-              type="input"
-              size="default"
-            >
-              <template #append>
-                <span @click="handleCode">{{ isCode ? '当前还有' + time + '秒钟' : '点击获取验证码'
-                }}</span>
-              </template>
-            </el-input>
-          </el-form-item>
-
-          <el-form-item class="form-item form-item--btn">
-            <el-button
-              class="btn"
-              type="primary"
-              size="default"
-              @click="login(formEl)"
-            >
-              登 录
-            </el-button>
-          </el-form-item>
-        </el-form>
-
         <div class="safe-tip">
           <el-icon><Lock /></el-icon>
           企业级数据加密，保障账号安全
@@ -173,18 +134,30 @@ import { onMounted, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { ElInput, ElForm, ElFormItem, ElButton, FormInstance } from "element-plus";
 import { ShoppingCart, Van, TrendCharts, Lock } from "@element-plus/icons-vue";
-import { getOtherQuery, useLogin, handleCode, toggleLogin } from "@/hooks/useLogin";
+import { getOtherQuery, useLogin } from "@/hooks/useLogin";
 
 let div = ref<any>(null);
 let formEl = ref<FormInstance>();
-const canvas = ref<HTMLCanvasElement | null>(null);
-const { formData, rules, redirect, otherQuery, isCode, isPhoneLogin, time, login } = useLogin();
+const { formData, rules, redirect, otherQuery, isPhoneLogin, login,getCatchas,isGetLoadingCahtcha } = useLogin();
 const routes = useRoute();
-
-onMounted(() => {
+let captcha=ref<{image:string,aptchaId:number}>({image:"",aptchaId:0})
+onMounted(async() => {
   const height = document.documentElement.clientHeight;
   div.value.style.height = height + "px";
+  getCatcha();
 });
+
+const getCatcha=async()=>{
+  try{
+    let data= await getCatchas() 
+    captcha.value.image=data?.data.image;;
+    captcha.value.aptchaId=data?.data.aptchaId;
+  }
+  catch(e){
+    console.log(e)
+  }
+
+}
 
 watchEffect(() => {
   redirect.value = routes.query.redirect || null;
@@ -519,4 +492,9 @@ watchEffect(() => {
     padding: 40px 28px 24px;
   }
 }
+.catcha {
+  width: 100%;
+  height: 100%;
+}
+
 </style>

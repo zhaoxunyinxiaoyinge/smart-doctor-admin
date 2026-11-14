@@ -3,7 +3,7 @@
     <el-form
       ref="form"
       :inline="props.inline"
-      :rules="props.formRule"
+      :rules="formRules"
       :model="formData"
       class="flex-1 form-item"
     >
@@ -17,10 +17,9 @@
           <el-form-item
             v-if="item.type == 'input'"
             :prop="item.name"
+            :label-width="item.width??100"
+            :label="item.label"
           >
-            <span :style="{ width: item.width + 'px', textAlign: 'center' }">
-              <slot name="label">{{ item.label }}</slot>
-            </span>
             <el-input
               v-model="formData[item.name]"
               type="text"
@@ -31,10 +30,9 @@
           <el-form-item
             v-if="item.type == 'input-number'"
             :prop="item.name"
+            :label-width="item.width??100"
+            :label="item.label"
           >
-            <span :style="{ width: item.width + 'px', textAlign: 'center' }">
-              <slot name="label">{{ item.label }}</slot>
-            </span>
             <el-input
               v-model="formData[item.name]"
               type="number"
@@ -46,10 +44,9 @@
           <el-form-item
             v-else-if="item.type == 'select'"
             :prop="item.name"
+            :label-width="item.width??100"
+            :label="item.label"
           >
-            <span :style="{ width: item.width + 'px', textAlign: 'center' }">
-              <slot name="label">{{ item.label }}</slot>
-            </span>
             <el-select
               v-model="formData[item.name]"
               class="input"
@@ -68,10 +65,9 @@
           <el-form-item
             v-else-if="item.type == 'checkbox'"
             :prop="item.name"
+            :label-width="item.width??100"
+            :label="item.label"
           >
-            <span :style="{ width: item.width + 'px', textAlign: 'center' }">
-              <slot name="label">{{ item.label }}</slot>
-            </span>
             <el-checkbox-group v-model="formData[item.name]">
               <el-checkbox
                 v-for="(sItem, sIndex) in item.options"
@@ -84,8 +80,10 @@
           <el-form-item
             v-else-if="item.type == 'radio'"
             :prop="item.name"
+            :label-width="item.width??100"
+            :label="item.label"
           >
-            <span :style="{ width: item.width + 'px', textAlign: 'center' }">
+            <span>
               <slot name="label">{{ item.label }}</slot>
             </span>
             <el-radio-group>
@@ -103,10 +101,9 @@
           <el-form-item
             v-else-if="item.type == 'dateRange'"
             :prop="item.name"
+            :label-width="item.width??100"
+            :label="item.label"
           >
-            <span :style="{ width: item.width + 'px', textAlign: 'center' }">
-              <slot name="label">{{ item.label }}</slot>
-            </span>
             <el-date-picker
               v-model="formData[item.name]"
               type="datetimerange"
@@ -118,12 +115,9 @@
           <el-form-item
             v-else-if="item.type == 'upload'"
             :prop="item.name"
+            :label-width="item.width??100"
+            :label="item.label"
           >
-            <span :style="{ width: item.width + 'px', textAlign: 'center', display: 'inline-block' }">
-              <slot name="label">
-                {{
-                  item.label }}</slot>
-            </span>
             <Upload
               ref="upload"
               :file-list="fileList"
@@ -141,7 +135,8 @@
           </el-form-item>
         </div>
       </template>
-      <el-form-item>
+      <el-form-item 
+      >
         <slot name="tree" />
       </el-form-item>
     </el-form>
@@ -196,6 +191,7 @@ import Quller from "@/components/vueEditer/index.vue";
 //添加表单验证，格式，默认为字段：【规则】
 
  export  interface prop {
+  usertype?:boolean,
   inline?: boolean,
   initData?:object,
   formField: Array<{ type: string, name: string, placeholder?: string, width?: number, label: string, options?: Array<{ label: string | number, value: number | string }> }>,
@@ -209,11 +205,27 @@ const form = ref<FormInstance | null>(null);
 
 const upload = ref<typeof Upload | null>(null);
 
+  
+const props = withDefaults(defineProps<prop>(), {
+  usertype:false,
+  inline: false,
+  formField: () => ([]),
+  initData:()=>({}),
+  formRule: () => ({}),
+});
+
+const emits = defineEmits<{
+  (e: 'search', formData: object): void,
+  (e: 'refsh'): void
+}>();
+
+onActivated(()=>{
+ form?.value?.clearValidate();
+})
+
 // 初始化字段值
-onMounted(() => {
-  nextTick(()=>{
-    console.log(props,"props")
-  })
+onMounted ( async() => {
+  // 给表单配置常用字段
   if (props.formField.length > 0) {
     props.formField.forEach(item => {
       formData[item.name] = props.initData[item.name]!=null?props.initData[item.name]:null;
@@ -222,23 +234,42 @@ onMounted(() => {
       }
     })
   }
+  // 给表单初始化验证规则
+  dynimacFormRule(props.formRule,props.usertype);
+ await nextTick(()=>{
+    form?.value?.clearValidate();
+  })
 })
 
-const props = withDefaults(defineProps<prop>(), {
-  inline: false,
-  formField: () => ([]),
-  initData:()=>({}),
-  formRule: () => ({}),
-})
+const dynimacFormRule=(rules,type)=>{
+    if(rules.length==0||!type) return ;
+    if(Object.keys(formData).length>0){
+      Object.keys(formData).forEach(item=>{
+       let ruleItem=rules[item];
+       if(!ruleItem){
+        formRules[item]=[{
+          required:true,
+          message:`${item}字段不能为空`,
+          trigger:`${findFeildType(item)}`
+        }]
+       }else{
+        formRules[item]=ruleItem;
+       }
+      })
+    }
+}
 
-const emits = defineEmits<{
-  (e: 'search', formData: object): void,
-  (e: 'refsh'): void
-}>();
+const findFeildType=(name:string)=>{
+  let item= props.formField.find(item=>item.name==name);
+  console.log(item,"item")
+  return item?.type=="input"?"blur":"change";
+}
 
 
 const formData = reactive<{ [key: string]: any }>({
 })
+
+const formRules=reactive({})
 
 const handleSuccess = (val: success, name: string) => {
   fileList.forEach(() => { fileList.splice(0, 1) });
@@ -248,7 +279,6 @@ const handleSuccess = (val: success, name: string) => {
     name: val.data.slice(prevIndex + 1, index),
     url: val.data,
   });
-  console.log(name,"name")
   formData[name] = val.data;
 }
 
@@ -291,14 +321,13 @@ const uploadCofig = reactive({
 })
 
 // 添加验证方法，对外提供，提交验证逻辑
-
 const commitFormValite=(formEl:typeof form |undefined)=>{
       if(!formEl) return ;
       formEl.value?.validate((valid)=>{
         if(valid){
-          console.log("效果正确");
+          console.log("效果通过");
         }else{
-          console.log("无效国")
+          console.log("验证不通过")
         }
       })
 } 

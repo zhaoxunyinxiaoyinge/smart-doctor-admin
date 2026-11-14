@@ -6,6 +6,7 @@ import Pagetion from "@/components/pagetions/index.vue";
 import { getDictDetail, getDictDetailDetail, delDictDetail } from "@/views/dict/api/index";
 import PageHeader from "@/components/pageHeader/index.vue";
 import DictDetail from "@/views/dict/components/addDetail.vue";
+import EditDetail    from "@/views/dict/components/editDetail.vue"
 import { ElMessageBox, ElMessage } from "element-plus";
 
 
@@ -241,11 +242,18 @@ const handleSize = (size: number) => {
   </div>
   <DictDetail
     :deital-data="deitalData"
-    :dialog-visible="dialogVisible"
+    :dialog-visible="dialogVisible&&!isEdit"
     :is-edit="isEdit"
     @update="handleUpdate"
     @close="handleClose"
   />
+  <EditDetail
+    :deital-data="deitalData"
+    :dialog-visible="dialogVisible&&isEdit"
+    :is-edit="isEdit"
+    @update="handleUpdate"
+    @close="handleClose"
+  ></EditDetail>
   <Pagetion
     :small="true"
     :page-size="listQuery.pageSize"

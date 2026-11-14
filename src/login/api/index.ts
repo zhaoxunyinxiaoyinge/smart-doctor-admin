@@ -7,3 +7,10 @@ export const login=(data:any)=>{
         data
     })
 }
+
+export const getCatcha=()=>{
+    return request({
+        method:"get",
+        url:"/api/user/catcha"
+    })
+}

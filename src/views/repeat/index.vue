@@ -1,92 +1,111 @@
 <script lang="ts" setup>
-import content from "@/assets/scss/layout.module.scss";
-const loading = ref<boolean>(true);
-const currentDate = ref<string>(new Date().toLocaleString());
 
-setTimeout(() => {
-  loading.value = false;
-}, 2000);
+import content from "@/assets/scss/layout.module.scss";
+import BpmnJS from 'bpmn-js'
+import 'bpmn-js/dist/assets/diagram-js.css'
+import 'bpmn-js/dist/assets/bpmn-js.css'
+import leaveXml from './file.bpmn?raw'
+import Modeler from 'bpmn-js/lib/Modeler'
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
+
+const container=ref<HTMLDivElement|null>(null)
+onMounted(async()=>{
+
+  const viewer = new Modeler({
+    container:container.value as HTMLDivElement
+});
+try {
+  const { warnings } = await viewer.importXML(leaveXml);  // 强制把内容缩放到可视区
+  if(container.value){
+    const canvas=viewer.get("canvas") 
+    canvas.zoom('fit-viewport', 'auto') ;
+     for (const id of ['StartEvent_1', 'Task_Apply']) {
+      if(container.value){
+          canvas.addMarker(id, 'is-done') 
+      }
+      }     
+  canvas.addMarker('Task_Manager', 'is-current')
+  canvas.addMarker('Flow_3', 'is-current-flow')  // 正在走的线：流动
+  }
+
+  console.log('rendered');
+} catch (err) {
+  console.log('error rendering', err);
+}
+
+
+  // 当前停留的节点标蓝
+ 
+})
+
 
 
 </script>
 
 <template>
-  <el-scrollbar :height="content.routeContentHeight">
-    <div class="">
-      <div style="display: flex;justify-content:flex-start;flex-wrap: wrap;">
-        <el-skeleton
-          v-for="item in 10"
-          :key="item"
-          style="margin-top:20px;margin-right: 20px;width: 240px;"
-          :loading="loading"
-          animated
-        >
-          <template #template>
-            <div style="width:240px">
-              <el-skeleton-item
-                variant="image"
-                style="width: 240px; height: 240px"
-              />
-              <div style="padding: 14px;width: 240px;padding-left: 0;">
-                <el-skeleton-item
-                  variant="h3"
-                  style="width:240px"
-                />
-                <div
-                  style="
-                      display: flex;
-                    align-items: center;
-                    justify-content: space-around;
-                    margin-top: 16px;
-                    height: 16px;
-                  "
-                >
-                  <el-skeleton-item
-                    variant="text"
-                    style="width: 33%"
-                  />
-                </div>
-              </div>
-            </div>
-          </template>
-          <template #default>
-            <el-card :body-style="{ padding: '0px', marginBottom: '1px' }">
-              <el-image
-                style="width:240px"
-                fit="fill"
-                src="https://ts1.cn.mm.bing.net/th/id/R-C.8cb4a6fb39ffdde88329b40d46497786?rik=PG0oA0YhzYKPYQ&riu=http%3a%2f%2ffiles.eduuu.com%2fimg%2f2017%2f11%2f07%2f140349_5a014cc561dad.jpg&ehk=wGN7ZOQtbyBRoSI0k931NO5XkL4h9qR1p%2bONhKdTg78%3d&risl=&pid=ImgRaw&r=0"
-              />
-              <div style="padding: 14px">
-                <span>Delicious hamburger {{ $t("message") }}</span>
-                <div class="bottom card-header">
-                  <div class="time">
-                    {{ currentDate }}
-                  </div>
-                </div>
-              </div>
-            </el-card>
-          </template>
-        </el-skeleton>
-      </div>
-
-      <!-- <Suspense
-        @fallback="handleResolve"
-        @resolve="handleFallback"
-      >
-        <template #fallback>
-          <span>正在加载中。。。。</span>
-        </template>
-        <template #default>
-          zhengzjfkjdk
-        </template>
-      </Suspense> -->
+    <div class="container" ref="container" id="canvas">
     </div>
-  </el-scrollbar>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .el-card {
   margin: 5px;
   padding-top: 10px;
 }
+
+.container {
+  height: 100%;
+  min-height: 500px;
+}
+
+/* scoped 里要用 :deep() 穿透 */
+:deep(.is-done .djs-visual > :nth-child(1)) {
+  fill: #eaf3de !important;      /* 底色淡绿 */
+  stroke: #639922 !important;    /* 边框绿 */
+}
+:deep(.is-current .djs-visual > :nth-child(1)) {
+  fill: #e6f1fb !important;
+  stroke: #185fa5 !important;
+  stroke-width: 2.5px !important;  /* 加粗边框，视觉焦点 */
+}
+/* 走过的连线也变色 */
+:deep(.is-done .djs-visual > path) {
+  stroke: #639922 !important;
+}
+
+
+:deep(.is-current-flow .djs-visual > path) {
+  stroke: #185fa5 !important;
+  stroke-dasharray: 6 4;
+  animation: flow 1s linear infinite;
+}
+:deep(.is-done .djs-visual > :nth-child(1)) {
+  fill: #eaf3de !important;
+  stroke: #639922 !important;
+}
+:deep(.is-done .djs-visual > path) {
+  stroke: #639922 !important;
+}
+
+/* 画布：淡网格背景，替代死灰 */
+:deep(.djs-container) {
+  background-color: #fafbfc;
+  background-image:
+    linear-gradient(#eef0f2 1px, transparent 1px),
+    linear-gradient(90deg, #eef0f2 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 节点文字加大加粗一点 */
+:deep(.djs-label) {
+  font-size: 13px !important;
+  font-weight: 500;
+  fill: #333;
+}
+
+
+@keyframes flow {
+  to { stroke-dashoffset: -20; }
+}
+
 </style>

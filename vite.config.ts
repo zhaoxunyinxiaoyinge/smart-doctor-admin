@@ -91,7 +91,7 @@ export default defineConfig(({ command,mode}) => {
         }
       },
       server: {
-        open: true,
+        open: false,
         port:parseInt(loadEnv(mode,"./").VITE_PORT) || 3000,
         proxy: {
           "^/api": {

@@ -68,16 +68,6 @@ const handleClose = () => {
 
 const handleCommit = () => {
     let data = formId.value?.formData;
-    if (propss.isEdit) {
-        putDictDetail(data).then((res: any) => {
-            if (res.code == 1) {
-                ElMessage.success("更新成功");
-            }
-
-            emits("close");
-            emits("update");
-        })
-    } else {
         postDictDetail(data).then((res: any) => {
             if (res.code == 1) {
                 ElMessage.success("添加成功");
@@ -85,23 +75,10 @@ const handleCommit = () => {
             emits("close");
             emits("update");
         })
-    }
-
 }
 
 
-watch(() => propss.dialogVisible, (cur) => {
-    if (propss.isEdit && cur) {
-        nextTick(() => {
-            propss.deitalData && Object.keys(propss.deitalData).forEach(name => {
-                if (formId.value && propss.deitalData) {
-                    formId.value.formData[name] = propss.deitalData[name];
-                }
-
-            })
-        })
-    }
-
+watch(() => propss.dialogVisible, () => {
     if (!propss.isEdit) {
         nextTick(() => {
             propss.deitalData && Object.keys(propss.deitalData).forEach(name => {
@@ -122,7 +99,7 @@ watch(() => propss.dialogVisible, (cur) => {
 <template>
     <el-dialog :model-value="propss.dialogVisible" :title="propss.isEdit ? '编辑' : '新增'" width="50%"
         :before-close="handleClose">
-        <Form ref="formId" :form-field="formConfig"></Form>
+        <Form ref="formId" :form-field="formConfig" :usertype="true"></Form>
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="handleClose">取消</el-button>

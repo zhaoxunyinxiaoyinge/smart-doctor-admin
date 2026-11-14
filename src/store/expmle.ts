@@ -76,8 +76,8 @@ export const userstore = defineStore(names.USER, {
          * @param {username,password} 
          * 
          */
-        async login(username: string, password: string): Promise<any> {
-            return login({ userName: username, passWord: password }).then(res => {
+        async login(username: string, password: string,answaner:string,aptchaId:number,): Promise<any> {
+            return login({ userName: username, passWord: password,answaner,aptchaId }).then(res => {
                 return Promise.resolve({ ...res });
             })
         },

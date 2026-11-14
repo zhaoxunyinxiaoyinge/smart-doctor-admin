@@ -285,6 +285,7 @@ const handleSuccess = (val: success) => {
 </script>
 
 <template>
+  <div class="user-container">
   <define-form
     ref="formId"
     :form-field="formFieldI18n"
@@ -450,4 +451,10 @@ const handleSuccess = (val: success) => {
     @page="handlePage"
     @size="handleSize"
   />
+  </div>
 </template>
+<style lang="scss" scoped>
+.user-container {
+  height: 100%;
+}
+</style>

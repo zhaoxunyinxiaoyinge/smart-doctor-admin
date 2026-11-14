@@ -470,7 +470,7 @@ onMounted(() => {
     contentDom=document.getElementById("content")
 
     mapDom = document.getElementById("map");
-    window.addEventListener("resize", handleResize);
+    // window.addEventListener("resize", handleResize);
 })
 
 nextTick(() => {

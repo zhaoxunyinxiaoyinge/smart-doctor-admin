@@ -1,6 +1,6 @@
 <template>
   <el-scrollbar :height="content.routeContentHeight">
-    <div class="dashboard">
+    <div class="dashboard" :style="{'height':content.routeContentHeight}">
 
       <!-- ============ KPI 指标卡 ============ -->
       <section class="kpi-grid">

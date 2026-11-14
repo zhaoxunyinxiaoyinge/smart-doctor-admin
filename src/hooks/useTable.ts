@@ -16,7 +16,8 @@ const useTable=()=>{
   const tableConfig=reactive<TablePropTypes[]>([]);
   const EditForm=reactive<{[propName:string]:string}>({});
   const EditFormInstance=ref(null);
-
+  const isEdit = ref(false);
+  const formData = reactive<any>({});
 
 
   //表格查询条件
@@ -32,7 +33,7 @@ const useTable=()=>{
   }
 
   //table拉取列表数据
-  const getData = async (query: object,getUser:(params:{page:number,pageSize:number,[propName:string]:any})=>Promise<any>) => {
+  const getData = async (getUser:(params:{page:number,pageSize:number,[propName:string]:any})=>Promise<any>,query?: object) => {
     list.length = 0;
     const argument={ page: listQuery.page, pageSize: listQuery.pageSize, ...query };
     const data = await getUser(argument);
@@ -86,16 +87,46 @@ const useTable=()=>{
   })
 }
 
+// 关闭弹框
+const handleClose = () => {
+    dialogFormVisible.value = false;
+
+}
+
+// 表格添加功能
+const handleAdd = () => {
+    dialogFormVisible.value = true;
+    if (Object.keys(formData).length > 0) Object.keys(formData).forEach(item => {
+        formData[item] = '';
+    })
+}
+
+// 表格编辑功能
+const handleEdit = (val: number,getDetial:({id:number})=>Promise<any>) => {
+    getDetial({ id: val }).then((res: any) => {
+        if (res.code == 1) {
+            Object.keys(res.data).forEach((name: any) => {
+                if (name != 'id' || name != "createTime" || name != "updateTime") {
+                    formData[name] = res.data[name];
+                }
+            })
+            dialogFormVisible.value = true;
+            isEdit.value = true
+
+        }
+    })
+}
 
 
-
-
-  return {
+return {
       initTableConfig,
       getData,
       handleSelectionChange,
       handleDelete,
       tableConfig,
+      handleAdd,
+      handleEdit,
+      handleClose,
 
       listQuery,
       multeSelection,
@@ -103,7 +134,9 @@ const useTable=()=>{
       title,
       list,
       EditForm,
-      EditFormInstance
+      EditFormInstance,
+      isEdit,
+      formData
   }
 }
 
